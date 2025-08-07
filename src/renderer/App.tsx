@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import InvoiceForm from './components/InvoiceForm';
+import InvoiceList from './components/InvoiceList';
 
 // Extend the global Window interface to include our electronAPI
 declare global {
@@ -14,6 +16,68 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<'form' | 'list'>('form');
+  const [invoices, setInvoices] = useState<any[]>([]);
+
+  // Sample data for testing
+  const sampleInvoices = [
+    {
+      id: '1',
+      guestInfo: { 
+        name: 'John Doe', 
+        phone: '123-456-7890', 
+        address: '123 Main St',
+        checkIn: '2024-01-01', 
+        checkOut: '2024-01-03' 
+      },
+      roomInfo: { 
+        roomNumber: '101',
+        roomType: 'Deluxe',
+        pricePerNight: 200,
+        nights: 2
+      },
+      foodItems: [
+        { name: 'Breakfast', quantity: 2, price: 25 }
+      ],
+      taxRate: 5,
+      discount: 0,
+      subtotal: 450,
+      tax: 22.5,
+      total: 472.5,
+      date: '2024-01-01T10:00:00Z'
+    },
+    {
+      id: '2',
+      guestInfo: { 
+        name: 'Jane Smith', 
+        phone: '987-654-3210', 
+        address: '456 Oak Ave',
+        checkIn: '2024-01-05', 
+        checkOut: '2024-01-07' 
+      },
+      roomInfo: { 
+        roomNumber: '205',
+        roomType: 'Suite',
+        pricePerNight: 350,
+        nights: 2
+      },
+      foodItems: [
+        { name: 'Dinner', quantity: 1, price: 45 },
+        { name: 'Room Service', quantity: 1, price: 30 }
+      ],
+      taxRate: 5,
+      discount: 50,
+      subtotal: 775,
+      tax: 38.75,
+      total: 763.75,
+      date: '2024-01-05T14:30:00Z'
+    }
+  ];
+
+  useEffect(() => {
+    // Set sample data
+    setInvoices(sampleInvoices);
+  }, []);
 
   useEffect(() => {
     // Listen for messages from the main process
@@ -38,11 +102,29 @@ const App: React.FC = () => {
     }
   };
 
+  const handleInvoiceSubmit = (invoiceData: any) => {
+    console.log('Invoice submitted:', invoiceData);
+    // Add new invoice to the list
+    const newInvoice = {
+      ...invoiceData,
+      id: Date.now().toString()
+    };
+    setInvoices(prev => [...prev, newInvoice]);
+    // Switch to list view
+    setCurrentView('list');
+    alert('Invoice created successfully!');
+  };
+
+  const handleInvoiceClick = (invoice: any) => {
+    console.log('Invoice clicked:', invoice);
+    alert(`Invoice ${invoice.id} details:\nGuest: ${invoice.guestInfo.name}\nTotal: $${invoice.total}`);
+  };
+
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>🚀 Electron React TypeScript</h1>
+          <h1>🏨 Hotel & Restaurant Invoice System</h1>
           <div className="status-indicator">
             <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
             <span className="status-text">
@@ -53,63 +135,50 @@ const App: React.FC = () => {
       </header>
 
       <main className="app-main">
-        <div className="content-container">
-          <div className="welcome-section">
-            <h2>Welcome to Your Electron App, Rafi Ali!</h2>
-            <p>This is a modern Electron application built with React and TypeScript.</p>
-          </div>
-
-          <div className="message-section">
-            <div className="message-input-container">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Type a message and press Enter..."
-                className="message-input"
-                disabled={!isConnected}
-              />
-              <button
-                onClick={handleSendMessage}
-                className="send-button"
-                disabled={!isConnected || !message.trim()}
+        {currentView === 'form' ? (
+          <div>
+            <InvoiceForm onSubmit={handleInvoiceSubmit} />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={() => setCurrentView('list')}
+                style={{
+                  background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
               >
-                Send
+                View Invoice List
               </button>
             </div>
-
-            <div className="messages-container">
-              <h3>Received Messages:</h3>
-              <div className="messages-list">
-                {receivedMessages.length === 0 ? (
-                  <p className="no-messages">No messages received yet...</p>
-                ) : (
-                  receivedMessages.map((msg, index) => (
-                    <div key={index} className="message-item">
-                      <span className="message-text">{msg}</span>
-                      <span className="message-time">
-                        {new Date().toLocaleTimeString()}
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
+          </div>
+        ) : (
+          <div>
+            <InvoiceList 
+              invoices={invoices} 
+              onInvoiceClick={handleInvoiceClick}
+            />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={() => setCurrentView('form')}
+                style={{
+                  background: '#3498db',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Create New Invoice
+              </button>
             </div>
           </div>
-
-          <div className="features-section">
-            <h3>Features:</h3>
-            <ul className="features-list">
-              <li>✅ Electron with React and TypeScript</li>
-              <li>✅ Modern UI with CSS Grid and Flexbox</li>
-              <li>✅ Secure IPC communication</li>
-              <li>✅ Hot reloading in development</li>
-              <li>✅ Webpack bundling</li>
-              <li>✅ Cross-platform compatibility</li>
-            </ul>
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

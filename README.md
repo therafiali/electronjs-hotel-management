@@ -1,177 +1,87 @@
-# Electron React TypeScript App
+🧾 Hotel & Restaurant Invoice Software – Skardu
+📌 Project Overview
+This is a simple offline billing software designed for your hotel in Skardu.
+It helps you manage both room and food services in one system.
 
-A modern Electron application built with React and TypeScript, featuring a beautiful UI and secure IPC communication.
+You can:
 
-## Features
+Create and print invoices (A4 size)
 
-- ⚡ **Electron** - Cross-platform desktop application framework
-- ⚛️ **React** - Modern UI library with hooks
-- 🔷 **TypeScript** - Type-safe JavaScript
-- 🎨 **Modern UI** - Beautiful, responsive design with CSS Grid and Flexbox
-- 🔒 **Secure IPC** - Context isolation and preload scripts
-- 📦 **Webpack** - Module bundling and development server
-- 🚀 **Hot Reloading** - Fast development experience
-- 🏗️ **Build System** - Production builds with electron-builder
+Save all billing records safely
 
-## Project Structure
+Get reports (daily, monthly, or custom date)
 
-```
-├── src/
-│   ├── main/           # Electron main process
-│   │   ├── main.ts     # Main process entry point
-│   │   └── preload.ts  # Preload script for secure IPC
-│   └── renderer/       # React renderer process
-│       ├── App.tsx     # Main React component
-│       ├── index.tsx   # React entry point
-│       ├── index.html  # HTML template
-│       └── styles.css  # Modern CSS styles
-├── dist/               # Built files (generated)
-├── webpack.config.js   # Webpack configuration
-├── tsconfig.json       # TypeScript config for renderer
-├── tsconfig.main.json  # TypeScript config for main process
-└── package.json        # Dependencies and scripts
-```
+Use it offline – no internet needed
 
-## Getting Started
+💡 Key Features
+1. 🔐 Two Types of Login
+Receptionist
+Can set room & food prices
 
-### Prerequisites
+Can generate invoices for guests
 
-- Node.js (v16 or higher)
-- npm or yarn
+Can add guest info and food orders
 
-### Installation
+Rates (price, tax, discount) will be set by Receptionist
 
-1. Clone the repository:
-```bash
-git clone <your-repo-url>
-cd electron-react-typescript
-```
+Super User
+Can review all data
 
-2. Install dependencies:
-```bash
-npm install
-```
+Can view reports from the system or website
 
-### Development
+Cannot change invoice prices – only view
 
-Start the development server with hot reloading:
+2. 🏨 Combined Hotel + Restaurant System
+No need for separate software
 
-```bash
-npm run dev
-```
+One app for both room and food billing
 
-This will:
-- Start the webpack dev server for the React app
-- Compile the main process TypeScript
-- Launch the Electron app
+3. 🧾 Invoice System
+Invoices are generated in A4 size
 
-### Building
+Once saved, invoice cannot be changed
 
-Build for production:
+Keeps data secure from fraud or mistakes
 
-```bash
-npm run build
-```
+Super User can review all invoices
 
-### Distribution
+4. 📊 Report System
+Super User can select any date range
 
-Create distributable packages:
+Get full sales reports
 
-```bash
-npm run dist
-```
+Total sales (hotel + food)
 
-This creates platform-specific installers in the `release/` directory.
+Room-wise & food-wise breakdown
 
-## Available Scripts
+5. 📴 Works Offline + ☁️ Optional Cloud Backup
+Software works without internet
 
-- `npm run dev` - Start development mode with hot reloading
-- `npm run build` - Build for production
-- `npm run dist` - Create distributable packages
-- `npm start` - Start the built application
+When internet is available (weekly/monthly), data can be safely backed up to cloud (Firebase)
 
-## Architecture
+This helps prevent data loss
 
-### Main Process (`src/main/main.ts`)
-- Creates the Electron window
-- Handles application lifecycle
-- Manages window state
+6. 🌐 Web Access for Super User
+Super User can log in to a website panel to:
 
-### Preload Script (`src/main/preload.ts`)
-- Provides secure API for renderer process
-- Exposes only necessary functions
-- Maintains context isolation
+View reports
 
-### Renderer Process (`src/renderer/`)
-- React application with TypeScript
-- Modern UI components
-- Secure communication with main process
+See all invoices
 
-## Security Features
+Monitor system activity
 
-- **Context Isolation**: Enabled by default
-- **Node Integration**: Disabled for security
-- **Preload Scripts**: Secure API exposure
-- **Remote Module**: Disabled
+🛡️ Data Protection & Security
+Once an invoice is created:
 
-## Customization
+It cannot be changed or deleted
 
-### Adding New IPC Methods
+System is locked for Receptionist to prevent unauthorized access
 
-1. Update the preload script (`src/main/preload.ts`):
-```typescript
-contextBridge.exposeInMainWorld('electronAPI', {
-  // Add your new methods here
-  yourNewMethod: (data: any) => ipcRenderer.send('your-channel', data),
-});
-```
+All records are safe for checking and proof
 
-2. Handle in main process (`src/main/main.ts`):
-```typescript
-ipcMain.on('your-channel', (event, data) => {
-  // Handle the data
-});
-```
+✅ Note:
 
-3. Use in React component:
-```typescript
-window.electronAPI.yourNewMethod(data);
-```
+Receptionist will set all prices, taxes, and discounts.
 
-### Styling
+Super User only reviews – cannot edit invoices or pricing.
 
-The app uses modern CSS with:
-- CSS Grid and Flexbox for layout
-- CSS Custom Properties for theming
-- Responsive design
-- Smooth animations and transitions
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Port 3000 already in use**: Change the port in `webpack.config.js`
-2. **TypeScript errors**: Ensure all dependencies are installed
-3. **Build failures**: Clear `dist/` directory and rebuild
-
-### Development Tips
-
-- Use the DevTools in development mode for debugging
-- Check the console for any errors
-- The app automatically reloads when you make changes
-
-## License
-
-MIT License - feel free to use this project as a starting point for your own applications.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
----
-
-Built with ❤️ using Electron, React, and TypeScript 
