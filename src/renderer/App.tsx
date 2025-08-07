@@ -19,65 +19,6 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'form' | 'list'>('form');
   const [invoices, setInvoices] = useState<any[]>([]);
 
-  // Sample data for testing
-  const sampleInvoices = [
-    {
-      id: '1',
-      guestInfo: { 
-        name: 'John Doe', 
-        phone: '123-456-7890', 
-        address: '123 Main St',
-        checkIn: '2024-01-01', 
-        checkOut: '2024-01-03' 
-      },
-      roomInfo: { 
-        roomNumber: '101',
-        roomType: 'Deluxe',
-        pricePerNight: 200,
-        nights: 2
-      },
-      foodItems: [
-        { name: 'Breakfast', quantity: 2, price: 25 }
-      ],
-      taxRate: 5,
-      discount: 0,
-      subtotal: 450,
-      tax: 22.5,
-      total: 472.5,
-      date: '2024-01-01T10:00:00Z'
-    },
-    {
-      id: '2',
-      guestInfo: { 
-        name: 'Jane Smith', 
-        phone: '987-654-3210', 
-        address: '456 Oak Ave',
-        checkIn: '2024-01-05', 
-        checkOut: '2024-01-07' 
-      },
-      roomInfo: { 
-        roomNumber: '205',
-        roomType: 'Suite',
-        pricePerNight: 350,
-        nights: 2
-      },
-      foodItems: [
-        { name: 'Dinner', quantity: 1, price: 45 },
-        { name: 'Room Service', quantity: 1, price: 30 }
-      ],
-      taxRate: 5,
-      discount: 50,
-      subtotal: 775,
-      tax: 38.75,
-      total: 763.75,
-      date: '2024-01-05T14:30:00Z'
-    }
-  ];
-
-  useEffect(() => {
-    // Set sample data
-    setInvoices(sampleInvoices);
-  }, []);
 
   useEffect(() => {
     // Listen for messages from the main process

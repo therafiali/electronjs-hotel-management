@@ -1,6 +1,32 @@
 import Database from 'better-sqlite3';
 import * as path from 'path';
 
+interface InvoiceRow {
+  id: string;
+  guestInfo: string;
+  roomInfo: string;
+  foodItems: string;
+  taxRate: number;
+  discount: number;
+  subtotal: number;
+  tax: number;
+  total: number;
+  date: string;
+}
+
+interface Invoice {
+  id: string;
+  guestInfo: unknown;
+  roomInfo: unknown;
+  foodItems: unknown;
+  taxRate: number;
+  discount: number;
+  subtotal: number;
+  tax: number;
+  total: number;
+  date: string;
+}
+
 class HotelDatabase {
   private db: Database.Database;
 
@@ -28,7 +54,7 @@ class HotelDatabase {
     `);
   }
 
-  saveInvoice(invoice: any) {
+  saveInvoice(invoice: Invoice) {
     const stmt = this.db.prepare(`
       INSERT INTO invoices (id, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -48,11 +74,11 @@ class HotelDatabase {
     );
   }
 
-  getAllInvoices() {
+  getAllInvoices(): Invoice[] {
     const stmt = this.db.prepare('SELECT * FROM invoices ORDER BY date DESC');
-    const rows = stmt.all();
-    
-    return rows.map(row => ({
+    const rows = stmt.all() as InvoiceRow[];
+
+    return rows.map((row) => ({
       id: row.id,
       guestInfo: JSON.parse(row.guestInfo),
       roomInfo: JSON.parse(row.roomInfo),
@@ -62,7 +88,7 @@ class HotelDatabase {
       subtotal: row.subtotal,
       tax: row.tax,
       total: row.total,
-      date: row.date
+      date: row.date,
     }));
   }
 
