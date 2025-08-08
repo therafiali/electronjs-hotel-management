@@ -26,6 +26,28 @@ function createWindow(): void {
   }
 }
 
+// Authentication IPC handlers
+ipcMain.handle('authenticate-user', async (event, { username, password }) => {
+  try {
+    console.log(`🔐 Authentication attempt for username: ${username}`);
+    const result = db.authenticateUser(username, password);
+    return result;
+  } catch (error) {
+    console.error('Error during authentication:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('get-all-users', async () => {
+  try {
+    const users = db.getAllUsers();
+    return users;
+  } catch (error) {
+    console.error('Error getting users:', error);
+    throw error;
+  }
+});
+
 // Database IPC handlers
 ipcMain.handle('save-invoice', async (event, invoice) => {
   try {

@@ -9,6 +9,9 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     onMessage: (callback) => {
         electron_1.ipcRenderer.on('message', (_, message) => callback(message));
     },
+    // Authentication API methods
+    authenticateUser: (username, password) => electron_1.ipcRenderer.invoke('authenticate-user', { username, password }),
+    getAllUsers: () => electron_1.ipcRenderer.invoke('get-all-users'),
     // Database API methods
     saveInvoice: (invoice) => electron_1.ipcRenderer.invoke('save-invoice', invoice),
     getAllInvoices: () => electron_1.ipcRenderer.invoke('get-all-invoices'),

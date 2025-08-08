@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import InvoiceForm from './components/InvoiceForm';
 import InvoiceList from './components/InvoiceList';
+import LoginPage from './components/LoginPage';
+
+// User interface
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: 'admin' | 'staff' | 'manager';
+  name: string;
+  isActive: boolean;
+  createdDate: string;
+}
 
 // Extend the global Window interface to include our electronAPI
 declare global {
@@ -8,6 +20,8 @@ declare global {
     electronAPI: {
       sendMessage: (message: string) => void;
       onMessage: (callback: (message: string) => void) => void;
+      authenticateUser: (username: string, password: string) => Promise<any>;
+      getAllUsers: () => Promise<User[]>;
       saveInvoice: (invoice: any) => Promise<any>;
       getAllInvoices: () => Promise<any[]>;
     };
@@ -22,6 +36,10 @@ const App: React.FC = () => {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  
+  // Authentication state
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
     // Listen for messages from the main process
@@ -111,16 +129,46 @@ const App: React.FC = () => {
     }
   };
 
+  // Authentication handlers
+  const handleLoginSuccess = (user: User) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    console.log('User logged in successfully:', user);
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setCurrentView('form');
+    console.log('User logged out');
+  };
+
+  // Show login page if not authenticated
+  if (!isAuthenticated) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1>🏨 Hotel & Restaurant Invoice System</h1>
-          <div className="status-indicator">
-            <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
-            <span className="status-text">
-              {isConnected ? 'Connected' : 'Disconnected'}
-            </span>
+          <h1>🏨 Hotel Paradise Management System</h1>
+          <div className="header-right">
+            <div className="user-info">
+              <span className="user-greeting">
+                Welcome, <strong>{currentUser?.name}</strong>
+              </span>
+              <span className="user-role">({currentUser?.role})</span>
+            </div>
+            <button onClick={handleLogout} className="logout-button">
+              🚪 Logout
+            </button>
+            <div className="status-indicator">
+              <span className={`status-dot ${isConnected ? 'connected' : 'disconnected'}`}></span>
+              <span className="status-text">
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
           </div>
         </div>
       </header>

@@ -8,6 +8,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMessage: (callback: (message: string) => void) => {
     ipcRenderer.on('message', (_, message) => callback(message));
   },
+  // Authentication API methods
+  authenticateUser: (username: string, password: string) => 
+    ipcRenderer.invoke('authenticate-user', { username, password }),
+  getAllUsers: () => ipcRenderer.invoke('get-all-users'),
   // Database API methods
   saveInvoice: (invoice: any) => ipcRenderer.invoke('save-invoice', invoice),
   getAllInvoices: () => ipcRenderer.invoke('get-all-invoices'),

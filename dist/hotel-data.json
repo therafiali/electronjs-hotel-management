@@ -1,24 +1,38 @@
-[
-  {
-    "guestInfo": {
-      "name": "rafi ali ",
-      "phone": "77",
-      "address": "dfdf",
-      "checkIn": "2025-08-19",
-      "checkOut": "2025-08-05"
-    },
-    "roomInfo": {
-      "roomNumber": "jj",
-      "roomType": "Family",
-      "pricePerNight": 0,
-      "nights": 1
-    },
-    "foodItems": [],
-    "taxRate": 5,
-    "discount": 0,
-    "subtotal": 0,
-    "tax": 0,
-    "total": 0,
-    "date": "2025-08-08T12:09:53.507Z"
-  }
-]
+{
+  "users": [
+    {
+      "id": "user_001",
+      "username": "admin",
+      "password": "hotel123",
+      "email": "admin@hotel.com",
+      "role": "admin",
+      "name": "Hotel Administrator",
+      "isActive": true,
+      "createdDate": "2025-08-08T13:29:14.642Z"
+    }
+  ],
+  "invoices": [
+    {
+      "guestInfo": {
+        "name": "rafi ali ",
+        "phone": "77",
+        "address": "dfdf",
+        "checkIn": "2025-08-19",
+        "checkOut": "2025-08-05"
+      },
+      "roomInfo": {
+        "roomNumber": "jj",
+        "roomType": "Family",
+        "pricePerNight": 0,
+        "nights": 1
+      },
+      "foodItems": [],
+      "taxRate": 5,
+      "discount": 0,
+      "subtotal": 0,
+      "tax": 0,
+      "total": 0,
+      "date": "2025-08-08T12:09:53.507Z"
+    }
+  ]
+}
