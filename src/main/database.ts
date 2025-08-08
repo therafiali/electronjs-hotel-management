@@ -1,5 +1,5 @@
-import Database from 'better-sqlite3';
 import * as path from 'path';
+import * as fs from 'fs';
 
 interface InvoiceRow {
   id: string;
@@ -28,77 +28,61 @@ interface Invoice {
 }
 
 class HotelDatabase {
-  private db: Database.Database;
+  private dbPath: string;
+  private invoices: Invoice[] = [];
 
   constructor() {
-    const dbPath = path.join(__dirname, '../hotel.db');
-    this.db = new Database(dbPath);
-    this.initTables();
+    this.dbPath = path.join(__dirname, '../hotel-data.json');
+    this.loadData();
   }
 
-  private initTables() {
-    // Create invoices table
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS invoices (
-        id TEXT PRIMARY KEY,
-        guestInfo TEXT,
-        roomInfo TEXT,
-        foodItems TEXT,
-        taxRate REAL,
-        discount REAL,
-        subtotal REAL,
-        tax REAL,
-        total REAL,
-        date TEXT
-      )
-    `);
+  private loadData() {
+    try {
+      if (fs.existsSync(this.dbPath)) {
+        const data = fs.readFileSync(this.dbPath, 'utf8');
+        this.invoices = JSON.parse(data);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+      this.invoices = [];
+    }
+  }
+
+  private saveData() {
+    try {
+      fs.writeFileSync(this.dbPath, JSON.stringify(this.invoices, null, 2));
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
   }
 
   saveInvoice(invoice: Invoice) {
-    const stmt = this.db.prepare(`
-      INSERT INTO invoices (id, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    // Remove existing invoice with same ID if exists
+    this.invoices = this.invoices.filter(inv => inv.id !== invoice.id);
     
-    return stmt.run(
-      invoice.id,
-      JSON.stringify(invoice.guestInfo),
-      JSON.stringify(invoice.roomInfo),
-      JSON.stringify(invoice.foodItems),
-      invoice.taxRate,
-      invoice.discount,
-      invoice.subtotal,
-      invoice.tax,
-      invoice.total,
-      invoice.date
-    );
+    // Add new invoice
+    this.invoices.push(invoice);
+    
+    // Save to file
+    this.saveData();
+    
+    return { success: true, id: invoice.id };
   }
 
   getAllInvoices(): Invoice[] {
-    const stmt = this.db.prepare('SELECT * FROM invoices ORDER BY date DESC');
-    const rows = stmt.all() as InvoiceRow[];
-
-    return rows.map((row) => ({
-      id: row.id,
-      guestInfo: JSON.parse(row.guestInfo),
-      roomInfo: JSON.parse(row.roomInfo),
-      foodItems: JSON.parse(row.foodItems),
-      taxRate: row.taxRate,
-      discount: row.discount,
-      subtotal: row.subtotal,
-      tax: row.tax,
-      total: row.total,
-      date: row.date,
-    }));
+    return [...this.invoices].sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
   }
 
   deleteInvoice(id: string) {
-    const stmt = this.db.prepare('DELETE FROM invoices WHERE id = ?');
-    return stmt.run(id);
+    this.invoices = this.invoices.filter(inv => inv.id !== id);
+    this.saveData();
+    return { success: true };
   }
 
   close() {
-    this.db.close();
+    // No need to close for file-based storage
   }
 }
 

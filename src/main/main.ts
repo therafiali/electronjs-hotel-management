@@ -1,5 +1,8 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
+import HotelDatabase from './database';
+
+let db: HotelDatabase;
 
 function createWindow(): void {
   // Create the browser window.
@@ -23,10 +26,35 @@ function createWindow(): void {
   }
 }
 
+// Database IPC handlers
+ipcMain.handle('save-invoice', async (event, invoice) => {
+  try {
+    const result = await db.saveInvoice(invoice);
+    return result;
+  } catch (error) {
+    console.error('Error saving invoice:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('get-all-invoices', async () => {
+  try {
+    const invoices = await db.getAllInvoices();
+    return invoices;
+  } catch (error) {
+    console.error('Error getting invoices:', error);
+    throw error;
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  // Initialize database
+  db = new HotelDatabase();
+  createWindow();
+});
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -42,5 +70,12 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
+  }
+});
+
+app.on('before-quit', () => {
+  // Close database connection
+  if (db) {
+    db.close();
   }
 }); 

@@ -8,6 +8,8 @@ declare global {
     electronAPI: {
       sendMessage: (message: string) => void;
       onMessage: (callback: (message: string) => void) => void;
+      saveInvoice: (invoice: any) => Promise<any>;
+      getAllInvoices: () => Promise<any[]>;
     };
   }
 }
@@ -16,9 +18,10 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<'form' | 'list'>('form');
+  const [currentView, setCurrentView] = useState<'form' | 'list' | 'debug'>('form');
   const [invoices, setInvoices] = useState<any[]>([]);
-
+  const [debugData, setDebugData] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Listen for messages from the main process
@@ -43,22 +46,69 @@ const App: React.FC = () => {
     }
   };
 
-  const handleInvoiceSubmit = (invoiceData: any) => {
-    console.log('Invoice submitted:', invoiceData);
-    // Add new invoice to the list
-    const newInvoice = {
-      ...invoiceData,
-      id: Date.now().toString()
-    };
-    setInvoices(prev => [...prev, newInvoice]);
-    // Switch to list view
-    setCurrentView('list');
-    alert('Invoice created successfully!');
+  const handleInvoiceSubmit = async (invoiceData: any) => {
+    try {
+      setLoading(true);
+      console.log('Saving invoice to database:', invoiceData);
+      
+      // Save to database
+      const result = await window.electronAPI.saveInvoice(invoiceData);
+      console.log('Invoice saved successfully:', result);
+      
+      // Refresh invoices list
+      await loadInvoices();
+      
+      // Switch to list view
+      setCurrentView('list');
+      alert('Invoice created and saved to database successfully!');
+    } catch (error) {
+      console.error('Error saving invoice:', error);
+      alert('Error saving invoice to database!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleInvoiceClick = (invoice: any) => {
     console.log('Invoice clicked:', invoice);
     alert(`Invoice ${invoice.id} details:\nGuest: ${invoice.guestInfo.name}\nTotal: $${invoice.total}`);
+  };
+
+  const loadInvoices = async () => {
+    try {
+      setLoading(true);
+      const allInvoices = await window.electronAPI.getAllInvoices();
+      setInvoices(allInvoices);
+      console.log('Loaded invoices from database:', allInvoices);
+    } catch (error) {
+      console.error('Error loading invoices:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadDebugData = async () => {
+    try {
+      setLoading(true);
+      console.log('Loading real data from database...');
+      
+      // Get real data from database
+      const realData = await window.electronAPI.getAllInvoices();
+      
+      // Log to console for easy viewing
+      console.log('🔍 Real getAllInvoices() Data:', realData);
+      console.log('📊 Total invoices in database:', realData.length);
+      if (realData.length > 0) {
+        console.log('📋 First invoice details:', realData[0]);
+      }
+      
+      setDebugData(JSON.stringify(realData, null, 2));
+    } catch (error) {
+      console.error('Error loading debug data:', error);
+      setDebugData('Error loading data from database: ' + (error as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -81,9 +131,30 @@ const App: React.FC = () => {
             <InvoiceForm onSubmit={handleInvoiceSubmit} />
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button 
-                onClick={() => setCurrentView('list')}
+                onClick={async () => {
+                  await loadInvoices();
+                  setCurrentView('list');
+                }}
                 style={{
                   background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  marginRight: '10px'
+                }}
+              >
+                View Invoice List
+              </button>
+              <button 
+                onClick={async () => {
+                  setCurrentView('debug');
+                  await loadDebugData();
+                }}
+                style={{
+                  background: '#e74c3c',
                   color: 'white',
                   border: 'none',
                   padding: '10px 20px',
@@ -92,11 +163,11 @@ const App: React.FC = () => {
                   fontSize: '14px'
                 }}
               >
-                View Invoice List
+                Debug Data Preview
               </button>
             </div>
           </div>
-        ) : (
+        ) : currentView === 'list' ? (
           <div>
             <InvoiceList 
               invoices={invoices} 
@@ -112,10 +183,110 @@ const App: React.FC = () => {
                   padding: '10px 20px',
                   borderRadius: '6px',
                   cursor: 'pointer',
-                  fontSize: '14px'
+                  fontSize: '14px',
+                  marginRight: '10px'
                 }}
               >
                 Create New Invoice
+              </button>
+              <button 
+                onClick={async () => {
+                  setCurrentView('debug');
+                  await loadDebugData();
+                }}
+                style={{
+                  background: '#e74c3c',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Debug Data Preview
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <h2>🔍 Real Database Data Preview</h2>
+              <p>This shows the actual data from getAllInvoices() in your database</p>
+            </div>
+            {loading && (
+              <div style={{ textAlign: 'center', margin: '20px' }}>
+                <p>Loading data from database...</p>
+              </div>
+            )}
+            <div style={{ 
+              background: '#f8f9fa', 
+              border: '1px solid #dee2e6', 
+              borderRadius: '8px',
+              padding: '20px',
+              margin: '20px',
+              maxHeight: '500px',
+              overflow: 'auto'
+            }}>
+              <pre style={{ 
+                margin: 0, 
+                whiteSpace: 'pre-wrap',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                color: '#333'
+              }}>
+                {debugData || 'Click "Load Real Data" to see actual database content'}
+              </pre>
+            </div>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={loadDebugData}
+                disabled={loading}
+                style={{
+                  background: '#17a2b8',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  marginRight: '10px',
+                  opacity: loading ? 0.6 : 1
+                }}
+              >
+                {loading ? 'Loading...' : 'Load Real Data'}
+              </button>
+              <button 
+                onClick={() => setCurrentView('form')}
+                style={{
+                  background: '#3498db',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  marginRight: '10px'
+                }}
+              >
+                Back to Form
+              </button>
+              <button 
+                onClick={async () => {
+                  await loadInvoices();
+                  setCurrentView('list');
+                }}
+                style={{
+                  background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Back to List
               </button>
             </div>
           </div>

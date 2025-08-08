@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMessage: (callback: (message: string) => void) => {
     ipcRenderer.on('message', (_, message) => callback(message));
   },
-  // Add more API methods as needed
+  // Database API methods
+  saveInvoice: (invoice: any) => ipcRenderer.invoke('save-invoice', invoice),
+  getAllInvoices: () => ipcRenderer.invoke('get-all-invoices'),
 }); 
