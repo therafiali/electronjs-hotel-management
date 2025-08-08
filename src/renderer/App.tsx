@@ -4,6 +4,13 @@ import InvoiceList from "./components/InvoiceList";
 import LoginPage from "./components/LoginPage";
 import Dashboard from "./components/Dashboard";
 import PDFCreator from "./components/PDFCreator";
+import React, { useState, useEffect } from 'react';
+import InvoiceForm from './components/InvoiceForm';
+import InvoiceList from './components/InvoiceList';
+import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
+import ItemsForm from './components/ItemsForm';
+import ItemsList from './components/ItemsList';
 
 // User interface
 interface User {
@@ -31,6 +38,10 @@ declare global {
         type: string,
         invoiceId?: string
       ) => Promise<{ success: boolean; filepath: string }>;
+      saveItem: (itemData: any) => Promise<any>;
+      getAllItems: () => Promise<any[]>;
+      deleteItem: (itemId: string) => Promise<any>;
+      updateItem: (id: string, updateData: any) => Promise<any>;
     };
   }
 }
@@ -44,6 +55,10 @@ const App: React.FC = () => {
   >("dashboard");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>("");
+  const [currentView, setCurrentView] = useState<'dashboard' | 'form' | 'list' | 'debug' | 'items' | 'itemsList'>('dashboard');
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
+  const [debugData, setDebugData] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
 
   // Authentication state
@@ -163,6 +178,50 @@ const App: React.FC = () => {
     }
   };
 
+  // Items handlers
+  const handleItemSubmit = async (itemData: any) => {
+    try {
+      setLoading(true);
+      console.log('Saving item to database:', itemData);
+      
+      // Save to database
+      const result = await window.electronAPI.saveItem(itemData);
+      console.log('Item saved successfully:', result);
+      
+      // Refresh items list
+      await loadItems();
+      
+      alert('Item created and saved to database successfully!');
+      
+      // Return success to indicate form should be reset
+      return { success: true };
+    } catch (error) {
+      console.error('Error saving item:', error);
+      alert('Error saving item to database!');
+      return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleItemClick = (item: any) => {
+    console.log('Item clicked:', item);
+    alert(`Item Details:\nName: ${item.name}\nCategory: ${item.category}\nPrice: $${item.price.toFixed(2)}`);
+  };
+
+  const loadItems = async () => {
+    try {
+      setLoading(true);
+      const allItems = await window.electronAPI.getAllItems();
+      setItems(allItems);
+      console.log('Loaded items from database:', allItems);
+    } catch (error) {
+      console.error('Error loading items:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Authentication handlers
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
@@ -226,6 +285,7 @@ const App: React.FC = () => {
               await loadInvoices();
               setCurrentView("list");
             }}
+            onNavigateToItems={() => setCurrentView('items')}
           />
         ) : currentView === "form" ? (
           <div>
@@ -324,9 +384,79 @@ const App: React.FC = () => {
                   borderRadius: "6px",
                   cursor: "pointer",
                   fontSize: "14px",
+        ) : currentView === 'items' ? (
+          <div>
+            <ItemsForm onSubmit={handleItemSubmit} />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={async () => {
+                  await loadItems();
+                  setCurrentView('itemsList');
+                }}
+                style={{
+                  background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  marginRight: '10px'
+                }}
+              >
+                View Items List
+              </button>
+              <button 
+                onClick={() => setCurrentView('dashboard')}
+                style={{
+                  background: '#3498db',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
                 }}
               >
                 Back to Dashboard
+              </button>
+            </div>
+          </div>
+        ) : currentView === 'itemsList' ? (
+          <div>
+            <ItemsList 
+              items={items} 
+              onItemClick={handleItemClick}
+            />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button 
+                onClick={() => setCurrentView('dashboard')}
+                style={{
+                  background: '#3498db',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  marginRight: '10px'
+                }}
+              >
+                Back to Dashboard
+              </button>
+              <button 
+                onClick={() => setCurrentView('items')}
+                style={{
+                  background: '#27ae60',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                Add New Item
               </button>
             </div>
           </div>

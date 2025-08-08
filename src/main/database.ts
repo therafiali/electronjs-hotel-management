@@ -38,16 +38,26 @@ interface User {
   createdDate: string;
 }
 
+interface Item {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  createdDate: string;
+}
+
 interface DatabaseData {
   users: User[];
   invoices: Invoice[];
+  items: Item[];
 }
 
 class HotelDatabase {
   private dbPath: string;
   private data: DatabaseData = {
     users: [],
-    invoices: []
+    invoices: [],
+    items: []
   };
 
   constructor() {
@@ -62,16 +72,18 @@ class HotelDatabase {
         const fileData = fs.readFileSync(this.dbPath, 'utf8');
         const parsedData = JSON.parse(fileData);
         
-        // Handle old format (array of invoices) vs new format (object with users and invoices)
+        // Handle old format (array of invoices) vs new format (object with users, invoices, and items)
         if (Array.isArray(parsedData)) {
           this.data = {
             users: [],
-            invoices: parsedData
+            invoices: parsedData,
+            items: []
           };
         } else {
           this.data = {
             users: parsedData.users || [],
-            invoices: parsedData.invoices || []
+            invoices: parsedData.invoices || [],
+            items: parsedData.items || []
           };
         }
       }
@@ -79,7 +91,8 @@ class HotelDatabase {
       console.error('Error loading data:', error);
       this.data = {
         users: [],
-        invoices: []
+        invoices: [],
+        items: []
       };
     }
   }
@@ -170,6 +183,47 @@ class HotelDatabase {
 
   deleteInvoice(id: string) {
     this.data.invoices = this.data.invoices.filter(inv => inv.id !== id);
+    this.saveData();
+    return { success: true };
+  }
+
+  // Item methods
+  saveItem(itemData: Omit<Item, 'id' | 'createdDate'>): { success: boolean; id: string } {
+    const newItem: Item = {
+      id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      ...itemData,
+      createdDate: new Date().toISOString()
+    };
+    
+    this.data.items.push(newItem);
+    this.saveData();
+    
+    return { success: true, id: newItem.id };
+  }
+
+  getAllItems(): Item[] {
+    return [...this.data.items].sort((a, b) => 
+      new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime()
+    );
+  }
+
+  deleteItem(id: string): { success: boolean } {
+    this.data.items = this.data.items.filter(item => item.id !== id);
+    this.saveData();
+    return { success: true };
+  }
+
+  updateItem(id: string, updateData: Partial<Omit<Item, 'id' | 'createdDate'>>): { success: boolean } {
+    const itemIndex = this.data.items.findIndex(item => item.id === id);
+    if (itemIndex === -1) {
+      return { success: false };
+    }
+
+    this.data.items[itemIndex] = {
+      ...this.data.items[itemIndex],
+      ...updateData
+    };
+    
     this.saveData();
     return { success: true };
   }

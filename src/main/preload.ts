@@ -20,3 +20,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   createPDF: (type: string, invoiceId?: string) =>
     ipcRenderer.invoke("create-pdf", { type, invoiceId }),
 });
+  saveInvoice: (invoice: any) => ipcRenderer.invoke('save-invoice', invoice),
+  getAllInvoices: () => ipcRenderer.invoke('get-all-invoices'),
+  // Items API methods
+  saveItem: (itemData: any) => ipcRenderer.invoke('save-item', itemData),
+  getAllItems: () => ipcRenderer.invoke('get-all-items'),
+  deleteItem: (itemId: string) => ipcRenderer.invoke('delete-item', itemId),
+  updateItem: (id: string, updateData: any) => ipcRenderer.invoke('update-item', { id, updateData }),
+}); 

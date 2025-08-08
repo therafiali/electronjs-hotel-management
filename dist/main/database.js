@@ -39,7 +39,8 @@ class HotelDatabase {
     constructor() {
         this.data = {
             users: [],
-            invoices: []
+            invoices: [],
+            items: []
         };
         this.dbPath = path.join(__dirname, '../hotel-data.json');
         this.loadData();
@@ -50,17 +51,19 @@ class HotelDatabase {
             if (fs.existsSync(this.dbPath)) {
                 const fileData = fs.readFileSync(this.dbPath, 'utf8');
                 const parsedData = JSON.parse(fileData);
-                // Handle old format (array of invoices) vs new format (object with users and invoices)
+                // Handle old format (array of invoices) vs new format (object with users, invoices, and items)
                 if (Array.isArray(parsedData)) {
                     this.data = {
                         users: [],
-                        invoices: parsedData
+                        invoices: parsedData,
+                        items: []
                     };
                 }
                 else {
                     this.data = {
                         users: parsedData.users || [],
-                        invoices: parsedData.invoices || []
+                        invoices: parsedData.invoices || [],
+                        items: parsedData.items || []
                     };
                 }
             }
@@ -69,7 +72,8 @@ class HotelDatabase {
             console.error('Error loading data:', error);
             this.data = {
                 users: [],
-                invoices: []
+                invoices: [],
+                items: []
             };
         }
     }
@@ -147,6 +151,37 @@ class HotelDatabase {
     }
     deleteInvoice(id) {
         this.data.invoices = this.data.invoices.filter(inv => inv.id !== id);
+        this.saveData();
+        return { success: true };
+    }
+    // Item methods
+    saveItem(itemData) {
+        const newItem = {
+            id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            ...itemData,
+            createdDate: new Date().toISOString()
+        };
+        this.data.items.push(newItem);
+        this.saveData();
+        return { success: true, id: newItem.id };
+    }
+    getAllItems() {
+        return [...this.data.items].sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
+    }
+    deleteItem(id) {
+        this.data.items = this.data.items.filter(item => item.id !== id);
+        this.saveData();
+        return { success: true };
+    }
+    updateItem(id, updateData) {
+        const itemIndex = this.data.items.findIndex(item => item.id === id);
+        if (itemIndex === -1) {
+            return { success: false };
+        }
+        this.data.items[itemIndex] = {
+            ...this.data.items[itemIndex],
+            ...updateData
+        };
         this.saveData();
         return { success: true };
     }

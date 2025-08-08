@@ -98,6 +98,47 @@ ipcMain.handle("create-pdf", async (event, { type, invoiceId }) => {
   }
 });
 
+// Items IPC handlers
+ipcMain.handle('save-item', async (event, itemData) => {
+  try {
+    const result = db.saveItem(itemData);
+    return result;
+  } catch (error) {
+    console.error('Error saving item:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('get-all-items', async () => {
+  try {
+    const items = db.getAllItems();
+    return items;
+  } catch (error) {
+    console.error('Error getting items:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('delete-item', async (event, itemId) => {
+  try {
+    const result = db.deleteItem(itemId);
+    return result;
+  } catch (error) {
+    console.error('Error deleting item:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('update-item', async (event, { id, updateData }) => {
+  try {
+    const result = db.updateItem(id, updateData);
+    return result;
+  } catch (error) {
+    console.error('Error updating item:', error);
+    throw error;
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

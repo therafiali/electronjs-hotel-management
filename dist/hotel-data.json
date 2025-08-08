@@ -56,6 +56,56 @@
       "tax": 0,
       "total": 0,
       "date": "2025-08-08T18:24:11.882Z"
+      "id": "invoice_1754676410171_jhartr",
+      "guestInfo": {
+        "name": "fsd",
+        "phone": "fsd",
+        "address": "fsd",
+        "checkIn": "2025-08-08",
+        "checkOut": "2025-08-08"
+      },
+      "roomInfo": {
+        "roomNumber": "fs",
+        "roomType": "Standard",
+        "pricePerNight": 4333,
+        "nights": 3
+      },
+      "foodItems": [
+        {
+          "name": "ted",
+          "quantity": 1,
+          "price": 232
+        }
+      ],
+      "taxRate": 5,
+      "discount": 0,
+      "subtotal": 13231,
+      "tax": 661.55,
+      "total": 13892.55,
+      "date": "2025-08-08T18:06:50.171Z"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_1754675486110_b6n7uuc7p",
+      "name": "chicken fry",
+      "category": "Food",
+      "price": 3000,
+      "createdDate": "2025-08-08T17:51:26.110Z"
+    },
+    {
+      "id": "item_1754675581301_efq5waxnl",
+      "name": "apple",
+      "category": "Food",
+      "price": 100,
+      "createdDate": "2025-08-08T17:53:01.301Z"
+    },
+    {
+      "id": "item_1754676303211_xmm053fpi",
+      "name": "tst",
+      "category": "Food",
+      "price": 200,
+      "createdDate": "2025-08-08T18:05:03.211Z"
     }
   ]
 }
