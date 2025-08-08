@@ -15,4 +15,9 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // Database API methods
     saveInvoice: (invoice) => electron_1.ipcRenderer.invoke('save-invoice', invoice),
     getAllInvoices: () => electron_1.ipcRenderer.invoke('get-all-invoices'),
+    // Items API methods
+    saveItem: (itemData) => electron_1.ipcRenderer.invoke('save-item', itemData),
+    getAllItems: () => electron_1.ipcRenderer.invoke('get-all-items'),
+    deleteItem: (itemId) => electron_1.ipcRenderer.invoke('delete-item', itemId),
+    updateItem: (id, updateData) => electron_1.ipcRenderer.invoke('update-item', { id, updateData }),
 });

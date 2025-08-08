@@ -15,7 +15,7 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState('admin'); // Default to admin for PIN-style login
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -56,111 +56,121 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        {/* Hotel Logo/Header */}
-        <div className="login-header">
-          <div className="hotel-logo">
-            <div className="logo-icon">🏨</div>
-            <h1>Hotel Paradise</h1>
-            <p>Management System</p>
+    <div className="elegant-login-container">
+      <div className="elegant-login-content">
+        {/* Profile Avatar */}
+        <div className="profile-avatar">
+          <div className="avatar-circle">
+            <div className="hotel-icon">🏨</div>
           </div>
         </div>
 
+        {/* User Name */}
+        <div className="user-display-name">
+          Hotel Administrator
+        </div>
+
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="login-form">
-          <div className="form-group">
-            <label htmlFor="username">
-              <span className="label-icon">👤</span>
-              Username
-            </label>
-            <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              disabled={loading}
-              autoComplete="username"
-            />
+        <form onSubmit={handleLogin} className="elegant-login-form">
+          {/* Username Field (Hidden but functional) */}
+          <input
+            type="hidden"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+
+          {/* Password/PIN Input */}
+          <div className="pin-input-container">
+            <div className="pin-input-wrapper">
+              <span className="pin-icon">🔒</span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your PIN"
+                disabled={loading}
+                autoComplete="current-password"
+                className="pin-input"
+                maxLength={20}
+              />
+              <button 
+                type="button" 
+                className="pin-visibility-toggle"
+                onClick={() => {
+                  const input = document.querySelector('.pin-input') as HTMLInputElement;
+                  if (input) {
+                    input.type = input.type === 'password' ? 'text' : 'password';
+                  }
+                }}
+              >
+                👁️
+              </button>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">
-              <span className="label-icon">🔒</span>
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              disabled={loading}
-              autoComplete="current-password"
-            />
-          </div>
-
+          {/* Error Message */}
           {error && (
-            <div className="error-message">
-              <span className="error-icon">⚠️</span>
+            <div className="elegant-error-message">
               {error}
             </div>
           )}
 
+          {/* Submit Button (Hidden, submits on Enter) */}
           <button 
             type="submit" 
-            className="login-button"
+            className="hidden-submit"
             disabled={loading}
+            style={{ display: 'none' }}
           >
-            {loading ? (
-              <>
-                <span className="loading-spinner">⏳</span>
-                Signing In...
-              </>
-            ) : (
-              <>
-                <span className="button-icon">🚪</span>
-                Sign In
-              </>
-            )}
+            Login
           </button>
-
-          {/* Demo Credentials Button */}
-          <div className="demo-section">
-            <button 
-              type="button" 
-              onClick={() => setShowDemo(!showDemo)}
-              className="demo-toggle"
-            >
-              {showDemo ? '🙈 Hide Demo Info' : '👀 Show Demo Credentials'}
-            </button>
-            
-            {showDemo && (
-              <div className="demo-info">
-                <p><strong>Demo Account:</strong></p>
-                <p>Username: <code>admin</code></p>
-                <p>Password: <code>hotel123</code></p>
-                <button 
-                  type="button"
-                  onClick={fillDemoCredentials}
-                  className="fill-demo-button"
-                >
-                  🎯 Fill Demo Credentials
-                </button>
-              </div>
-            )}
-          </div>
         </form>
 
-        {/* Footer */}
-        <div className="login-footer">
-          <p>🌟 Welcome to Hotel Paradise Management System 🌟</p>
-          <p className="subtitle">Manage your hotel operations with ease</p>
+        {/* Forgot PIN Link */}
+        <div className="forgot-pin-section">
+          <button 
+            type="button" 
+            onClick={() => setShowDemo(!showDemo)}
+            className="forgot-pin-link"
+          >
+            Forgot your PIN?
+          </button>
         </div>
+
+        {/* Demo Info (Hidden by default) */}
+        {showDemo && (
+          <div className="demo-credentials">
+            <div className="demo-info-card">
+              <p><strong>Demo Credentials:</strong></p>
+              <div className="demo-item">
+                <span>Username:</span> <code>admin</code>
+              </div>
+              <div className="demo-item">
+                <span>PIN:</span> <code>hotel123</code>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setUsername('admin');
+                  setPassword('hotel123');
+                  setError('');
+                }}
+                className="use-demo-btn"
+              >
+                Use Demo Credentials
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Overlay */}
+        {loading && (
+          <div className="loading-overlay">
+            <div className="loading-spinner-elegant">⏳</div>
+            <div className="loading-text">Authenticating...</div>
+          </div>
+        )}
       </div>
-
-
     </div>
   );
 };
