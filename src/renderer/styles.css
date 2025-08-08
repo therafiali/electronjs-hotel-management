@@ -84,6 +84,26 @@ body {
   box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
 }
 
+.pdf-button {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pdf-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
 .app-header h1 {
   margin: 0;
   font-size: 1.8rem;
@@ -1142,4 +1162,253 @@ body {
   .action-card {
     padding: 1.5rem;
   }
-} 
+}
+
+/* PDF Creator Styles */
+.pdf-creator {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.pdf-creator h2 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.pdf-creator > p {
+  text-align: center;
+  color: #718096;
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+}
+
+.pdf-form {
+  margin-bottom: 2rem;
+}
+
+.pdf-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.pdf-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.pdf-form select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  color: #2d3748;
+  transition: all 0.3s ease;
+}
+
+.pdf-form select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.pdf-form select:disabled {
+  background: #f7fafc;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.pdf-description {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #667eea;
+}
+
+.pdf-description p {
+  margin: 0;
+  color: #4a5568;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.create-pdf-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.create-pdf-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.create-pdf-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.message {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #f0fff4;
+  border: 1px solid #9ae6b4;
+  color: #22543d;
+}
+
+.message.error {
+  background: #fed7d7;
+  border: 1px solid #feb2b2;
+  color: #742a2a;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.pdf-info {
+  background: #f7fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.pdf-info h3 {
+  color: #2d3748;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.pdf-info ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.pdf-info li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  color: #4a5568;
+  line-height: 1.5;
+}
+
+.pdf-info li:last-child {
+  border-bottom: none;
+}
+
+.pdf-info li strong {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.pdf-info p {
+  margin: 0;
+  color: #718096;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Dashboard button for PDF Creator */
+.dashboard-btn.tertiary {
+  background: linear-gradient(135deg, #ed8936, #dd6b20);
+}
+
+.dashboard-btn.tertiary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3);
+}
+
+/* Action buttons in table */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.print-btn {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 80px;
+  justify-content: center;
+}
+
+.print-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+  background: linear-gradient(135deg, #2c5aa0, #1e40af);
+}
+
+.print-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(49, 130, 206, 0.3);
+}
+
+/* Table action column styling */
+.table-cell.action {
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.table-cell.action .action-buttons {
+  margin: 0;
+}

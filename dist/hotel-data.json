@@ -33,6 +33,29 @@
       "tax": 0,
       "total": 0,
       "date": "2025-08-08T12:09:53.507Z"
+    },
+    {
+      "id": "invoice_1754677451882_mpyc79",
+      "guestInfo": {
+        "name": "gdfsg",
+        "phone": "gsdfg",
+        "address": "gdfg",
+        "checkIn": "2025-08-13",
+        "checkOut": "2025-08-13"
+      },
+      "roomInfo": {
+        "roomNumber": "fd",
+        "roomType": "Family",
+        "pricePerNight": 0,
+        "nights": 1
+      },
+      "foodItems": [],
+      "taxRate": 5,
+      "discount": 0,
+      "subtotal": 0,
+      "tax": 0,
+      "total": 0,
+      "date": "2025-08-08T18:24:11.882Z"
     }
   ]
 }

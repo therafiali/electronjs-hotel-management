@@ -1,18 +1,22 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer } from "electron";
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
-contextBridge.exposeInMainWorld('electronAPI', {
+contextBridge.exposeInMainWorld("electronAPI", {
   // Example API methods
-  sendMessage: (message: string) => ipcRenderer.send('message', message),
+  sendMessage: (message: string) => ipcRenderer.send("message", message),
   onMessage: (callback: (message: string) => void) => {
-    ipcRenderer.on('message', (_, message) => callback(message));
+    ipcRenderer.on("message", (_, message) => callback(message));
   },
   // Authentication API methods
-  authenticateUser: (username: string, password: string) => 
-    ipcRenderer.invoke('authenticate-user', { username, password }),
-  getAllUsers: () => ipcRenderer.invoke('get-all-users'),
+  authenticateUser: (username: string, password: string) =>
+    ipcRenderer.invoke("authenticate-user", { username, password }),
+  getAllUsers: () => ipcRenderer.invoke("get-all-users"),
   // Database API methods
-  saveInvoice: (invoice: any) => ipcRenderer.invoke('save-invoice', invoice),
-  getAllInvoices: () => ipcRenderer.invoke('get-all-invoices'),
-}); 
+  saveInvoice: (invoice: any) => ipcRenderer.invoke("save-invoice", invoice),
+  getAllInvoices: () => ipcRenderer.invoke("get-all-invoices"),
+  // PDF Creator API methods
+  getPDFTypes: () => ipcRenderer.invoke("get-pdf-types"),
+  createPDF: (type: string, invoiceId?: string) =>
+    ipcRenderer.invoke("create-pdf", { type, invoiceId }),
+});

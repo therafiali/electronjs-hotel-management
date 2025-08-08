@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 interface Column {
   key: string;
   label: string;
-  type?: 'text' | 'number' | 'date' | 'currency' | 'action';
+  type?: "text" | "number" | "date" | "currency" | "action";
   sortable?: boolean;
   width?: string;
   render?: (value: any, row: any) => React.ReactNode;
@@ -28,15 +28,18 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   searchable = true,
   pagination = true,
   itemsPerPage = 10,
-  className = ''
+  className = "",
 }) => {
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter data based on search term
-  const filteredData = data.filter(row =>
-    columns.some(column => {
+  const filteredData = data.filter((row) =>
+    columns.some((column) => {
       const value = row[column.key];
       if (value == null) return false;
       return value.toString().toLowerCase().includes(searchTerm.toLowerCase());
@@ -50,8 +53,8 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
     const aValue = a[sortConfig.key];
     const bValue = b[sortConfig.key];
 
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
     return 0;
   });
 
@@ -63,30 +66,30 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   const handleSort = (key: string) => {
     if (!sortable) return;
 
-    setSortConfig(current => {
+    setSortConfig((current) => {
       if (current && current.key === key) {
         return {
           key,
-          direction: current.direction === 'asc' ? 'desc' : 'asc'
+          direction: current.direction === "asc" ? "desc" : "asc",
         };
       }
-      return { key, direction: 'asc' };
+      return { key, direction: "asc" };
     });
   };
 
-  const formatValue = (value: any, column: Column) => {
+  const formatValue = (value: any, column: Column, row: any) => {
     if (column.render) {
-      return column.render(value, value);
+      return column.render(value, row);
     }
 
-    if (value == null) return '-';
+    if (value == null) return "-";
 
     switch (column.type) {
-      case 'currency':
+      case "currency":
         return `$${Number(value).toFixed(2)}`;
-      case 'number':
+      case "number":
         return Number(value).toLocaleString();
-      case 'date':
+      case "date":
         return new Date(value).toLocaleDateString();
       default:
         return value.toString();
@@ -94,8 +97,8 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
   };
 
   const getSortIcon = (key: string) => {
-    if (!sortConfig || sortConfig.key !== key) return '↕️';
-    return sortConfig.direction === 'asc' ? '↑' : '↓';
+    if (!sortConfig || sortConfig.key !== key) return "↕️";
+    return sortConfig.direction === "asc" ? "↑" : "↓";
   };
 
   return (
@@ -118,17 +121,21 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
         <table className="table">
           <thead>
             <tr>
-              {columns.map(column => (
+              {columns.map((column) => (
                 <th
                   key={column.key}
                   onClick={() => handleSort(column.key)}
-                  className={`table-header ${sortable && column.sortable !== false ? 'sortable' : ''}`}
+                  className={`table-header ${
+                    sortable && column.sortable !== false ? "sortable" : ""
+                  }`}
                   style={{ width: column.width }}
                 >
                   <div className="header-content">
                     <span>{column.label}</span>
                     {sortable && column.sortable !== false && (
-                      <span className="sort-icon">{getSortIcon(column.key)}</span>
+                      <span className="sort-icon">
+                        {getSortIcon(column.key)}
+                      </span>
                     )}
                   </div>
                 </th>
@@ -147,11 +154,14 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
                 <tr
                   key={index}
                   onClick={() => onRowClick?.(row)}
-                  className={onRowClick ? 'clickable-row' : ''}
+                  className={onRowClick ? "clickable-row" : ""}
                 >
-                  {columns.map(column => (
-                    <td key={column.key} className={`table-cell ${column.type || 'text'}`}>
-                      {formatValue(row[column.key], column)}
+                  {columns.map((column) => (
+                    <td
+                      key={column.key}
+                      className={`table-cell ${column.type || "text"}`}
+                    >
+                      {formatValue(row[column.key], column, row)}
                     </td>
                   ))}
                 </tr>
@@ -165,19 +175,21 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
       {pagination && totalPages > 1 && (
         <div className="pagination">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
             className="pagination-btn"
           >
             Previous
           </button>
-          
+
           <span className="page-info">
             Page {currentPage} of {totalPages}
           </span>
-          
+
           <button
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
             className="pagination-btn"
           >
@@ -188,7 +200,9 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
 
       {/* Results Info */}
       <div className="results-info">
-        Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, sortedData.length)} of {sortedData.length} results
+        Showing {startIndex + 1} to{" "}
+        {Math.min(startIndex + itemsPerPage, sortedData.length)} of{" "}
+        {sortedData.length} results
       </div>
     </div>
   );

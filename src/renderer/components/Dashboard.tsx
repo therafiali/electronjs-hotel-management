@@ -1,11 +1,14 @@
-import React from 'react';
+import React from "react";
 
 interface DashboardProps {
   onNavigateToInvoice: () => void;
   onNavigateToList: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateToList }) => {
+const Dashboard: React.FC<DashboardProps> = ({
+  onNavigateToInvoice,
+  onNavigateToList,
+}) => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -23,7 +26,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateTo
           <div className="action-card">
             <h3>📋 Invoice Management</h3>
             <p>Create and manage hotel invoices</p>
-            <button 
+            <button
               onClick={onNavigateToInvoice}
               className="dashboard-btn primary"
             >
@@ -34,7 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateTo
           <div className="action-card">
             <h3>📊 Invoice History</h3>
             <p>View all created invoices</p>
-            <button 
+            <button
               onClick={onNavigateToList}
               className="dashboard-btn secondary"
             >

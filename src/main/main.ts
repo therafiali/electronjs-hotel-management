@@ -1,8 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
-import * as path from 'path';
-import HotelDatabase from './database';
+import { app, BrowserWindow, ipcMain } from "electron";
+import * as path from "path";
+import HotelDatabase from "./database";
+import PDFCreator from "./pdfCreator";
 
 let db: HotelDatabase;
+let pdfCreator: PDFCreator;
 
 function createWindow(): void {
   // Create the browser window.
@@ -12,59 +14,86 @@ function createWindow(): void {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
   // Load the index.html of the app.
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.loadURL('http://localhost:3000');
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.loadURL("http://localhost:3000");
     // Open the DevTools in development.
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
+    mainWindow.loadFile(path.join(__dirname, "../index.html"));
   }
 }
 
 // Authentication IPC handlers
-ipcMain.handle('authenticate-user', async (event, { username, password }) => {
+ipcMain.handle("authenticate-user", async (event, { username, password }) => {
   try {
     console.log(`🔐 Authentication attempt for username: ${username}`);
     const result = db.authenticateUser(username, password);
     return result;
   } catch (error) {
-    console.error('Error during authentication:', error);
+    console.error("Error during authentication:", error);
     throw error;
   }
 });
 
-ipcMain.handle('get-all-users', async () => {
+ipcMain.handle("get-all-users", async () => {
   try {
     const users = db.getAllUsers();
     return users;
   } catch (error) {
-    console.error('Error getting users:', error);
+    console.error("Error getting users:", error);
     throw error;
   }
 });
 
 // Database IPC handlers
-ipcMain.handle('save-invoice', async (event, invoice) => {
+ipcMain.handle("save-invoice", async (event, invoice) => {
   try {
     const result = await db.saveInvoice(invoice);
     return result;
   } catch (error) {
-    console.error('Error saving invoice:', error);
+    console.error("Error saving invoice:", error);
     throw error;
   }
 });
 
-ipcMain.handle('get-all-invoices', async () => {
+ipcMain.handle("get-all-invoices", async () => {
   try {
     const invoices = await db.getAllInvoices();
     return invoices;
   } catch (error) {
-    console.error('Error getting invoices:', error);
+    console.error("Error getting invoices:", error);
+    throw error;
+  }
+});
+
+// PDF Creator IPC handlers
+ipcMain.handle("get-pdf-types", async () => {
+  try {
+    const pdfTypes = pdfCreator.getAvailablePDFTypes();
+    return pdfTypes;
+  } catch (error) {
+    console.error("Error getting PDF types:", error);
+    throw error;
+  }
+});
+
+ipcMain.handle("create-pdf", async (event, { type, invoiceId }) => {
+  try {
+    console.log(
+      `📄 Creating PDF of type: ${type}${
+        invoiceId ? ` for invoice: ${invoiceId}` : ""
+      }`
+    );
+    const filepath = await pdfCreator.createPDF(type, invoiceId);
+    console.log(`✅ PDF created successfully: ${filepath}`);
+    return { success: true, filepath };
+  } catch (error) {
+    console.error("Error creating PDF:", error);
     throw error;
   }
 });
@@ -73,21 +102,22 @@ ipcMain.handle('get-all-invoices', async () => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  // Initialize database
+  // Initialize database and PDF creator
   db = new HotelDatabase();
+  pdfCreator = new PDFCreator();
   createWindow();
 });
 
 // Quit when all windows are closed.
-app.on('window-all-closed', () => {
+app.on("window-all-closed", () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
-  if (process.platform !== 'darwin') {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on("activate", () => {
   // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
@@ -95,9 +125,9 @@ app.on('activate', () => {
   }
 });
 
-app.on('before-quit', () => {
+app.on("before-quit", () => {
   // Close database connection
   if (db) {
     db.close();
   }
-}); 
+});
