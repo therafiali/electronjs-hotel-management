@@ -9,8 +9,8 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToInvoice,
   onNavigateToList,
+  onNavigateToItems,
 }) => {
-const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateToList, onNavigateToItems }) => {
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -50,7 +50,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateTo
           <div className="action-card">
             <h3>🛍️ Items Management</h3>
             <p>Manage hotel items and services</p>
-            <button 
+            <button
               onClick={onNavigateToItems}
               className="dashboard-btn primary"
             >

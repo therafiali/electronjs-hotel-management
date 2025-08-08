@@ -18,8 +18,6 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     // PDF Creator API methods
     getPDFTypes: () => electron_1.ipcRenderer.invoke("get-pdf-types"),
     createPDF: (type, invoiceId) => electron_1.ipcRenderer.invoke("create-pdf", { type, invoiceId }),
-    saveInvoice: (invoice) => electron_1.ipcRenderer.invoke('save-invoice', invoice),
-    getAllInvoices: () => electron_1.ipcRenderer.invoke('get-all-invoices'),
     // Items API methods
     saveItem: (itemData) => electron_1.ipcRenderer.invoke('save-item', itemData),
     getAllItems: () => electron_1.ipcRenderer.invoke('get-all-items'),

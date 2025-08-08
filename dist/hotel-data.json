@@ -8,104 +8,33 @@
       "role": "admin",
       "name": "Hotel Administrator",
       "isActive": true,
-      "createdDate": "2025-08-08T13:29:14.642Z"
+      "createdDate": "2025-08-08T18:50:21.971Z"
     }
   ],
   "invoices": [
     {
+      "id": "invoice_1754679096622_4llqp7",
       "guestInfo": {
-        "name": "rafi ali ",
-        "phone": "77",
-        "address": "dfdf",
-        "checkIn": "2025-08-19",
-        "checkOut": "2025-08-05"
+        "name": "fasdf",
+        "phone": "asdgdg",
+        "address": "zv",
+        "checkIn": "2025-08-06",
+        "checkOut": "2025-08-20"
       },
       "roomInfo": {
-        "roomNumber": "jj",
-        "roomType": "Family",
-        "pricePerNight": 0,
-        "nights": 1
-      },
-      "foodItems": [],
-      "taxRate": 5,
-      "discount": 0,
-      "subtotal": 0,
-      "tax": 0,
-      "total": 0,
-      "date": "2025-08-08T12:09:53.507Z"
-    },
-    {
-      "id": "invoice_1754677451882_mpyc79",
-      "guestInfo": {
-        "name": "gdfsg",
-        "phone": "gsdfg",
-        "address": "gdfg",
-        "checkIn": "2025-08-13",
-        "checkOut": "2025-08-13"
-      },
-      "roomInfo": {
-        "roomNumber": "fd",
-        "roomType": "Family",
-        "pricePerNight": 0,
-        "nights": 1
-      },
-      "foodItems": [],
-      "taxRate": 5,
-      "discount": 0,
-      "subtotal": 0,
-      "tax": 0,
-      "total": 0,
-      "date": "2025-08-08T18:24:11.882Z"
-      "id": "invoice_1754676410171_jhartr",
-      "guestInfo": {
-        "name": "fsd",
-        "phone": "fsd",
-        "address": "fsd",
-        "checkIn": "2025-08-08",
-        "checkOut": "2025-08-08"
-      },
-      "roomInfo": {
-        "roomNumber": "fs",
+        "roomNumber": "sf",
         "roomType": "Standard",
-        "pricePerNight": 4333,
-        "nights": 3
+        "pricePerNight": 1,
+        "nights": 1
       },
-      "foodItems": [
-        {
-          "name": "ted",
-          "quantity": 1,
-          "price": 232
-        }
-      ],
+      "foodItems": [],
       "taxRate": 5,
       "discount": 0,
-      "subtotal": 13231,
-      "tax": 661.55,
-      "total": 13892.55,
-      "date": "2025-08-08T18:06:50.171Z"
+      "subtotal": 1,
+      "tax": 0.05,
+      "total": 1.05,
+      "date": "2025-08-08T18:51:36.623Z"
     }
   ],
-  "items": [
-    {
-      "id": "item_1754675486110_b6n7uuc7p",
-      "name": "chicken fry",
-      "category": "Food",
-      "price": 3000,
-      "createdDate": "2025-08-08T17:51:26.110Z"
-    },
-    {
-      "id": "item_1754675581301_efq5waxnl",
-      "name": "apple",
-      "category": "Food",
-      "price": 100,
-      "createdDate": "2025-08-08T17:53:01.301Z"
-    },
-    {
-      "id": "item_1754676303211_xmm053fpi",
-      "name": "tst",
-      "category": "Food",
-      "price": 200,
-      "createdDate": "2025-08-08T18:05:03.211Z"
-    }
-  ]
+  "items": []
 }
