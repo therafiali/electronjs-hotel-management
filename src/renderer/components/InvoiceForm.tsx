@@ -82,9 +82,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
     return calculateSubtotal() + calculateTax() - discount;
   };
 
+  // Generate unique ID for each invoice
+  const generateUniqueId = () => {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `invoice_${timestamp}_${random}`;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const invoiceData = {
+      id: generateUniqueId(), // Add unique ID
       guestInfo,
       roomInfo,
       foodItems,
