@@ -13,7 +13,6 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     authenticateUser: (username, password) => electron_1.ipcRenderer.invoke("authenticate-user", { username, password }),
     getAllUsers: () => electron_1.ipcRenderer.invoke("get-all-users"),
     // Database API methods
-<<<<<<< Updated upstream
     saveInvoice: (invoice) => electron_1.ipcRenderer.invoke("save-invoice", invoice),
     getAllInvoices: () => electron_1.ipcRenderer.invoke("get-all-invoices"),
     // PDF Creator API methods
@@ -24,11 +23,4 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     getAllItems: () => electron_1.ipcRenderer.invoke('get-all-items'),
     deleteItem: (itemId) => electron_1.ipcRenderer.invoke('delete-item', itemId),
     updateItem: (id, updateData) => electron_1.ipcRenderer.invoke('update-item', { id, updateData }),
-=======
-    saveInvoice: (invoice) => electron_1.ipcRenderer.invoke('save-invoice', invoice),
-    getAllInvoices: () => electron_1.ipcRenderer.invoke('get-all-invoices'),
-    // Room API methods
-    saveRoom: (room) => electron_1.ipcRenderer.invoke('save-room', room),
-    getAllRooms: () => electron_1.ipcRenderer.invoke('get-all-rooms'),
->>>>>>> Stashed changes
 });

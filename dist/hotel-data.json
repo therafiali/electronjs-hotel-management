@@ -30,49 +30,10 @@
       "foodItems": [],
       "taxRate": 5,
       "discount": 0,
-<<<<<<< Updated upstream
       "subtotal": 1,
       "tax": 0.05,
       "total": 1.05,
       "date": "2025-08-08T18:51:36.623Z"
-=======
-      "subtotal": 0,
-      "tax": 0,
-      "total": 0,
-      "date": "2025-08-08T12:09:53.507Z"
-    },
-    {
-      "id": "invoice_1754677739760_occ13e",
-      "guestInfo": {
-        "name": "yahya",
-        "phone": "5746588",
-        "address": "hbfghfgh",
-        "checkIn": "2025-08-01",
-        "checkOut": "2025-08-29"
-      },
-      "roomInfo": {
-        "roomNumber": "11",
-        "roomType": "Standard",
-        "pricePerNight": 0,
-        "nights": 1
-      },
-      "foodItems": [],
-      "taxRate": 5,
-      "discount": 22,
-      "subtotal": 0,
-      "tax": 0,
-      "total": -22,
-      "date": "2025-08-08T18:28:59.760Z"
-    }
-  ],
-  "rooms": [
-    {
-      "id": "room_1754675766229_i5uxov",
-      "roomType": "Standard",
-      "price": 3,
-      "roomNumber": "2",
-      "date": "2025-08-08T17:56:06.229Z"
->>>>>>> Stashed changes
     }
   ],
   "items": []

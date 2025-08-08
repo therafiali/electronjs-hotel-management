@@ -40,11 +40,7 @@ class HotelDatabase {
         this.data = {
             users: [],
             invoices: [],
-<<<<<<< Updated upstream
             items: []
-=======
-            rooms: []
->>>>>>> Stashed changes
         };
         this.dbPath = path.join(__dirname, '../hotel-data.json');
         this.loadData();
@@ -60,22 +56,14 @@ class HotelDatabase {
                     this.data = {
                         users: [],
                         invoices: parsedData,
-<<<<<<< Updated upstream
                         items: []
-=======
-                        rooms: []
->>>>>>> Stashed changes
                     };
                 }
                 else {
                     this.data = {
                         users: parsedData.users || [],
                         invoices: parsedData.invoices || [],
-<<<<<<< Updated upstream
                         items: parsedData.items || []
-=======
-                        rooms: parsedData.rooms || []
->>>>>>> Stashed changes
                     };
                 }
             }
@@ -85,11 +73,7 @@ class HotelDatabase {
             this.data = {
                 users: [],
                 invoices: [],
-<<<<<<< Updated upstream
                 items: []
-=======
-                rooms: []
->>>>>>> Stashed changes
             };
         }
     }
@@ -170,7 +154,6 @@ class HotelDatabase {
         this.saveData();
         return { success: true };
     }
-<<<<<<< Updated upstream
     // Item methods
     saveItem(itemData) {
         const newItem = {
@@ -199,23 +182,6 @@ class HotelDatabase {
             ...this.data.items[itemIndex],
             ...updateData
         };
-=======
-    // Room methods
-    saveRoom(room) {
-        // Remove existing room with same ID if exists
-        this.data.rooms = this.data.rooms.filter(r => r.id !== room.id);
-        // Add new room
-        this.data.rooms.push(room);
-        // Save to file
-        this.saveData();
-        return { success: true, id: room.id };
-    }
-    getAllRooms() {
-        return [...this.data.rooms].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    }
-    deleteRoom(id) {
-        this.data.rooms = this.data.rooms.filter(r => r.id !== id);
->>>>>>> Stashed changes
         this.saveData();
         return { success: true };
     }

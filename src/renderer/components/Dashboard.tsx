@@ -3,7 +3,6 @@ import React from "react";
 interface DashboardProps {
   onNavigateToInvoice: () => void;
   onNavigateToList: () => void;
-<<<<<<< Updated upstream
   onNavigateToItems: () => void;
 }
 
@@ -12,12 +11,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToList,
   onNavigateToItems,
 }) => {
-=======
-  onNavigateToAddRoom: () => void;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateToList, onNavigateToAddRoom }) => {
->>>>>>> Stashed changes
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -55,7 +48,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateTo
           </div>
 
           <div className="action-card">
-<<<<<<< Updated upstream
             <h3>🛍️ Items Management</h3>
             <p>Manage hotel items and services</p>
             <button
@@ -63,15 +55,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigateToInvoice, onNavigateTo
               className="dashboard-btn primary"
             >
               Manage Items
-=======
-            <h3>🏠 Room Management</h3>
-            <p>Add new rooms to the hotel</p>
-            <button 
-              onClick={onNavigateToAddRoom}
-              className="dashboard-btn tertiary"
-            >
-              Add New Room
->>>>>>> Stashed changes
             </button>
           </div>
         </div>

@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 import React, { useState, useEffect } from "react";
 import InvoiceForm from "./components/InvoiceForm";
 import InvoiceList from "./components/InvoiceList";
@@ -7,14 +6,6 @@ import Dashboard from "./components/Dashboard";
 import PDFCreator from "./components/PDFCreator";
 import ItemsForm from "./components/ItemsForm";
 import ItemsList from "./components/ItemsList";
-=======
-import React, { useState, useEffect } from 'react';
-import InvoiceForm from './components/InvoiceForm';
-import InvoiceList from './components/InvoiceList';
-import LoginPage from './components/LoginPage';
-import Dashboard from './components/Dashboard';
-import AddRoom from './components/AddRoom';
->>>>>>> Stashed changes
 
 // User interface
 interface User {
@@ -37,7 +28,6 @@ declare global {
       getAllUsers: () => Promise<User[]>;
       saveInvoice: (invoice: any) => Promise<any>;
       getAllInvoices: () => Promise<any[]>;
-<<<<<<< Updated upstream
       getPDFTypes: () => Promise<any[]>;
       createPDF: (
         type: string,
@@ -47,10 +37,6 @@ declare global {
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
       updateItem: (id: string, updateData: any) => Promise<any>;
-=======
-      saveRoom: (room: any) => Promise<any>;
-      getAllRooms: () => Promise<any[]>;
->>>>>>> Stashed changes
     };
   }
 }
@@ -59,13 +45,9 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>("");
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-<<<<<<< Updated upstream
   const [currentView, setCurrentView] = useState<
     "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "itemsList"
   >("dashboard");
-=======
-  const [currentView, setCurrentView] = useState<'dashboard' | 'form' | 'list' | 'debug' | 'addroom'>('dashboard');
->>>>>>> Stashed changes
   const [invoices, setInvoices] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>("");
@@ -243,25 +225,6 @@ const App: React.FC = () => {
     console.log("User logged in successfully:", user);
   };
 
-  const handleRoomSubmit = async (roomData: any) => {
-    try {
-      setLoading(true);
-      console.log('Saving room to database:', roomData);
-      
-      // Save to database
-      const result = await window.electronAPI.saveRoom(roomData);
-      console.log('Room saved successfully:', result);
-      
-      alert('Room added successfully!');
-      setCurrentView('dashboard');
-    } catch (error) {
-      console.error('Error saving room:', error);
-      alert('Error saving room to database!');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
@@ -318,16 +281,7 @@ const App: React.FC = () => {
               await loadInvoices();
               setCurrentView("list");
             }}
-<<<<<<< Updated upstream
             onNavigateToItems={() => setCurrentView("items")}
-=======
-            onNavigateToAddRoom={() => setCurrentView('addroom')}
-          />
-        ) : currentView === 'addroom' ? (
-          <AddRoom 
-            onSubmit={handleRoomSubmit}
-            onBack={() => setCurrentView('dashboard')}
->>>>>>> Stashed changes
           />
         ) : currentView === "form" ? (
           <div>

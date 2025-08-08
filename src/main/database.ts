@@ -1,7 +1,5 @@
 import * as path from 'path';
-
 import * as fs from 'fs';
-
 
 interface InvoiceRow {
   id: string;
@@ -40,31 +38,18 @@ interface User {
   createdDate: string;
 }
 
-<<<<<<< Updated upstream
 interface Item {
   id: string;
   name: string;
   category: string;
   price: number;
   createdDate: string;
-=======
-interface Room {
-  id: string;
-  roomType: string;
-  price: number;
-  roomNumber: string;
-  date: string;
->>>>>>> Stashed changes
 }
 
 interface DatabaseData {
   users: User[];
   invoices: Invoice[];
-<<<<<<< Updated upstream
   items: Item[];
-=======
-  rooms: Room[];
->>>>>>> Stashed changes
 }
 
 class HotelDatabase {
@@ -72,11 +57,7 @@ class HotelDatabase {
   private data: DatabaseData = {
     users: [],
     invoices: [],
-<<<<<<< Updated upstream
     items: []
-=======
-    rooms: []
->>>>>>> Stashed changes
   };
 
   constructor() {
@@ -96,21 +77,13 @@ class HotelDatabase {
           this.data = {
             users: [],
             invoices: parsedData,
-<<<<<<< Updated upstream
             items: []
-=======
-            rooms: []
->>>>>>> Stashed changes
           };
         } else {
           this.data = {
             users: parsedData.users || [],
             invoices: parsedData.invoices || [],
-<<<<<<< Updated upstream
             items: parsedData.items || []
-=======
-            rooms: parsedData.rooms || []
->>>>>>> Stashed changes
           };
         }
       }
@@ -119,11 +92,7 @@ class HotelDatabase {
       this.data = {
         users: [],
         invoices: [],
-<<<<<<< Updated upstream
         items: []
-=======
-        rooms: []
->>>>>>> Stashed changes
       };
     }
   }
@@ -218,7 +187,6 @@ class HotelDatabase {
     return { success: true };
   }
 
-<<<<<<< Updated upstream
   // Item methods
   saveItem(itemData: Omit<Item, 'id' | 'createdDate'>): { success: boolean; id: string } {
     const newItem: Item = {
@@ -256,30 +224,6 @@ class HotelDatabase {
       ...updateData
     };
     
-=======
-  // Room methods
-  saveRoom(room: Room) {
-    // Remove existing room with same ID if exists
-    this.data.rooms = this.data.rooms.filter(r => r.id !== room.id);
-    
-    // Add new room
-    this.data.rooms.push(room);
-    
-    // Save to file
-    this.saveData();
-    
-    return { success: true, id: room.id };
-  }
-
-  getAllRooms(): Room[] {
-    return [...this.data.rooms].sort((a, b) => 
-      new Date(b.date).getTime() - new Date(a.date).getTime()
-    );
-  }
-
-  deleteRoom(id: string) {
-    this.data.rooms = this.data.rooms.filter(r => r.id !== id);
->>>>>>> Stashed changes
     this.saveData();
     return { success: true };
   }
