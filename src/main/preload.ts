@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("authenticate-user", { username, password }),
   getAllUsers: () => ipcRenderer.invoke("get-all-users"),
   // Database API methods
+<<<<<<< Updated upstream
   saveInvoice: (invoice: any) => ipcRenderer.invoke("save-invoice", invoice),
   getAllInvoices: () => ipcRenderer.invoke("get-all-invoices"),
   // PDF Creator API methods
@@ -26,3 +27,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateItem: (id: string, updateData: any) =>
     ipcRenderer.invoke("update-item", { id, updateData }),
 });
+=======
+  saveInvoice: (invoice: any) => ipcRenderer.invoke('save-invoice', invoice),
+  getAllInvoices: () => ipcRenderer.invoke('get-all-invoices'),
+  // Room API methods
+  saveRoom: (room: any) => ipcRenderer.invoke('save-room', room),
+  getAllRooms: () => ipcRenderer.invoke('get-all-rooms'),
+}); 
+>>>>>>> Stashed changes

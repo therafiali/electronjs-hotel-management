@@ -139,6 +139,27 @@ ipcMain.handle('update-item', async (event, { id, updateData }) => {
   }
 });
 
+// Room IPC handlers
+ipcMain.handle('save-room', async (event, room) => {
+  try {
+    const result = await db.saveRoom(room);
+    return result;
+  } catch (error) {
+    console.error('Error saving room:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('get-all-rooms', async () => {
+  try {
+    const rooms = await db.getAllRooms();
+    return rooms;
+  } catch (error) {
+    console.error('Error getting rooms:', error);
+    throw error;
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
