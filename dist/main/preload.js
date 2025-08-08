@@ -19,8 +19,8 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     getPDFTypes: () => electron_1.ipcRenderer.invoke("get-pdf-types"),
     createPDF: (type, invoiceId) => electron_1.ipcRenderer.invoke("create-pdf", { type, invoiceId }),
     // Items API methods
-    saveItem: (itemData) => electron_1.ipcRenderer.invoke('save-item', itemData),
-    getAllItems: () => electron_1.ipcRenderer.invoke('get-all-items'),
-    deleteItem: (itemId) => electron_1.ipcRenderer.invoke('delete-item', itemId),
-    updateItem: (id, updateData) => electron_1.ipcRenderer.invoke('update-item', { id, updateData }),
+    saveItem: (itemData) => electron_1.ipcRenderer.invoke("save-item", itemData),
+    getAllItems: () => electron_1.ipcRenderer.invoke("get-all-items"),
+    deleteItem: (itemId) => electron_1.ipcRenderer.invoke("delete-item", itemId),
+    updateItem: (id, updateData) => electron_1.ipcRenderer.invoke("update-item", { id, updateData }),
 });
