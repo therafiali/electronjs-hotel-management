@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import InvoiceForm from './components/InvoiceForm';
 import InvoiceList from './components/InvoiceList';
 import LoginPage from './components/LoginPage';
+import Dashboard from './components/Dashboard';
 
 // User interface
 interface User {
@@ -32,7 +33,7 @@ const App: React.FC = () => {
   const [message, setMessage] = useState<string>('');
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [currentView, setCurrentView] = useState<'form' | 'list' | 'debug'>('form');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'form' | 'list' | 'debug'>('dashboard');
   const [invoices, setInvoices] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -139,7 +140,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setCurrentUser(null);
     setIsAuthenticated(false);
-    setCurrentView('form');
+    setCurrentView('dashboard');
     console.log('User logged out');
   };
 
@@ -174,7 +175,15 @@ const App: React.FC = () => {
       </header>
 
       <main className="app-main">
-        {currentView === 'form' ? (
+        {currentView === 'dashboard' ? (
+          <Dashboard 
+            onNavigateToInvoice={() => setCurrentView('form')}
+            onNavigateToList={async () => {
+              await loadInvoices();
+              setCurrentView('list');
+            }}
+          />
+        ) : currentView === 'form' ? (
           <div>
             <InvoiceForm onSubmit={handleInvoiceSubmit} />
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -223,7 +232,7 @@ const App: React.FC = () => {
             />
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button 
-                onClick={() => setCurrentView('form')}
+                onClick={() => setCurrentView('dashboard')}
                 style={{
                   background: '#3498db',
                   color: 'white',
@@ -235,7 +244,7 @@ const App: React.FC = () => {
                   marginRight: '10px'
                 }}
               >
-                Create New Invoice
+                Back to Dashboard
               </button>
               <button 
                 onClick={async () => {
@@ -305,7 +314,7 @@ const App: React.FC = () => {
                 {loading ? 'Loading...' : 'Load Real Data'}
               </button>
               <button 
-                onClick={() => setCurrentView('form')}
+                onClick={() => setCurrentView('dashboard')}
                 style={{
                   background: '#3498db',
                   color: 'white',
@@ -317,7 +326,7 @@ const App: React.FC = () => {
                   marginRight: '10px'
                 }}
               >
-                Back to Form
+                Back to Dashboard
               </button>
               <button 
                 onClick={async () => {
