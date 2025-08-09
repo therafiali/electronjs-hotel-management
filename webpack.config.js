@@ -26,6 +26,9 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  optimization: {
+    splitChunks: false
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/renderer/index.html',

@@ -37,16 +37,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __importStar(require("path"));
-const fs = __importStar(require("fs"));
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 class HotelDatabase {
     constructor() {
         this.dbPath = path.join(__dirname, '../hotel.db');
-        this.jsonPath = path.join(__dirname, '../hotel-data.json');
         // Initialize SQLite database
         this.db = new better_sqlite3_1.default(this.dbPath);
+        // Disable foreign key constraints to avoid conflicts
+        this.db.pragma('foreign_keys = OFF');
         this.initializeTables();
-        this.migrateFromJsonIfNeeded();
         this.initializeDefaultUser();
     }
     initializeTables() {
@@ -93,69 +92,6 @@ class HotelDatabase {
         }
         catch (error) {
             console.error('❌ Error initializing database tables:', error);
-        }
-    }
-    migrateFromJsonIfNeeded() {
-        try {
-            // Check if we need to migrate from JSON
-            if (fs.existsSync(this.jsonPath)) {
-                const fileData = fs.readFileSync(this.jsonPath, 'utf8');
-                const parsedData = JSON.parse(fileData);
-                // Check if database is empty (needs migration)
-                const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get();
-                const invoiceCount = this.db.prepare('SELECT COUNT(*) as count FROM invoices').get();
-                if (userCount.count === 0 && invoiceCount.count === 0) {
-                    console.log('🔄 Migrating data from JSON to SQLite...');
-                    // Handle old format (array of invoices) vs new format
-                    let data;
-                    if (Array.isArray(parsedData)) {
-                        data = {
-                            users: [],
-                            invoices: parsedData,
-                            items: []
-                        };
-                    }
-                    else {
-                        data = {
-                            users: parsedData.users || [],
-                            invoices: parsedData.invoices || [],
-                            items: parsedData.items || []
-                        };
-                    }
-                    // Migrate users
-                    const insertUser = this.db.prepare(`
-            INSERT OR REPLACE INTO users (id, username, password, email, role, name, isActive, createdDate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          `);
-                    for (const user of data.users) {
-                        insertUser.run(user.id, user.username, user.password, user.email, user.role, user.name, user.isActive ? 1 : 0, user.createdDate);
-                    }
-                    // Migrate invoices
-                    const insertInvoice = this.db.prepare(`
-            INSERT OR REPLACE INTO invoices (id, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `);
-                    for (const invoice of data.invoices) {
-                        insertInvoice.run(invoice.id, JSON.stringify(invoice.guestInfo), JSON.stringify(invoice.roomInfo), JSON.stringify(invoice.foodItems), invoice.taxRate, invoice.discount, invoice.subtotal, invoice.tax, invoice.total, invoice.date);
-                    }
-                    // Migrate items
-                    const insertItem = this.db.prepare(`
-            INSERT OR REPLACE INTO items (id, name, category, price, createdDate)
-            VALUES (?, ?, ?, ?, ?)
-          `);
-                    for (const item of data.items) {
-                        insertItem.run(item.id, item.name, item.category, item.price, item.createdDate);
-                    }
-                    console.log(`✅ Migration completed: ${data.users.length} users, ${data.invoices.length} invoices, ${data.items.length} items`);
-                    // Create backup of JSON file
-                    const backupPath = this.jsonPath + '.backup';
-                    fs.copyFileSync(this.jsonPath, backupPath);
-                    console.log(`📁 JSON backup created: ${backupPath}`);
-                }
-            }
-        }
-        catch (error) {
-            console.error('❌ Error during data migration:', error);
         }
     }
     initializeDefaultUser() {
