@@ -118,7 +118,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
               className="print-btn"
               title="Print Invoice PDF"
             >
-              🖨️ Print
+              🖨️ Create Invoice
             </button>
           </div>
         );

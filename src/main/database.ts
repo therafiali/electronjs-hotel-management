@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as fs from 'fs';
 import Database from 'better-sqlite3';
 
 interface InvoiceRow {
@@ -47,25 +46,22 @@ interface Item {
   createdDate: string;
 }
 
-interface DatabaseData {
-  users: User[];
-  invoices: Invoice[];
-  items: Item[];
-}
+
 
 class HotelDatabase {
   private db: Database.Database;
   private dbPath: string;
-  private jsonPath: string;
 
   constructor() {
     this.dbPath = path.join(__dirname, '../hotel.db');
-    this.jsonPath = path.join(__dirname, '../hotel-data.json');
     
     // Initialize SQLite database
     this.db = new Database(this.dbPath);
+    
+    // Disable foreign key constraints to avoid conflicts
+    this.db.pragma('foreign_keys = OFF');
+    
     this.initializeTables();
-    this.migrateFromJsonIfNeeded();
     this.initializeDefaultUser();
   }
 
@@ -118,88 +114,7 @@ class HotelDatabase {
     }
   }
 
-  private migrateFromJsonIfNeeded() {
-    try {
-      // Check if we need to migrate from JSON
-      if (fs.existsSync(this.jsonPath)) {
-        const fileData = fs.readFileSync(this.jsonPath, 'utf8');
-        const parsedData = JSON.parse(fileData);
-        
-        // Check if database is empty (needs migration)
-        const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-        const invoiceCount = this.db.prepare('SELECT COUNT(*) as count FROM invoices').get() as { count: number };
-        
-        if (userCount.count === 0 && invoiceCount.count === 0) {
-          console.log('🔄 Migrating data from JSON to SQLite...');
-          
-          // Handle old format (array of invoices) vs new format
-          let data: DatabaseData;
-          if (Array.isArray(parsedData)) {
-            data = {
-              users: [],
-              invoices: parsedData,
-              items: []
-            };
-          } else {
-            data = {
-              users: parsedData.users || [],
-              invoices: parsedData.invoices || [],
-              items: parsedData.items || []
-            };
-          }
 
-          // Migrate users
-          const insertUser = this.db.prepare(`
-            INSERT OR REPLACE INTO users (id, username, password, email, role, name, isActive, createdDate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          `);
-          
-          for (const user of data.users) {
-            insertUser.run(
-              user.id, user.username, user.password, user.email, 
-              user.role, user.name, user.isActive ? 1 : 0, user.createdDate
-            );
-          }
-
-          // Migrate invoices
-          const insertInvoice = this.db.prepare(`
-            INSERT OR REPLACE INTO invoices (id, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          `);
-          
-          for (const invoice of data.invoices) {
-            insertInvoice.run(
-              invoice.id, 
-              JSON.stringify(invoice.guestInfo), 
-              JSON.stringify(invoice.roomInfo),
-              JSON.stringify(invoice.foodItems),
-              invoice.taxRate, invoice.discount, invoice.subtotal, 
-              invoice.tax, invoice.total, invoice.date
-            );
-          }
-
-          // Migrate items
-          const insertItem = this.db.prepare(`
-            INSERT OR REPLACE INTO items (id, name, category, price, createdDate)
-            VALUES (?, ?, ?, ?, ?)
-          `);
-          
-          for (const item of data.items) {
-            insertItem.run(item.id, item.name, item.category, item.price, item.createdDate);
-          }
-
-          console.log(`✅ Migration completed: ${data.users.length} users, ${data.invoices.length} invoices, ${data.items.length} items`);
-          
-          // Create backup of JSON file
-          const backupPath = this.jsonPath + '.backup';
-          fs.copyFileSync(this.jsonPath, backupPath);
-          console.log(`📁 JSON backup created: ${backupPath}`);
-        }
-      }
-    } catch (error) {
-      console.error('❌ Error during data migration:', error);
-    }
-  }
 
   private initializeDefaultUser() {
     try {
@@ -283,7 +198,7 @@ class HotelDatabase {
     try {
       const stmt = this.db.prepare('SELECT * FROM users');
       const userRows = stmt.all() as any[];
-      
+      console.log(userRows);
       return userRows.map(row => ({
         id: row.id,
         username: row.username,

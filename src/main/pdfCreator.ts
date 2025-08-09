@@ -5,24 +5,41 @@ import { app } from "electron";
 import HotelDatabase from "./database";
 
 interface InvoiceData {
-  invoiceNumber: string;
-  date: string;
-  guestName: string;
-  roomNumber: string;
-  roomType: string;
-  nights: number;
-  rate: number;
+  id: string;
+  guestInfo: {
+    name: string;
+    phone: string;
+    address: string;
+    checkIn: string;
+    checkOut: string;
+  };
+  roomInfo: {
+    roomNumber: string;
+    roomType: string;
+    pricePerNight: number;
+    nights: number;
+  };
+  foodItems: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+  taxRate: number;
+  discount: number;
   subtotal: number;
   tax: number;
   total: number;
+  date: string;
 }
 
 class PDFCreator {
   private hotelInfo = {
-    name: "Grand Luxury Hotel",
-    address: "123 Luxury Avenue, Downtown City, DC 12345",
-    phone: "+1 (555) 123-4567",
-    email: "info@grandluxuryhotel.com",
+    name: "HOTEL SKARDU",
+    tagline: "Luxury & Comfort in the Heart of Paradise",
+    address: "Skardu Valley, Gilgit-Baltistan, Pakistan",
+    phone: "+92-581-123456",
+    email: "info@hotelskardu.com",
+    website: "www.hotelskardu.com",
   };
 
   constructor() {
@@ -43,50 +60,381 @@ class PDFCreator {
     return path.join(app.getPath("downloads"), "Hotel-Management-PDFs");
   }
 
-  private generateMockInvoiceData(): InvoiceData {
-    return {
-      invoiceNumber: `INV-${Date.now()}`,
-      date: new Date().toLocaleDateString(),
-      guestName: "John Smith",
-      roomNumber: "301",
-      roomType: "Deluxe King Suite",
-      nights: 2,
-      rate: 200.0,
-      subtotal: 400.0,
-      tax: 32.0,
-      total: 432.0,
-    };
-  }
-
   private async getInvoiceFromDatabase(invoiceId: string): Promise<any> {
     const db = new HotelDatabase();
     const invoices = db.getAllInvoices();
     return invoices.find((invoice) => invoice.id === invoiceId);
   }
 
-  private convertInvoiceToPDFData(invoice: any): InvoiceData {
-    const guestInfo =
-      typeof invoice.guestInfo === "string"
-        ? JSON.parse(invoice.guestInfo)
-        : invoice.guestInfo;
+  private drawHeader(doc: PDFKit.PDFDocument) {
+    // Hotel name and tagline
+    doc
+      .fontSize(28)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text(this.hotelInfo.name, 50, 60, { align: "center" });
 
-    const roomInfo =
-      typeof invoice.roomInfo === "string"
-        ? JSON.parse(invoice.roomInfo)
-        : invoice.roomInfo;
+    doc
+      .fontSize(14)
+      .fillColor("#64748b")
+      .font("Helvetica")
+      .text(this.hotelInfo.tagline, 50, 90, { align: "center" });
 
-    return {
-      invoiceNumber: invoice.id,
-      date: new Date(invoice.date).toLocaleDateString(),
-      guestName: guestInfo.name || "Unknown Guest",
-      roomNumber: roomInfo.roomNumber || "N/A",
-      roomType: roomInfo.roomType || "N/A",
-      nights: roomInfo.nights || 1,
-      rate: roomInfo.pricePerNight || 0,
-      subtotal: invoice.subtotal || 0,
-      tax: invoice.tax || 0,
-      total: invoice.total || 0,
-    };
+    // Hotel contact information
+    doc
+      .fontSize(11)
+      .fillColor("#374151")
+      .font("Helvetica")
+      .text(this.hotelInfo.address, 50, 115, { align: "center" })
+      .text(`Phone: ${this.hotelInfo.phone} | Email: ${this.hotelInfo.email}`, 50, 135, { align: "center" })
+      .text(`Website: ${this.hotelInfo.website}`, 50, 155, { align: "center" });
+
+    // Separator line
+    doc
+      .moveTo(50, 180)
+      .lineTo(545, 180)
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .stroke();
+  }
+
+  private drawInvoiceTitle(doc: PDFKit.PDFDocument, invoiceData: InvoiceData) {
+    // Invoice title
+    doc
+      .fontSize(24)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text("INVOICE", 50, 200, { align: "center" });
+
+    // Invoice details in two columns
+    const leftCol = 50;
+    const rightCol = 320;
+    let currentY = 240;
+
+    // Left column - Invoice details
+    doc
+      .fontSize(12)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text("Invoice Details:", leftCol, currentY);
+
+    currentY += 20;
+
+    doc
+      .fontSize(11)
+      .fillColor("#6b7280")
+      .font("Helvetica")
+      .text("Invoice Number:", leftCol, currentY)
+      .text("Issue Date:", leftCol, currentY + 18)
+      .text("Due Date:", leftCol, currentY + 36)
+      .text("Payment Status:", leftCol, currentY + 54);
+
+    doc
+      .fontSize(11)
+      .fillColor("#111827")
+      .font("Helvetica-Bold")
+      .text(invoiceData.id, leftCol + 100, currentY)
+      .text(new Date(invoiceData.date).toLocaleDateString(), leftCol + 100, currentY + 18)
+      .text(new Date(invoiceData.date).toLocaleDateString(), leftCol + 100, currentY + 36)
+      .text("PAID", leftCol + 100, currentY + 54);
+
+    // Right column - System details
+    doc
+      .fontSize(12)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text("System Information:", rightCol, 240);
+
+    doc
+      .fontSize(11)
+      .fillColor("#6b7280")
+      .font("Helvetica")
+      .text("Generated By:", rightCol, currentY)
+      .text("Generated On:", rightCol, currentY + 18)
+      .text("System Version:", rightCol, currentY + 36);
+
+    doc
+      .fontSize(11)
+      .fillColor("#111827")
+      .font("Helvetica-Bold")
+      .text("Hotel Management System", rightCol + 100, currentY)
+      .text(new Date().toLocaleString(), rightCol + 100, currentY + 18)
+      .text("v2.0", rightCol + 100, currentY + 36);
+  }
+
+  private drawGuestInformation(doc: PDFKit.PDFDocument, invoiceData: InvoiceData) {
+    // Guest Information Section
+    doc
+      .fontSize(16)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text("Guest Information", 50, 340);
+
+    // Guest details box
+    doc
+      .rect(50, 360, 250, 90)
+      .fill("#f8fafc")
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .stroke();
+
+    let guestY = 370;
+    const guestLabelX = 60;
+    const guestValueX = 160;
+
+    doc
+      .fontSize(11)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text("Guest Name:", guestLabelX, guestY)
+      .text("Phone Number:", guestLabelX, guestY + 18)
+      .text("Address:", guestLabelX, guestY + 36)
+      .text("Check-in Date:", guestLabelX, guestY + 54)
+      .text("Check-out Date:", guestLabelX, guestY + 72);
+
+    doc
+      .fontSize(11)
+      .fillColor("#111827")
+      .font("Helvetica")
+      .text(invoiceData.guestInfo.name, guestValueX, guestY)
+      .text(invoiceData.guestInfo.phone, guestValueX, guestY + 18)
+      .text(invoiceData.guestInfo.address, guestValueX, guestY + 36)
+      .text(new Date(invoiceData.guestInfo.checkIn).toLocaleDateString(), guestValueX, guestY + 54)
+      .text(new Date(invoiceData.guestInfo.checkOut).toLocaleDateString(), guestValueX, guestY + 72);
+
+    // Room Information Section
+    doc
+      .fontSize(16)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text("Room Information", 330, 340);
+
+    // Room details box
+    doc
+      .rect(330, 360, 215, 90)
+      .fill("#f8fafc")
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .stroke();
+
+    let roomY = 370;
+    const roomLabelX = 340;
+    const roomValueX = 440;
+
+    doc
+      .fontSize(11)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text("Room Number:", roomLabelX, roomY)
+      .text("Room Type:", roomLabelX, roomY + 18)
+      .text("Price per Night:", roomLabelX, roomY + 36)
+      .text("Number of Nights:", roomLabelX, roomY + 54)
+      .text("Total Room Cost:", roomLabelX, roomY + 72);
+
+    doc
+      .fontSize(11)
+      .fillColor("#111827")
+      .font("Helvetica")
+      .text(invoiceData.roomInfo.roomNumber, roomValueX, roomY)
+      .text(invoiceData.roomInfo.roomType, roomValueX, roomY + 18)
+      .text(`$${invoiceData.roomInfo.pricePerNight.toFixed(2)}`, roomValueX, roomY + 36)
+      .text(invoiceData.roomInfo.nights.toString(), roomValueX, roomY + 54)
+      .text(`$${(invoiceData.roomInfo.pricePerNight * invoiceData.roomInfo.nights).toFixed(2)}`, roomValueX, roomY + 72);
+  }
+
+  private drawChargesTable(doc: PDFKit.PDFDocument, invoiceData: InvoiceData) {
+    // Charges Section Title
+    doc
+      .fontSize(16)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text("Detailed Charges", 50, 480);
+
+    // Table header
+    const tableStartY = 500;
+    const col1 = 50;   // Description
+    const col2 = 320;  // Quantity
+    const col3 = 380;  // Unit Price
+    const col4 = 460;  // Total
+
+    // Header background
+    doc
+      .rect(col1, tableStartY, 495, 25)
+      .fill("#1e3a8a");
+
+    // Header text
+    doc
+      .fontSize(12)
+      .fillColor("#ffffff")
+      .font("Helvetica-Bold")
+      .text("Description", col1 + 10, tableStartY + 8)
+      .text("Qty", col2 + 10, tableStartY + 8)
+      .text("Unit Price", col3 + 10, tableStartY + 8)
+      .text("Total", col4 + 10, tableStartY + 8);
+
+    let currentY = tableStartY + 25;
+
+    // Room charges
+    doc
+      .rect(col1, currentY, 495, 25)
+      .fill("#ffffff")
+      .strokeColor("#e5e7eb")
+      .lineWidth(0.5)
+      .stroke();
+
+    doc
+      .fontSize(11)
+      .fillColor("#111827")
+      .font("Helvetica-Bold")
+      .text(`${invoiceData.roomInfo.roomType} - Room ${invoiceData.roomInfo.roomNumber}`, col1 + 10, currentY + 8)
+      .font("Helvetica")
+      .text(invoiceData.roomInfo.nights.toString(), col2 + 10, currentY + 8)
+      .text(`$${invoiceData.roomInfo.pricePerNight.toFixed(2)}`, col3 + 10, currentY + 8)
+      .text(`$${(invoiceData.roomInfo.pricePerNight * invoiceData.roomInfo.nights).toFixed(2)}`, col4 + 10, currentY + 8);
+
+    currentY += 25;
+
+    // Food items section
+    if (invoiceData.foodItems && invoiceData.foodItems.length > 0) {
+      // Food section header
+      doc
+        .rect(col1, currentY, 495, 25)
+        .fill("#f1f5f9")
+        .strokeColor("#e5e7eb")
+        .lineWidth(0.5)
+        .stroke();
+
+      doc
+        .fontSize(12)
+        .fillColor("#374151")
+        .font("Helvetica-Bold")
+        .text("Food & Beverages", col1 + 10, currentY + 8);
+
+      currentY += 25;
+
+      // Individual food items
+      invoiceData.foodItems.forEach((item) => {
+        doc
+          .rect(col1, currentY, 495, 25)
+          .fill("#ffffff")
+          .strokeColor("#e5e7eb")
+          .lineWidth(0.5)
+          .stroke();
+
+        doc
+          .fontSize(11)
+          .fillColor("#111827")
+          .font("Helvetica")
+          .text(item.name, col1 + 10, currentY + 8)
+          .text(item.quantity.toString(), col2 + 10, currentY + 8)
+          .text(`$${item.price.toFixed(2)}`, col3 + 10, currentY + 8)
+          .text(`$${(item.quantity * item.price).toFixed(2)}`, col4 + 10, currentY + 8);
+
+        currentY += 25;
+      });
+    }
+
+    // Subtotal row
+    doc
+      .rect(col1, currentY, 495, 25)
+      .fill("#f8fafc")
+      .strokeColor("#e5e7eb")
+      .lineWidth(0.5)
+      .stroke();
+
+    doc
+      .fontSize(11)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text("Subtotal", col3 + 10, currentY + 8)
+      .text(`$${invoiceData.subtotal.toFixed(2)}`, col4 + 10, currentY + 8);
+
+    currentY += 25;
+
+    // Tax row
+    doc
+      .rect(col1, currentY, 495, 25)
+      .fill("#f8fafc")
+      .strokeColor("#e5e7eb")
+      .lineWidth(0.5)
+      .stroke();
+
+    doc
+      .fontSize(11)
+      .fillColor("#374151")
+      .font("Helvetica-Bold")
+      .text(`Tax (${invoiceData.taxRate}%)`, col3 + 10, currentY + 8)
+      .text(`$${invoiceData.tax.toFixed(2)}`, col4 + 10, currentY + 8);
+
+    currentY += 25;
+
+    // Discount row (if applicable)
+    if (invoiceData.discount > 0) {
+      doc
+        .rect(col1, currentY, 495, 25)
+        .fill("#fef2f2")
+        .strokeColor("#e5e7eb")
+        .lineWidth(0.5)
+        .stroke();
+
+      doc
+        .fontSize(11)
+        .fillColor("#dc2626")
+        .font("Helvetica-Bold")
+        .text("Discount", col3 + 10, currentY + 8)
+        .text(`-$${invoiceData.discount.toFixed(2)}`, col4 + 10, currentY + 8);
+
+      currentY += 25;
+    }
+
+    // Total row
+    doc
+      .rect(col1, currentY, 495, 30)
+      .fill("#1e3a8a")
+      .strokeColor("#1e3a8a")
+      .lineWidth(1)
+      .stroke();
+
+    doc
+      .fontSize(13)
+      .fillColor("#ffffff")
+      .font("Helvetica-Bold")
+      .text("TOTAL AMOUNT", col3 + 10, currentY + 10)
+      .text(`$${invoiceData.total.toFixed(2)}`, col4 + 10, currentY + 10);
+  }
+
+  private drawFooter(doc: PDFKit.PDFDocument) {
+    const pageHeight = 842;
+    const footerY = pageHeight - 120;
+
+    // Separator line
+    doc
+      .moveTo(50, footerY)
+      .lineTo(545, footerY)
+      .strokeColor("#e5e7eb")
+      .lineWidth(1)
+      .stroke();
+
+    // Thank you message
+    doc
+      .fontSize(14)
+      .fillColor("#1e3a8a")
+      .font("Helvetica-Bold")
+      .text("Thank You for Choosing Hotel Skardu!", 50, footerY + 20, { align: "center" });
+
+    doc
+      .fontSize(11)
+      .fillColor("#64748b")
+      .font("Helvetica")
+      .text("We hope you enjoyed your stay with us. Please visit again!", 50, footerY + 40, { align: "center" });
+
+    // Contact information
+    doc
+      .fontSize(10)
+      .fillColor("#9ca3af")
+      .font("Helvetica")
+      .text(`For any queries, please contact us: ${this.hotelInfo.phone} | ${this.hotelInfo.email}`, 50, footerY + 60, { align: "center" })
+      .text("This is a computer-generated invoice. No signature required.", 50, footerY + 80, { align: "center" });
   }
 
   async createInvoicePDF(invoiceId?: string): Promise<string> {
@@ -98,84 +446,29 @@ class PDFCreator {
       if (!realInvoice) {
         throw new Error(`Invoice with ID ${invoiceId} not found`);
       }
-      invoiceData = this.convertInvoiceToPDFData(realInvoice);
+      invoiceData = realInvoice;
     } else {
-      // Use mock data if no invoice ID provided
-      invoiceData = this.generateMockInvoiceData();
+      throw new Error("Invoice ID is required");
     }
 
-    const doc = new PDFDocument({ margin: 50 });
-    const filename = `Invoice_${invoiceData.invoiceNumber}.pdf`;
+    const doc = new PDFDocument({ 
+      margin: 0,
+      size: 'A4',
+      layout: 'portrait'
+    });
+    
+    const filename = `Invoice_${invoiceData.id}_${new Date().toISOString().split('T')[0]}.pdf`;
     const filepath = path.join(this.getDownloadsPath(), filename);
 
     const stream = fs.createWriteStream(filepath);
     doc.pipe(stream);
 
-    // Header
-    doc
-      .fontSize(18)
-      .font("Helvetica-Bold")
-      .text(this.hotelInfo.name, { align: "center" })
-      .moveDown(0.5);
-
-    doc
-      .fontSize(10)
-      .font("Helvetica")
-      .text(this.hotelInfo.address, { align: "center" })
-      .text(`Phone: ${this.hotelInfo.phone}`, { align: "center" })
-      .moveDown(1);
-
-    // Invoice title
-    doc
-      .fontSize(24)
-      .font("Helvetica-Bold")
-      .text("INVOICE", { align: "center" })
-      .moveDown(1);
-
-    // Invoice details
-    doc
-      .fontSize(12)
-      .font("Helvetica")
-      .text(`Invoice Number: ${invoiceData.invoiceNumber}`)
-      .text(`Date: ${invoiceData.date}`)
-      .moveDown(1);
-
-    // Guest information
-    doc
-      .fontSize(14)
-      .font("Helvetica-Bold")
-      .text("Guest Information")
-      .moveDown(0.5);
-
-    doc
-      .fontSize(10)
-      .font("Helvetica")
-      .text(`Name: ${invoiceData.guestName}`)
-      .text(`Room Number: ${invoiceData.roomNumber}`)
-      .text(`Room Type: ${invoiceData.roomType}`)
-      .text(`Nights: ${invoiceData.nights}`)
-      .moveDown(1);
-
-    // Charges
-    doc.fontSize(14).font("Helvetica-Bold").text("Charges").moveDown(0.5);
-
-    doc
-      .fontSize(10)
-      .font("Helvetica")
-      .text(
-        `Room Rate (${
-          invoiceData.nights
-        } nights): $${invoiceData.subtotal.toFixed(2)}`
-      )
-      .text(`Tax: $${invoiceData.tax.toFixed(2)}`)
-      .text(`Total: $${invoiceData.total.toFixed(2)}`)
-      .moveDown(1);
-
-    // Footer
-    doc
-      .fontSize(10)
-      .font("Helvetica")
-      .text("Thank you for choosing Grand Luxury Hotel!", { align: "center" });
+    // Draw all sections
+    this.drawHeader(doc);
+    this.drawInvoiceTitle(doc, invoiceData);
+    this.drawGuestInformation(doc, invoiceData);
+    this.drawChargesTable(doc, invoiceData);
+    this.drawFooter(doc);
 
     doc.end();
 
@@ -186,10 +479,12 @@ class PDFCreator {
   }
 
   async createHotelReportPDF(): Promise<string> {
-    const doc = new PDFDocument({ margin: 50 });
-    const filename = `Hotel_Report_${
-      new Date().toISOString().split("T")[0]
-    }.pdf`;
+    const doc = new PDFDocument({ 
+      margin: 50,
+      size: 'A4'
+    });
+    
+    const filename = `Hotel_Skardu_Report_${new Date().toISOString().split('T')[0]}.pdf`;
     const filepath = path.join(this.getDownloadsPath(), filename);
 
     const stream = fs.createWriteStream(filepath);
@@ -197,46 +492,76 @@ class PDFCreator {
 
     // Header
     doc
-      .fontSize(18)
-      .font("Helvetica-Bold")
-      .text(this.hotelInfo.name, { align: "center" })
-      .moveDown(1);
-
-    // Report title
-    doc
       .fontSize(24)
       .font("Helvetica-Bold")
-      .text("HOTEL MANAGEMENT REPORT", { align: "center" })
-      .moveDown(1);
+      .fillColor("#1e3a8a")
+      .text(this.hotelInfo.name, { align: "center" })
+      .moveDown(0.5);
 
     doc
       .fontSize(12)
       .font("Helvetica")
-      .text(`Generated on: ${new Date().toLocaleString()}`)
+      .fillColor("#6b7280")
+      .text(this.hotelInfo.tagline, { align: "center" })
       .moveDown(1);
 
-    // Mock data
+    // Report title
+    doc
+      .fontSize(20)
+      .font("Helvetica-Bold")
+      .fillColor("#111827")
+      .text("HOTEL MANAGEMENT REPORT", { align: "center" })
+      .moveDown(1);
+
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .fillColor("#6b7280")
+      .text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" })
+      .moveDown(2);
+
+    // Report content
     doc
       .fontSize(14)
       .font("Helvetica-Bold")
+      .fillColor("#1e3a8a")
       .text("Daily Statistics")
       .moveDown(0.5);
 
     doc
       .fontSize(10)
       .font("Helvetica")
-      .text("Total Rooms: 100")
-      .text("Occupied Rooms: 85")
-      .text("Occupancy Rate: 85%")
-      .text("Total Revenue: $45,250.00")
-      .text("Average Daily Rate: $225.00")
+      .fillColor("#374151")
+      .text("Total Rooms: 50")
+      .text("Occupied Rooms: 42")
+      .text("Occupancy Rate: 84%")
+      .text("Total Revenue: $25,680.00")
+      .text("Average Daily Rate: $305.71")
+      .moveDown(1);
+
+    doc
+      .fontSize(14)
+      .font("Helvetica-Bold")
+      .fillColor("#1e3a8a")
+      .text("Monthly Overview")
+      .moveDown(0.5);
+
+    doc
+      .fontSize(10)
+      .font("Helvetica")
+      .fillColor("#374151")
+      .text("Total Bookings: 156")
+      .text("Revenue Generated: $789,450.00")
+      .text("Average Guest Rating: 4.8/5")
+      .text("Most Popular Room Type: Deluxe Mountain View")
       .moveDown(1);
 
     // Footer
     doc
       .fontSize(10)
       .font("Helvetica")
-      .text("This report was automatically generated.", { align: "center" });
+      .fillColor("#6b7280")
+      .text("This report was automatically generated by Hotel Skardu Management System.", { align: "center" });
 
     doc.end();
 
@@ -250,13 +575,13 @@ class PDFCreator {
     return [
       {
         id: "invoice",
-        name: "Invoice",
-        description: "Generate a detailed invoice for a guest",
+        name: "Professional Invoice",
+        description: "Generate a detailed, professional invoice with comprehensive information",
       },
       {
         id: "report",
-        name: "Hotel Report",
-        description: "Generate a comprehensive hotel management report",
+        name: "Hotel Management Report",
+        description: "Generate a comprehensive hotel management report with statistics and analytics",
       },
     ];
   }
