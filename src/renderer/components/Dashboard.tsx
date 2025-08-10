@@ -4,12 +4,14 @@ interface DashboardProps {
   onNavigateToInvoice: () => void;
   onNavigateToList: () => void;
   onNavigateToItems: () => void;
+  onNavigateToRooms: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToInvoice,
   onNavigateToList,
   onNavigateToItems,
+  onNavigateToRooms,
 }) => {
   return (
     <div className="dashboard">
@@ -55,6 +57,17 @@ const Dashboard: React.FC<DashboardProps> = ({
               className="dashboard-btn primary"
             >
               Manage Items
+            </button>
+          </div>
+
+          <div className="action-card">
+            <h3>🏠 Room Management</h3>
+            <p>Create and manage room types</p>
+            <button
+              onClick={onNavigateToRooms}
+              className="dashboard-btn secondary"
+            >
+              Create Room Type
             </button>
           </div>
         </div>

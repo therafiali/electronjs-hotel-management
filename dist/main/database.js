@@ -88,6 +88,15 @@ class HotelDatabase {
           createdDate TEXT NOT NULL
         )
       `);
+            // Create rooms table
+            this.db.exec(`
+        CREATE TABLE IF NOT EXISTS rooms (
+          id TEXT PRIMARY KEY,
+          roomType TEXT NOT NULL,
+          price REAL NOT NULL,
+          createdDate TEXT NOT NULL
+        )
+      `);
             console.log('✅ Database tables initialized successfully');
         }
         catch (error) {
@@ -306,6 +315,43 @@ class HotelDatabase {
         catch (error) {
             console.error('Error updating item:', error);
             return { success: false };
+        }
+    }
+    // Room methods
+    saveRoom(roomData) {
+        try {
+            const newRoom = {
+                id: `room_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                ...roomData,
+                createdDate: new Date().toISOString()
+            };
+            const stmt = this.db.prepare(`
+        INSERT INTO rooms (id, roomType, price, createdDate)
+        VALUES (?, ?, ?, ?)
+      `);
+            stmt.run(newRoom.id, newRoom.roomType, newRoom.price, newRoom.createdDate);
+            console.log(`✅ Room saved: ${newRoom.id}`);
+            return { success: true, id: newRoom.id };
+        }
+        catch (error) {
+            console.error('Error saving room:', error);
+            return { success: false, id: '' };
+        }
+    }
+    getAllRooms() {
+        try {
+            const stmt = this.db.prepare('SELECT * FROM rooms ORDER BY createdDate DESC');
+            const roomRows = stmt.all();
+            return roomRows.map(row => ({
+                id: row.id,
+                roomType: row.roomType,
+                price: row.price,
+                createdDate: row.createdDate
+            }));
+        }
+        catch (error) {
+            console.error('Error getting rooms:', error);
+            return [];
         }
     }
     close() {

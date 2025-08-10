@@ -25,4 +25,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   deleteItem: (itemId: string) => ipcRenderer.invoke("delete-item", itemId),
   updateItem: (id: string, updateData: any) =>
     ipcRenderer.invoke("update-item", { id, updateData }),
+  // Room API methods
+  saveRoom: (roomData: any) => ipcRenderer.invoke("save-room", roomData),
+  getAllRooms: () => ipcRenderer.invoke("get-all-rooms"),
 });

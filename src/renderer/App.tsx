@@ -6,6 +6,7 @@ import Dashboard from "./components/Dashboard";
 import PDFCreator from "./components/PDFCreator";
 import ItemsForm from "./components/ItemsForm";
 import ItemsList from "./components/ItemsList";
+import RoomForm from "./components/RoomForm";
 
 // User interface
 interface User {
@@ -37,6 +38,8 @@ declare global {
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
       updateItem: (id: string, updateData: any) => Promise<any>;
+      saveRoom: (roomData: any) => Promise<any>;
+      getAllRooms: () => Promise<any[]>;
     };
   }
 }
@@ -46,7 +49,7 @@ const App: React.FC = () => {
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "itemsList"
+    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "itemsList" | "rooms"
   >("dashboard");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
@@ -196,6 +199,29 @@ const App: React.FC = () => {
     }
   };
 
+  // Room handlers
+  const handleRoomSubmit = async (roomData: any) => {
+    try {
+      setLoading(true);
+      console.log("Saving room to database:", roomData);
+
+      // Save to database
+      const result = await window.electronAPI.saveRoom(roomData);
+      console.log("Room saved successfully:", result);
+
+      alert("Room type created and saved to database successfully!");
+
+      // Return success to indicate form should be reset
+      return { success: true };
+    } catch (error) {
+      console.error("Error saving room:", error);
+      alert("Error saving room to database!");
+      return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleItemClick = (item: any) => {
     console.log("Item clicked:", item);
     alert(
@@ -282,6 +308,7 @@ const App: React.FC = () => {
               setCurrentView("list");
             }}
             onNavigateToItems={() => setCurrentView("items")}
+            onNavigateToRooms={() => setCurrentView("rooms")}
           />
         ) : currentView === "form" ? (
           <div>
@@ -456,6 +483,26 @@ const App: React.FC = () => {
                 }}
               >
                 Add New Item
+              </button>
+            </div>
+          </div>
+        ) : currentView === "rooms" ? (
+          <div>
+            <RoomForm onSubmit={handleRoomSubmit} />
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                style={{
+                  background: "#3498db",
+                  color: "white",
+                  border: "none",
+                  padding: "10px 20px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "14px",
+                }}
+              >
+                Back to Dashboard
               </button>
             </div>
           </div>
