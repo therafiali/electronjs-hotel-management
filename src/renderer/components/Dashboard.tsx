@@ -21,6 +21,44 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       <div className="dashboard-content">
+        <div className="stats-section">
+          <div className="stat-card">
+            <div className="stat-icon">🏠</div>
+            <div className="stat-content">
+              <div className="stat-number">25/30</div>
+              <div className="stat-label">Rooms Available</div>
+              <div className="stat-trend positive">+2 from yesterday</div>
+            </div>
+          </div>
+          
+          <div className="stat-card">
+            <div className="stat-icon">📅</div>
+            <div className="stat-content">
+              <div className="stat-number">8</div>
+              <div className="stat-label">Check-ins Today</div>
+              <div className="stat-trend positive">+3 from yesterday</div>
+            </div>
+          </div>
+          
+          <div className="stat-card">
+            <div className="stat-icon">💰</div>
+            <div className="stat-content">
+              <div className="stat-number">$12.5K</div>
+              <div className="stat-label">Monthly Revenue</div>
+              <div className="stat-trend positive">+15% this month</div>
+            </div>
+          </div>
+          
+          <div className="stat-card">
+            <div className="stat-icon">⭐</div>
+            <div className="stat-content">
+              <div className="stat-number">4.8</div>
+              <div className="stat-label">Guest Rating</div>
+              <div className="stat-trend positive">+0.2 this week</div>
+            </div>
+          </div>
+        </div>
+
         <div className="welcome-section">
           <h2>Welcome to Skardu Serenity Inn</h2>
           <p>Manage your hotel operations efficiently</p>

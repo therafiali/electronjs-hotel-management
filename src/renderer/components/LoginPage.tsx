@@ -139,15 +139,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         {/* Demo Info (Hidden by default) */}
         {showDemo && (
-          <div className="demo-credentials">
-            <div className="demo-info-card">
-              <p><strong>Demo Credentials:</strong></p>
-              <div className="demo-item">
-                <span>Username:</span> <code>admin</code>
-              </div>
-              <div className="demo-item">
-                <span>PIN:</span> <code>hotel123</code>
-              </div>
+          <div className="demo-info-simple">
+            <div className="demo-hint">
+              <p>Demo PIN: <span className="demo-pin">hotel123</span></p>
               <button 
                 type="button"
                 onClick={() => {
@@ -155,9 +149,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                   setPassword('hotel123');
                   setError('');
                 }}
-                className="use-demo-btn"
+                className="use-demo-btn-simple"
               >
-                Use Demo Credentials
+                Use Demo PIN
               </button>
             </div>
           </div>
