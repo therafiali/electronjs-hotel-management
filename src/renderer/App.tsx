@@ -77,8 +77,9 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Load rooms when component mounts
+    // Load rooms and items when component mounts
     loadRooms();
+    loadItems();
   }, []);
 
   const handleSendMessage = () => {
@@ -446,7 +447,7 @@ const App: React.FC = () => {
           />
         ) : currentView === "form" ? (
           <div>
-            <InvoiceForm onSubmit={handleInvoiceSubmit} rooms={rooms} />
+            <InvoiceForm onSubmit={handleInvoiceSubmit} rooms={rooms} items={items} />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
                 onClick={async () => {

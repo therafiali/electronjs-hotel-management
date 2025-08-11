@@ -25,12 +25,22 @@ interface FoodItem {
   price: number;
 }
 
+interface Item {
+  id: string;
+  name: string;
+  item_name: string;
+  category: string;
+  price: number;
+  createdDate: string;
+}
+
 interface InvoiceFormProps {
   onSubmit: (invoiceData: any) => void;
   rooms: Room[];
+  items: Item[];
 }
 
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => {
   const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     name: '',
     phone: '',
@@ -50,6 +60,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms }) => {
     quantity: 1,
     price: 0
   });
+
+  const handleItemSelect = (itemId: string) => {
+    const selectedItem = items.find(item => item.id === itemId);
+    if (selectedItem) {
+      setNewFoodItem({
+        name: selectedItem.name,
+        quantity: 1,
+        price: selectedItem.price
+      });
+    }
+  };
 
   const [taxRate, setTaxRate] = useState<number>(5);
   const [discount, setDiscount] = useState<number>(0);
@@ -216,12 +237,17 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms }) => {
           <div className="food-input-row">
             <div className="form-group">
               <label>Food Item:</label>
-              <input
-                type="text"
-                value={newFoodItem.name}
-                onChange={(e) => setNewFoodItem({...newFoodItem, name: e.target.value})}
-                placeholder="Enter food item name"
-              />
+              <select
+                value=""
+                onChange={(e) => handleItemSelect(e.target.value)}
+              >
+                <option value="">Select Food Item</option>
+                {items.map(item => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} - ${item.price}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Quantity:</label>
@@ -239,12 +265,22 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms }) => {
                 value={newFoodItem.price}
                 onChange={(e) => setNewFoodItem({...newFoodItem, price: Number(e.target.value)})}
                 min="0"
+                readOnly
               />
             </div>
             <button type="button" onClick={addFoodItem} className="add-food-btn">
               Add Food Item
             </button>
           </div>
+          
+          {/* Food Item Info Display */}
+          {newFoodItem.name && (
+            <div className="room-info-display">
+              <p>Selected Item: {newFoodItem.name}</p>
+              <p>Price per Item: ${newFoodItem.price}</p>
+              <p>Item Total: ${newFoodItem.price * newFoodItem.quantity}</p>
+            </div>
+          )}
 
           {/* Food Items List */}
           {foodItems.length > 0 && (
