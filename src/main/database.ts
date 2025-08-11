@@ -2,7 +2,7 @@ import * as path from 'path';
 import Database from 'better-sqlite3';
 
 interface InvoiceRow {
-  id: string;
+  invoiceId: string;
   guestInfo: string;
   roomInfo: string;
   foodItems: string;
@@ -12,10 +12,12 @@ interface InvoiceRow {
   tax: number;
   total: number;
   date: string;
+  room_id: string;
+  room_price: number;
 }
 
 interface Invoice {
-  id: string;
+  invoiceId: string;
   guestInfo: unknown;
   roomInfo: unknown;
   foodItems: unknown;
@@ -25,6 +27,18 @@ interface Invoice {
   tax: number;
   total: number;
   date: string;
+  room_id: string;
+  room_price: number;
+}
+
+interface InvoiceFoodItem {
+  invoiceFoodItemId: string;
+  invoiceId: string;
+  itemId: string;
+  quantity: number;
+  subtotal: number;
+  priceAtTime: number;
+  createdAt: string;
 }
 
 interface User {
@@ -41,6 +55,7 @@ interface User {
 interface Item {
   id: string;
   name: string;
+  item_name: string;
   category: string;
   price: number;
   createdDate: string;
@@ -92,33 +107,6 @@ class HotelDatabase {
         )
       `);
 
-      // Create invoices table
-      this.db.exec(`
-        CREATE TABLE IF NOT EXISTS invoices (
-          id TEXT PRIMARY KEY,
-          guestInfo TEXT NOT NULL,
-          roomInfo TEXT NOT NULL,
-          foodItems TEXT NOT NULL,
-          taxRate REAL NOT NULL,
-          discount REAL NOT NULL,
-          subtotal REAL NOT NULL,
-          tax REAL NOT NULL,
-          total REAL NOT NULL,
-          date TEXT NOT NULL
-        )
-      `);
-
-      // Create items table
-      this.db.exec(`
-        CREATE TABLE IF NOT EXISTS items (
-          id TEXT PRIMARY KEY,
-          name TEXT NOT NULL,
-          category TEXT NOT NULL,
-          price REAL NOT NULL,
-          createdDate TEXT NOT NULL
-        )
-      `);
-
       // Create rooms table
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS rooms (
@@ -130,6 +118,60 @@ class HotelDatabase {
           roomType TEXT NOT NULL CHECK (roomType IN ('Standard', 'Deluxe', 'Suite', 'Family')),
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL
+        )
+      `);
+
+      // Create items table
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS items (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          item_name TEXT,
+          category TEXT NOT NULL,
+          price REAL NOT NULL,
+          createdDate TEXT NOT NULL
+        )
+      `);
+
+      // Create invoices table (with new room_id and room_price columns)
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS invoices (
+          invoiceId TEXT PRIMARY KEY,
+          guestInfo TEXT,
+          roomInfo TEXT,
+          foodItems TEXT,
+          taxRate REAL,
+          discount REAL,
+          subtotal REAL,
+          tax REAL,
+          total REAL,
+          date TEXT,
+          room_id TEXT,
+          room_price REAL,
+          FOREIGN KEY (room_id) REFERENCES rooms(roomId)
+        )
+      `);
+
+      // Create invoiceFoodItems table
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS invoiceFoodItems (
+          invoiceFoodItemId TEXT PRIMARY KEY,
+          invoiceId TEXT NOT NULL,
+          itemId TEXT NOT NULL,
+          quantity INTEGER NOT NULL,
+          subtotal REAL NOT NULL,
+          priceAtTime REAL NOT NULL,
+          createdAt TEXT NOT NULL,
+          FOREIGN KEY (invoiceId) REFERENCES invoices(invoiceId),
+          FOREIGN KEY (itemId) REFERENCES items(id)
+        )
+      `);
+
+      // Create metadata table
+      this.db.exec(`
+        CREATE TABLE IF NOT EXISTS metadata (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
         )
       `);
 
@@ -263,12 +305,12 @@ class HotelDatabase {
     try {
       const stmt = this.db.prepare(`
         INSERT OR REPLACE INTO invoices 
-        (id, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (invoiceId, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date, room_id, room_price)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
       
       stmt.run(
-        invoice.id,
+        invoice.invoiceId,
         JSON.stringify(invoice.guestInfo),
         JSON.stringify(invoice.roomInfo),
         JSON.stringify(invoice.foodItems),
@@ -277,14 +319,16 @@ class HotelDatabase {
         invoice.subtotal,
         invoice.tax,
         invoice.total,
-        invoice.date
+        invoice.date,
+        invoice.room_id,
+        invoice.room_price
       );
       
-      console.log(`✅ Invoice saved: ${invoice.id}`);
-      return { success: true, id: invoice.id };
+      console.log(`✅ Invoice saved: ${invoice.invoiceId}`);
+      return { success: true, id: invoice.invoiceId };
     } catch (error) {
       console.error('Error saving invoice:', error);
-      return { success: false, id: invoice.id };
+      return { success: false, id: invoice.invoiceId };
     }
   }
 
@@ -294,16 +338,18 @@ class HotelDatabase {
       const invoiceRows = stmt.all() as any[];
       
       return invoiceRows.map(row => ({
-        id: row.id,
-        guestInfo: JSON.parse(row.guestInfo),
-        roomInfo: JSON.parse(row.roomInfo),
-        foodItems: JSON.parse(row.foodItems),
+        invoiceId: row.invoiceId,
+        guestInfo: JSON.parse(row.guestInfo || '{}'),
+        roomInfo: JSON.parse(row.roomInfo || '{}'),
+        foodItems: JSON.parse(row.foodItems || '{}'),
         taxRate: row.taxRate,
         discount: row.discount,
         subtotal: row.subtotal,
         tax: row.tax,
         total: row.total,
-        date: row.date
+        date: row.date,
+        room_id: row.room_id,
+        room_price: row.room_price
       }));
     } catch (error) {
       console.error('Error getting invoices:', error);
@@ -313,7 +359,7 @@ class HotelDatabase {
 
   deleteInvoice(id: string) {
     try {
-      const stmt = this.db.prepare('DELETE FROM invoices WHERE id = ?');
+      const stmt = this.db.prepare('DELETE FROM invoices WHERE invoiceId = ?');
       const result = stmt.run(id);
       
       console.log(`✅ Invoice deleted: ${id}`);
@@ -334,11 +380,11 @@ class HotelDatabase {
       };
       
       const stmt = this.db.prepare(`
-        INSERT INTO items (id, name, category, price, createdDate)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO items (id, name, item_name, category, price, createdDate)
+        VALUES (?, ?, ?, ?, ?, ?)
       `);
       
-      stmt.run(newItem.id, newItem.name, newItem.category, newItem.price, newItem.createdDate);
+      stmt.run(newItem.id, newItem.name, newItem.item_name, newItem.category, newItem.price, newItem.createdDate);
       
       console.log(`✅ Item saved: ${newItem.id}`);
       return { success: true, id: newItem.id };
@@ -356,6 +402,7 @@ class HotelDatabase {
       return itemRows.map(row => ({
         id: row.id,
         name: row.name,
+        item_name: row.item_name || row.name,
         category: row.category,
         price: row.price,
         createdDate: row.createdDate
@@ -449,6 +496,7 @@ class HotelDatabase {
         roomNumber: row.roomNumber,
         roomType: row.roomType,
         price: row.pricePerNight,
+        pricePerNight: row.pricePerNight,
         createdDate: row.createdAt
       }));
     } catch (error) {
@@ -577,6 +625,118 @@ class HotelDatabase {
     } catch (error) {
       console.error('Error clearing activity logs:', error);
       return { success: false };
+    }
+  }
+
+  // Invoice Food Items methods
+  saveInvoiceFoodItem(invoiceFoodItem: Omit<InvoiceFoodItem, 'invoiceFoodItemId' | 'createdAt'>): { success: boolean; id: string } {
+    try {
+      const newInvoiceFoodItem: InvoiceFoodItem = {
+        invoiceFoodItemId: `invfood_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...invoiceFoodItem,
+        createdAt: new Date().toISOString()
+      };
+      
+      const stmt = this.db.prepare(`
+        INSERT INTO invoiceFoodItems (invoiceFoodItemId, invoiceId, itemId, quantity, subtotal, priceAtTime, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run(
+        newInvoiceFoodItem.invoiceFoodItemId,
+        newInvoiceFoodItem.invoiceId,
+        newInvoiceFoodItem.itemId,
+        newInvoiceFoodItem.quantity,
+        newInvoiceFoodItem.subtotal,
+        newInvoiceFoodItem.priceAtTime,
+        newInvoiceFoodItem.createdAt
+      );
+      
+      console.log(`✅ Invoice food item saved: ${newInvoiceFoodItem.invoiceFoodItemId}`);
+      return { success: true, id: newInvoiceFoodItem.invoiceFoodItemId };
+    } catch (error) {
+      console.error('Error saving invoice food item:', error);
+      return { success: false, id: '' };
+    }
+  }
+
+  getInvoiceFoodItems(invoiceId: string): InvoiceFoodItem[] {
+    try {
+      const stmt = this.db.prepare('SELECT * FROM invoiceFoodItems WHERE invoiceId = ? ORDER BY createdAt DESC');
+      const itemRows = stmt.all(invoiceId) as any[];
+      
+      return itemRows.map(row => ({
+        invoiceFoodItemId: row.invoiceFoodItemId,
+        invoiceId: row.invoiceId,
+        itemId: row.itemId,
+        quantity: row.quantity,
+        subtotal: row.subtotal,
+        priceAtTime: row.priceAtTime,
+        createdAt: row.createdAt
+      }));
+    } catch (error) {
+      console.error('Error getting invoice food items:', error);
+      return [];
+    }
+  }
+
+  deleteInvoiceFoodItem(id: string): { success: boolean } {
+    try {
+      const stmt = this.db.prepare('DELETE FROM invoiceFoodItems WHERE invoiceFoodItemId = ?');
+      const result = stmt.run(id);
+      
+      console.log(`✅ Invoice food item deleted: ${id}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Error deleting invoice food item:', error);
+      return { success: false };
+    }
+  }
+
+  // Metadata methods
+  setMetadata(key: string, value: string): { success: boolean } {
+    try {
+      const stmt = this.db.prepare(`
+        INSERT OR REPLACE INTO metadata (key, value)
+        VALUES (?, ?)
+      `);
+      
+      stmt.run(key, value);
+      
+      console.log(`✅ Metadata set: ${key} = ${value}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Error setting metadata:', error);
+      return { success: false };
+    }
+  }
+
+  getMetadata(key: string): string | null {
+    try {
+      const stmt = this.db.prepare('SELECT value FROM metadata WHERE key = ?');
+      const result = stmt.get(key) as { value: string } | undefined;
+      
+      return result ? result.value : null;
+    } catch (error) {
+      console.error('Error getting metadata:', error);
+      return null;
+    }
+  }
+
+  getAllMetadata(): { [key: string]: string } {
+    try {
+      const stmt = this.db.prepare('SELECT key, value FROM metadata');
+      const rows = stmt.all() as { key: string; value: string }[];
+      
+      const metadata: { [key: string]: string } = {};
+      rows.forEach(row => {
+        metadata[row.key] = row.value;
+      });
+      
+      return metadata;
+    } catch (error) {
+      console.error('Error getting all metadata:', error);
+      return {};
     }
   }
 

@@ -77,7 +77,7 @@ class PDFCreator {
     async getInvoiceFromDatabase(invoiceId) {
         const db = new database_1.default();
         const invoices = db.getAllInvoices();
-        return invoices.find((invoice) => invoice.id === invoiceId);
+        return invoices.find((invoice) => invoice.invoiceId === invoiceId);
     }
     convertInvoiceToPDFData(invoice) {
         const guestInfo = typeof invoice.guestInfo === "string"

@@ -115,14 +115,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             </div>
           )}
 
-          {/* Submit Button (Hidden, submits on Enter) */}
+          {/* Submit Button */}
           <button 
             type="submit" 
-            className="hidden-submit"
+            className="login-button"
             disabled={loading}
-            style={{ display: 'none' }}
           >
-            Login
+            {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 

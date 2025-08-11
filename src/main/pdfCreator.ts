@@ -61,7 +61,7 @@ class PDFCreator {
   private async getInvoiceFromDatabase(invoiceId: string): Promise<any> {
     const db = new HotelDatabase();
     const invoices = db.getAllInvoices();
-    return invoices.find((invoice) => invoice.id === invoiceId);
+    return invoices.find((invoice) => invoice.invoiceId === invoiceId);
   }
 
   private convertInvoiceToPDFData(invoice: any): InvoiceData {

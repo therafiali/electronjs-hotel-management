@@ -76,6 +76,11 @@ const App: React.FC = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Load rooms when component mounts
+    loadRooms();
+  }, []);
+
   const handleSendMessage = () => {
     if (message.trim() && window.electronAPI) {
       window.electronAPI.sendMessage(message);
@@ -441,7 +446,7 @@ const App: React.FC = () => {
           />
         ) : currentView === "form" ? (
           <div>
-            <InvoiceForm onSubmit={handleInvoiceSubmit} />
+            <InvoiceForm onSubmit={handleInvoiceSubmit} rooms={rooms} />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
                 onClick={async () => {

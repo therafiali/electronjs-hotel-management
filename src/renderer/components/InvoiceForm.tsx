@@ -10,9 +10,13 @@ interface GuestInfo {
 
 interface RoomInfo {
   roomNumber: string;
-  roomType: string;
-  pricePerNight: number;
   nights: number;
+}
+
+interface Room {
+  roomId: string;
+  roomNumber: string;
+  pricePerNight: number;
 }
 
 interface FoodItem {
@@ -23,9 +27,10 @@ interface FoodItem {
 
 interface InvoiceFormProps {
   onSubmit: (invoiceData: any) => void;
+  rooms: Room[];
 }
 
-const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
+const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms }) => {
   const [guestInfo, setGuestInfo] = useState<GuestInfo>({
     name: '',
     phone: '',
@@ -36,8 +41,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
 
   const [roomInfo, setRoomInfo] = useState<RoomInfo>({
     roomNumber: '',
-    roomType: '',
-    pricePerNight: 0,
     nights: 1
   });
 
@@ -63,7 +66,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
   };
 
   const calculateRoomTotal = () => {
-    return roomInfo.pricePerNight * roomInfo.nights;
+    const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
+    return selectedRoom ? selectedRoom.pricePerNight * roomInfo.nights : 0;
   };
 
   const calculateFoodTotal = () => {
@@ -91,8 +95,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
     const invoiceData = {
-      id: generateUniqueId(), // Add unique ID
+      invoiceId: generateUniqueId(), // Add unique ID
       guestInfo,
       roomInfo,
       foodItems,
@@ -101,7 +106,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
       subtotal: calculateSubtotal(),
       tax: calculateTax(),
       total: calculateTotal(),
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      room_id: selectedRoom?.roomId || '',
+      room_price: selectedRoom?.pricePerNight || 0
     };
     onSubmit(invoiceData);
   };
@@ -170,38 +177,18 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
           <div className="form-row">
             <div className="form-group">
               <label>Room Number:</label>
-              <input
-                type="text"
+              <select
                 value={roomInfo.roomNumber}
                 onChange={(e) => setRoomInfo({...roomInfo, roomNumber: e.target.value})}
                 required
-              />
-            </div>
-            <div className="form-group">
-              <label>Room Type:</label>
-              <select
-                value={roomInfo.roomType}
-                onChange={(e) => setRoomInfo({...roomInfo, roomType: e.target.value})}
-                required
               >
-                <option value="">Select Room Type</option>
-                <option value="Standard">Standard</option>
-                <option value="Deluxe">Deluxe</option>
-                <option value="Suite">Suite</option>
-                <option value="Family">Family</option>
+                <option value="">Select Room</option>
+                {rooms.map(room => (
+                  <option key={room.roomId} value={room.roomNumber}>
+                    {room.roomNumber} - ${room.pricePerNight}/night
+                  </option>
+                ))}
               </select>
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Price per Night:</label>
-              <input
-                type="number"
-                value={roomInfo.pricePerNight}
-                onChange={(e) => setRoomInfo({...roomInfo, pricePerNight: Number(e.target.value)})}
-                min="0"
-                required
-              />
             </div>
             <div className="form-group">
               <label>Number of Nights:</label>
@@ -214,6 +201,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit }) => {
               />
             </div>
           </div>
+          {roomInfo.roomNumber && (
+            <div className="room-info-display">
+              <p>Selected Room: {roomInfo.roomNumber}</p>
+              <p>Price per Night: ${rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
+              <p>Room Total: ${calculateRoomTotal()}</p>
+            </div>
+          )}
         </div>
 
         {/* Food Items */}

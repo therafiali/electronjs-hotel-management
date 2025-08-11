@@ -94,6 +94,9 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, 
                   onChange={(e) => setItemName(e.target.value)}
                   placeholder="Enter item name"
                   required
+                onBlur={() => {
+                  setItemName(itemName.trim());
+                }}
                 />
               </div>
 
