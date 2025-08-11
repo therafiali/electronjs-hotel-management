@@ -30,4 +30,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getAllRooms: () => ipcRenderer.invoke("get-all-rooms"),
   updateRoom: (id: string, updateData: any) =>
     ipcRenderer.invoke("update-room", { id, updateData }),
+  getAllActivityLogs: () => ipcRenderer.invoke("get-all-activity-logs"),
+  addActivityLog: (logData: any) => ipcRenderer.invoke("add-activity-log", logData),
+  clearActivityLogs: () => ipcRenderer.invoke("clear-activity-logs"),
 });

@@ -27,4 +27,7 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     saveRoom: (roomData) => electron_1.ipcRenderer.invoke("save-room", roomData),
     getAllRooms: () => electron_1.ipcRenderer.invoke("get-all-rooms"),
     updateRoom: (id, updateData) => electron_1.ipcRenderer.invoke("update-room", { id, updateData }),
+    getAllActivityLogs: () => electron_1.ipcRenderer.invoke("get-all-activity-logs"),
+    addActivityLog: (logData) => electron_1.ipcRenderer.invoke("add-activity-log", logData),
+    clearActivityLogs: () => electron_1.ipcRenderer.invoke("clear-activity-logs"),
 });

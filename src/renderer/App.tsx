@@ -7,6 +7,7 @@ import PDFCreator from "./components/PDFCreator";
 import ItemsForm from "./components/ItemsForm";
 import ItemsList from "./components/ItemsList";
 import RoomForm from "./components/RoomForm";
+import ActivityLogs from "./components/ActivityLogs";
 
 // User interface
 interface User {
@@ -38,9 +39,12 @@ declare global {
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
       updateItem: (id: string, updateData: any) => Promise<any>;
-             saveRoom: (roomData: any) => Promise<any>;
-       getAllRooms: () => Promise<any[]>;
-       updateRoom: (id: string, updateData: any) => Promise<any>;
+                   saveRoom: (roomData: any) => Promise<any>;
+      getAllRooms: () => Promise<any[]>;
+      updateRoom: (id: string, updateData: any) => Promise<any>;
+      getAllActivityLogs: () => Promise<any[]>;
+      addActivityLog: (logData: any) => Promise<any>;
+      clearActivityLogs: () => Promise<any>;
     };
   }
 }
@@ -50,7 +54,7 @@ const App: React.FC = () => {
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "rooms"
+    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "rooms" | "activityLogs"
   >("dashboard");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
@@ -93,6 +97,15 @@ const App: React.FC = () => {
       // Save to database
       const result = await window.electronAPI.saveInvoice(invoiceData);
       console.log("Invoice saved successfully:", result);
+
+      // Log the activity
+      await window.electronAPI.addActivityLog({
+        tableName: 'invoices',
+        recordId: result.id,
+        action: 'CREATE',
+        description: `New invoice created for ${invoiceData.guestInfo?.name || 'Guest'} with total $${invoiceData.total}`,
+        userId: 'Admin'
+      });
 
       // Refresh invoices list
       await loadInvoices();
@@ -185,6 +198,15 @@ const App: React.FC = () => {
       const result = await window.electronAPI.saveItem(itemData);
       console.log("Item saved successfully:", result);
 
+      // Log the activity
+      await window.electronAPI.addActivityLog({
+        tableName: 'items',
+        recordId: result.id,
+        action: 'CREATE',
+        description: `New item "${itemData.name}" (${itemData.category}) created with price $${itemData.price}`,
+        userId: 'Admin'
+      });
+
       // Refresh items list
       await loadItems();
 
@@ -206,9 +228,25 @@ const App: React.FC = () => {
       setLoading(true);
       console.log("Updating item price:", itemId, newPrice);
 
+      // Get current item to get old price for logging
+      const currentItem = items.find(item => item.id === itemId);
+      const oldPrice = currentItem ? currentItem.price : 'Unknown';
+
       // Update item price in database
       const result = await window.electronAPI.updateItem(itemId, { price: newPrice });
       console.log("Item price updated successfully:", result);
+
+      // Log the activity
+      await window.electronAPI.addActivityLog({
+        tableName: 'items',
+        recordId: itemId,
+        action: 'UPDATE',
+        fieldName: 'price',
+        oldValue: oldPrice.toString(),
+        newValue: newPrice.toString(),
+        description: `Item "${currentItem?.name || itemId}" price updated from $${oldPrice} to $${newPrice}`,
+        userId: 'Admin'
+      });
 
       // Refresh items list to show updated price
       await loadItems();
@@ -228,9 +266,25 @@ const App: React.FC = () => {
       setLoading(true);
       console.log("Updating room price:", roomId, newPrice);
 
+      // Get current room to get old price for logging
+      const currentRoom = rooms.find(room => room.id === roomId);
+      const oldPrice = currentRoom ? currentRoom.price : 'Unknown';
+
       // Update room price in database
       const result = await window.electronAPI.updateRoom(roomId, { pricePerNight: newPrice });
       console.log("Room price updated successfully:", result);
+
+      // Log the activity
+      await window.electronAPI.addActivityLog({
+        tableName: 'rooms',
+        recordId: roomId,
+        action: 'UPDATE',
+        fieldName: 'price',
+        oldValue: oldPrice.toString(),
+        newValue: newPrice.toString(),
+        description: `Room ${currentRoom?.roomNumber || roomId} price updated from $${oldPrice} to $${newPrice}`,
+        userId: 'Admin'
+      });
 
       // Refresh rooms list to show updated price
       await loadRooms();
@@ -254,6 +308,15 @@ const App: React.FC = () => {
       // Save to database
       const result = await window.electronAPI.saveRoom(roomData);
       console.log("Room saved successfully:", result);
+
+      // Log the activity
+      await window.electronAPI.addActivityLog({
+        tableName: 'rooms',
+        recordId: result.id,
+        action: 'CREATE',
+        description: `New room "${roomData.roomNumber}" (${roomData.roomType}) created with price $${roomData.price}`,
+        userId: 'Admin'
+      });
 
       alert("Room type created and saved to database successfully!");
 
@@ -374,6 +437,7 @@ const App: React.FC = () => {
               await loadRooms();
               setCurrentView("rooms");
             }}
+            onNavigateToActivityLogs={() => setCurrentView("activityLogs")}
           />
         ) : currentView === "form" ? (
           <div>
@@ -528,6 +592,10 @@ const App: React.FC = () => {
                 Back to Dashboard
               </button>
             </div>
+          </div>
+        ) : currentView === "activityLogs" ? (
+          <div>
+            <ActivityLogs onBackToDashboard={() => setCurrentView("dashboard")} />
           </div>
 
         ) : (

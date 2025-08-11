@@ -5,6 +5,7 @@ interface DashboardProps {
   onNavigateToList: () => void;
   onNavigateToItems: () => void;
   onNavigateToRooms: () => void;
+  onNavigateToActivityLogs: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({
@@ -12,6 +13,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToList,
   onNavigateToItems,
   onNavigateToRooms,
+  onNavigateToActivityLogs,
 }) => {
   return (
     <div className="dashboard">
@@ -107,7 +109,17 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               Create Room Type
             </button>
+          </div>
 
+          <div className="action-card">
+            <h3>📊 Activity Logs</h3>
+            <p>View all system activity and changes</p>
+            <button
+              onClick={onNavigateToActivityLogs}
+              className="dashboard-btn primary"
+            >
+              View Activity Logs
+            </button>
           </div>
         </div>
       </div>

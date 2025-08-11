@@ -40,7 +40,9 @@ const path = __importStar(require("path"));
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 class HotelDatabase {
     constructor() {
-        this.dbPath = path.join(__dirname, '../hotel.db');
+        // Fix the database path to use the project root directory
+        this.dbPath = path.join(process.cwd(), 'hotel.db');
+        console.log('🔍 Database path:', this.dbPath);
         // Initialize SQLite database
         this.db = new better_sqlite3_1.default(this.dbPath);
         // Disable foreign key constraints to avoid conflicts
@@ -99,6 +101,23 @@ class HotelDatabase {
           roomType TEXT NOT NULL CHECK (roomType IN ('Standard', 'Deluxe', 'Suite', 'Family')),
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL
+        )
+      `);
+            // Create activity_logs table
+            this.db.exec(`
+        CREATE TABLE IF NOT EXISTS activity_logs (
+          id TEXT PRIMARY KEY,
+          timestamp TEXT NOT NULL,
+          tableName TEXT NOT NULL,
+          recordId TEXT NOT NULL,
+          action TEXT NOT NULL,
+          fieldName TEXT,
+          oldValue TEXT,
+          newValue TEXT,
+          description TEXT NOT NULL,
+          userId TEXT DEFAULT 'Admin',
+          ipAddress TEXT,
+          userAgent TEXT
         )
       `);
             console.log('✅ Database tables initialized successfully');
@@ -392,6 +411,68 @@ class HotelDatabase {
         }
         catch (error) {
             console.error('Error updating room:', error);
+            return { success: false };
+        }
+    }
+    // Activity Log methods
+    getAllActivityLogs() {
+        try {
+            const stmt = this.db.prepare('SELECT * FROM activity_logs ORDER BY timestamp DESC');
+            const logRows = stmt.all();
+            return logRows.map(row => ({
+                id: row.id,
+                timestamp: row.timestamp,
+                tableName: row.tableName,
+                recordId: row.recordId,
+                action: row.action,
+                fieldName: row.fieldName,
+                oldValue: row.oldValue,
+                newValue: row.newValue,
+                description: row.description,
+                userId: row.userId,
+                ipAddress: row.ipAddress,
+                userAgent: row.userAgent
+            }));
+        }
+        catch (error) {
+            console.error('Error getting activity logs:', error);
+            return [];
+        }
+    }
+    addActivityLog(logData) {
+        try {
+            const logId = `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const timestamp = new Date().toISOString();
+            const stmt = this.db.prepare(`
+        INSERT INTO activity_logs (
+          id, timestamp, tableName, recordId, action, fieldName, 
+          oldValue, newValue, description, userId
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+            stmt.run(logId, timestamp, logData.tableName, logData.recordId, logData.action, logData.fieldName || null, logData.oldValue || null, logData.newValue || null, logData.description, logData.userId || 'Admin');
+            console.log(`✅ Activity log added: ${logData.description}`);
+            return { success: true };
+        }
+        catch (error) {
+            console.error('Error adding activity log:', error);
+            return { success: false };
+        }
+    }
+    clearActivityLogs() {
+        try {
+            const stmt = this.db.prepare('DELETE FROM activity_logs');
+            const result = stmt.run();
+            if (result.changes > 0) {
+                console.log('✅ Activity logs cleared successfully');
+                return { success: true };
+            }
+            else {
+                console.log('No activity logs to clear.');
+                return { success: true }; // Indicate success even if no logs
+            }
+        }
+        catch (error) {
+            console.error('Error clearing activity logs:', error);
             return { success: false };
         }
     }

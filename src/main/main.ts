@@ -170,6 +170,36 @@ ipcMain.handle('update-room', async (event, { id, updateData }) => {
   }
 });
 
+ipcMain.handle('get-all-activity-logs', async () => {
+  try {
+    const logs = db.getAllActivityLogs();
+    return logs;
+  } catch (error) {
+    console.error('Error getting activity logs:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('add-activity-log', async (event, logData) => {
+  try {
+    const result = db.addActivityLog(logData);
+    return result;
+  } catch (error) {
+    console.error('Error adding activity log:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('clear-activity-logs', async () => {
+  try {
+    const result = db.clearActivityLogs();
+    return result;
+  } catch (error) {
+    console.error('Error clearing activity logs:', error);
+    throw error;
+  }
+});
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
