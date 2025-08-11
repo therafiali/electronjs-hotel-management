@@ -107,6 +107,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               Create Room Type
             </button>
+
           </div>
         </div>
       </div>

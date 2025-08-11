@@ -49,10 +49,11 @@ const App: React.FC = () => {
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "itemsList" | "rooms"
+    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "rooms"
   >("dashboard");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -244,6 +245,19 @@ const App: React.FC = () => {
     }
   };
 
+  const loadRooms = async () => {
+    try {
+      setLoading(true);
+      const allRooms = await window.electronAPI.getAllRooms();
+      setRooms(allRooms);
+      console.log("Loaded rooms from database:", allRooms);
+    } catch (error) {
+      console.error("Error loading rooms:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Authentication handlers
   const handleLoginSuccess = (user: User) => {
     setCurrentUser(user);
@@ -307,8 +321,14 @@ const App: React.FC = () => {
               await loadInvoices();
               setCurrentView("list");
             }}
-            onNavigateToItems={() => setCurrentView("items")}
-            onNavigateToRooms={() => setCurrentView("rooms")}
+            onNavigateToItems={async () => {
+              await loadItems();
+              setCurrentView("items");
+            }}
+            onNavigateToRooms={async () => {
+              await loadRooms();
+              setCurrentView("rooms");
+            }}
           />
         ) : currentView === "form" ? (
           <div>
@@ -415,26 +435,12 @@ const App: React.FC = () => {
           </div>
         ) : currentView === "items" ? (
           <div>
-            <ItemsForm onSubmit={handleItemSubmit} />
+            <ItemsForm 
+              onSubmit={handleItemSubmit} 
+              items={items}
+              onRefreshItems={loadItems}
+            />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <button
-                onClick={async () => {
-                  await loadItems();
-                  setCurrentView("itemsList");
-                }}
-                style={{
-                  background: "#27ae60",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  marginRight: "10px",
-                }}
-              >
-                View Items List
-              </button>
               <button
                 onClick={() => setCurrentView("dashboard")}
                 style={{
@@ -451,44 +457,14 @@ const App: React.FC = () => {
               </button>
             </div>
           </div>
-        ) : currentView === "itemsList" ? (
-          <div>
-            <ItemsList items={items} onItemClick={handleItemClick} />
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <button
-                onClick={() => setCurrentView("dashboard")}
-                style={{
-                  background: "#3498db",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                  marginRight: "10px",
-                }}
-              >
-                Back to Dashboard
-              </button>
-              <button
-                onClick={() => setCurrentView("items")}
-                style={{
-                  background: "#27ae60",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
-                Add New Item
-              </button>
-            </div>
-          </div>
+
         ) : currentView === "rooms" ? (
           <div>
-            <RoomForm onSubmit={handleRoomSubmit} />
+            <RoomForm 
+              onSubmit={handleRoomSubmit} 
+              rooms={rooms}
+              onRefreshRooms={loadRooms}
+            />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
                 onClick={() => setCurrentView("dashboard")}
@@ -506,6 +482,7 @@ const App: React.FC = () => {
               </button>
             </div>
           </div>
+
         ) : (
           <div>
             <div style={{ textAlign: "center", marginBottom: "20px" }}>
