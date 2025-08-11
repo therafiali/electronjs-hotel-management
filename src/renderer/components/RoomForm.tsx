@@ -5,6 +5,7 @@ interface RoomFormProps {
 }
 
 const RoomForm: React.FC<RoomFormProps> = ({ onSubmit }) => {
+  const [roomNumber, setRoomNumber] = useState('');
   const [roomType, setRoomType] = useState('');
   const [price, setPrice] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!roomType.trim() || price <= 0) {
+    if (!roomNumber.trim() || !roomType.trim() || price <= 0) {
       alert('Please fill all fields with valid values');
       return;
     }
@@ -20,6 +21,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit }) => {
     setLoading(true);
 
     const roomData = {
+      roomNumber: roomNumber.trim(),
       roomType: roomType.trim(),
       price: price,
       createdDate: new Date().toISOString()
@@ -29,6 +31,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit }) => {
       const result = await onSubmit(roomData);
       if (result && result.success) {
         // Reset form
+        setRoomNumber('');
         setRoomType('');
         setPrice(0);
         alert('Room type created successfully!');
@@ -48,6 +51,17 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit }) => {
         <div className="form-section">
           <h3>Room Information</h3>
           
+          <div className="form-group">
+            <label>Room Number:</label>
+            <input
+              type="text"
+              value={roomNumber}
+              onChange={(e) => setRoomNumber(e.target.value)}
+              placeholder="Enter room number (e.g., 101, A1, etc.)"
+              required
+            />
+          </div>
+
           <div className="form-group">
             <label>Room Type:</label>
             <select

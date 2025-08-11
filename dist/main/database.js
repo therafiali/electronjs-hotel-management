@@ -326,10 +326,13 @@ class HotelDatabase {
                 createdDate: new Date().toISOString()
             };
             const stmt = this.db.prepare(`
-        INSERT INTO rooms (id, roomType, price, createdDate)
-        VALUES (?, ?, ?, ?)
+        INSERT INTO rooms (roomId, roomNumber, capacity, status, pricePerNight, roomType, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `);
-            stmt.run(newRoom.id, newRoom.roomType, newRoom.price, newRoom.createdDate);
+            stmt.run(newRoom.id, newRoom.roomNumber, // Use room number from form
+            2, // Default capacity
+            'Vacant', // Default status
+            newRoom.price, newRoom.roomType, newRoom.createdDate, newRoom.createdDate);
             console.log(`✅ Room saved: ${newRoom.id}`);
             return { success: true, id: newRoom.id };
         }
@@ -340,13 +343,14 @@ class HotelDatabase {
     }
     getAllRooms() {
         try {
-            const stmt = this.db.prepare('SELECT * FROM rooms ORDER BY createdDate DESC');
+            const stmt = this.db.prepare('SELECT * FROM rooms ORDER BY createdAt DESC');
             const roomRows = stmt.all();
             return roomRows.map(row => ({
-                id: row.id,
+                id: row.roomId,
+                roomNumber: row.roomNumber,
                 roomType: row.roomType,
-                price: row.price,
-                createdDate: row.createdDate
+                price: row.pricePerNight,
+                createdDate: row.createdAt
             }));
         }
         catch (error) {
