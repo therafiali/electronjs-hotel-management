@@ -38,8 +38,9 @@ declare global {
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
       updateItem: (id: string, updateData: any) => Promise<any>;
-      saveRoom: (roomData: any) => Promise<any>;
-      getAllRooms: () => Promise<any[]>;
+             saveRoom: (roomData: any) => Promise<any>;
+       getAllRooms: () => Promise<any[]>;
+       updateRoom: (id: string, updateData: any) => Promise<any>;
     };
   }
 }
@@ -195,6 +196,50 @@ const App: React.FC = () => {
       console.error("Error saving item:", error);
       alert("Error saving item to database!");
       return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateItemPrice = async (itemId: string, newPrice: number) => {
+    try {
+      setLoading(true);
+      console.log("Updating item price:", itemId, newPrice);
+
+      // Update item price in database
+      const result = await window.electronAPI.updateItem(itemId, { price: newPrice });
+      console.log("Item price updated successfully:", result);
+
+      // Refresh items list to show updated price
+      await loadItems();
+
+      alert("Item price updated successfully!");
+    } catch (error) {
+      console.error("Error updating item price:", error);
+      alert("Error updating item price!");
+      throw error; // Re-throw to let EditButton handle the error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateRoomPrice = async (roomId: string, newPrice: number) => {
+    try {
+      setLoading(true);
+      console.log("Updating room price:", roomId, newPrice);
+
+      // Update room price in database
+      const result = await window.electronAPI.updateRoom(roomId, { pricePerNight: newPrice });
+      console.log("Room price updated successfully:", result);
+
+      // Refresh rooms list to show updated price
+      await loadRooms();
+
+      alert("Room price updated successfully!");
+    } catch (error) {
+      console.error("Error updating room price:", error);
+      alert("Error updating room price!");
+      throw error; // Re-throw to let EditButton handle the error
     } finally {
       setLoading(false);
     }
@@ -439,6 +484,7 @@ const App: React.FC = () => {
               onSubmit={handleItemSubmit} 
               items={items}
               onRefreshItems={loadItems}
+              onUpdateItemPrice={handleUpdateItemPrice}
             />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button
@@ -464,6 +510,7 @@ const App: React.FC = () => {
               onSubmit={handleRoomSubmit} 
               rooms={rooms}
               onRefreshRooms={loadRooms}
+              onUpdateRoomPrice={handleUpdateRoomPrice}
             />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <button

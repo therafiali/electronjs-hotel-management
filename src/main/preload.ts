@@ -28,4 +28,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Room API methods
   saveRoom: (roomData: any) => ipcRenderer.invoke("save-room", roomData),
   getAllRooms: () => ipcRenderer.invoke("get-all-rooms"),
+  updateRoom: (id: string, updateData: any) =>
+    ipcRenderer.invoke("update-room", { id, updateData }),
 });

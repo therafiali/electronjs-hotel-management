@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
+import EditButton from './EditButton';
 
 interface RoomFormProps {
   onSubmit: (roomData: any) => Promise<any>;
   rooms: any[];
   onRefreshRooms: () => void;
+  onUpdateRoomPrice?: (roomId: string, newPrice: number) => Promise<void>;
 }
 
-const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms }) => {
+const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, onUpdateRoomPrice }) => {
   const [roomNumber, setRoomNumber] = useState('');
   const [roomType, setRoomType] = useState('');
   const [price, setPrice] = useState<number>(0);
@@ -123,20 +125,34 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms }) 
             <table style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: "8px", overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
               <thead>
                 <tr style={{ background: "#3498db", color: "white" }}>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Room Number</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Room Type</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Price per Night</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Created Date</th>
+                                     <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Room Number</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Room Type</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Price per Night</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Created Date</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {rooms.map((room) => (
-                  <tr key={room.id} style={{ borderBottom: "1px solid #eee" }}>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomNumber}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomType}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${room.price}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(room.createdDate).toLocaleDateString()}</td>
-                  </tr>
+                                     <tr key={room.id} style={{ borderBottom: "1px solid #eee" }}>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomNumber}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomType}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${room.price}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(room.createdDate).toLocaleDateString()}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>
+                       {onUpdateRoomPrice && (
+                         <EditButton
+                           value={room.price}
+                           onSave={async (newPrice) => {
+                             await onUpdateRoomPrice(room.id, newPrice as number);
+                             onRefreshRooms(); // Refresh to show updated price
+                           }}
+                           fieldType="number"
+                           placeholder="New price"
+                         />
+                       )}
+                     </td>
+                   </tr>
                 ))}
               </tbody>
             </table>

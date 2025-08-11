@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import EditButton from './EditButton';
 
 interface Item {
   id: string;
@@ -11,9 +12,10 @@ interface ItemsFormProps {
   onSubmit: (itemData: Omit<Item, 'id'>) => Promise<any>;
   items: any[];
   onRefreshItems: () => void;
+  onUpdateItemPrice?: (itemId: string, newPrice: number) => Promise<void>;
 }
 
-const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems }) => {
+const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, onUpdateItemPrice }) => {
   const [itemName, setItemName] = useState('');
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState<number | ''>('');
@@ -150,20 +152,34 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems }
             <table style={{ width: "100%", borderCollapse: "collapse", background: "white", borderRadius: "8px", overflow: "hidden", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
               <thead>
                 <tr style={{ background: "#3498db", color: "white" }}>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Item Name</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Category</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Price</th>
-                  <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Created Date</th>
+                                     <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Item Name</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Category</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Price</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Created Date</th>
+                   <th style={{ padding: "12px", textAlign: "left", borderBottom: "1px solid #ddd" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {items.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.name}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.category}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${item.price}</td>
-                    <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(item.createdDate).toLocaleDateString()}</td>
-                  </tr>
+                                     <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.name}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.category}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${item.price}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(item.createdDate).toLocaleDateString()}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>
+                       {onUpdateItemPrice && (
+                         <EditButton
+                           value={item.price}
+                           onSave={async (newPrice) => {
+                             await onUpdateItemPrice(item.id, newPrice as number);
+                             onRefreshItems(); // Refresh to show updated price
+                           }}
+                           fieldType="number"
+                           placeholder="New price"
+                         />
+                       )}
+                     </td>
+                   </tr>
                 ))}
               </tbody>
             </table>

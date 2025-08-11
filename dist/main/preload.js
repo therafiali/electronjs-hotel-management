@@ -26,4 +26,5 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     // Room API methods
     saveRoom: (roomData) => electron_1.ipcRenderer.invoke("save-room", roomData),
     getAllRooms: () => electron_1.ipcRenderer.invoke("get-all-rooms"),
+    updateRoom: (id, updateData) => electron_1.ipcRenderer.invoke("update-room", { id, updateData }),
 });

@@ -119,10 +119,14 @@ class HotelDatabase {
       // Create rooms table
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS rooms (
-          id TEXT PRIMARY KEY,
-          roomType TEXT NOT NULL,
-          price REAL NOT NULL,
-          createdDate TEXT NOT NULL
+          roomId TEXT PRIMARY KEY,
+          roomNumber TEXT UNIQUE NOT NULL,
+          capacity INTEGER NOT NULL,
+          status TEXT NOT NULL CHECK (status IN ('Occupied', 'Vacant', 'Maintenance', 'Reserved')),
+          pricePerNight REAL NOT NULL,
+          roomType TEXT NOT NULL CHECK (roomType IN ('Standard', 'Deluxe', 'Suite', 'Family')),
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
         )
       `);
 
@@ -429,6 +433,44 @@ class HotelDatabase {
     } catch (error) {
       console.error('Error getting rooms:', error);
       return [];
+    }
+  }
+
+  updateRoom(id: string, updateData: Partial<Omit<Room, 'id' | 'createdDate'>>): { success: boolean } {
+    try {
+      // Build dynamic update query
+      const updateFields = Object.keys(updateData).filter(key => updateData[key as keyof typeof updateData] !== undefined);
+      
+      if (updateFields.length === 0) {
+        return { success: false };
+      }
+      
+      // Map frontend field names to database column names
+      const fieldMapping: { [key: string]: string } = {
+        price: 'pricePerNight',
+        roomNumber: 'roomNumber',
+        roomType: 'roomType'
+      };
+      
+      const setClause = updateFields.map(field => {
+        const dbField = fieldMapping[field] || field;
+        return `${dbField} = ?`;
+      }).join(', ');
+      
+      const values = updateFields.map(field => updateData[field as keyof typeof updateData]);
+      
+      const stmt = this.db.prepare(`UPDATE rooms SET ${setClause} WHERE roomId = ?`);
+      const result = stmt.run(...values, id);
+      
+      if (result.changes > 0) {
+        console.log(`✅ Room updated: ${id}`);
+        return { success: true };
+      } else {
+        return { success: false };
+      }
+    } catch (error) {
+      console.error('Error updating room:', error);
+      return { success: false };
     }
   }
 
