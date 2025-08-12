@@ -91,8 +91,16 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, on
               <label>Price per Night:</label>
               <input
                 type="number"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
+                value={price || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setPrice(0);
+                  } else {
+                    setPrice(Number(value));
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="0"
                 step="0.01"
                 placeholder="Enter price per night"
