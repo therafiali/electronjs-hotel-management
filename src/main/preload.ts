@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getPDFTypes: () => ipcRenderer.invoke("get-pdf-types"),
   createPDF: (type: string, invoiceId?: string) =>
     ipcRenderer.invoke("create-pdf", { type, invoiceId }),
+  openFile: (filepath: string) => ipcRenderer.invoke("open-file", filepath),
   // Items API methods
   saveItem: (itemData: any) => ipcRenderer.invoke("save-item", itemData),
   getAllItems: () => ipcRenderer.invoke("get-all-items"),
@@ -31,6 +32,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   updateRoom: (id: string, updateData: any) =>
     ipcRenderer.invoke("update-room", { id, updateData }),
   getAllActivityLogs: () => ipcRenderer.invoke("get-all-activity-logs"),
-  addActivityLog: (logData: any) => ipcRenderer.invoke("add-activity-log", logData),
+  addActivityLog: (logData: any) =>
+    ipcRenderer.invoke("add-activity-log", logData),
   clearActivityLogs: () => ipcRenderer.invoke("clear-activity-logs"),
 });

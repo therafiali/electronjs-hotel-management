@@ -99,114 +99,127 @@ ipcMain.handle("create-pdf", async (event, { type, invoiceId }) => {
 });
 
 // Items IPC handlers
-ipcMain.handle('save-item', async (event, itemData) => {
+ipcMain.handle("save-item", async (event, itemData) => {
   try {
     const result = db.saveItem(itemData);
     return result;
   } catch (error) {
-    console.error('Error saving item:', error);
+    console.error("Error saving item:", error);
     throw error;
   }
 });
 
-ipcMain.handle('get-all-items', async () => {
+ipcMain.handle("get-all-items", async () => {
   try {
     const items = db.getAllItems();
     return items;
   } catch (error) {
-    console.error('Error getting items:', error);
+    console.error("Error getting items:", error);
     throw error;
   }
 });
 
-ipcMain.handle('delete-item', async (event, itemId) => {
+ipcMain.handle("delete-item", async (event, itemId) => {
   try {
     const result = db.deleteItem(itemId);
     return result;
   } catch (error) {
-    console.error('Error deleting item:', error);
+    console.error("Error deleting item:", error);
     throw error;
   }
 });
 
-ipcMain.handle('update-item', async (event, { id, updateData }) => {
+ipcMain.handle("update-item", async (event, { id, updateData }) => {
   try {
     const result = db.updateItem(id, updateData);
     return result;
   } catch (error) {
-    console.error('Error updating item:', error);
+    console.error("Error updating item:", error);
     throw error;
   }
 });
 
 // Room IPC handlers
-ipcMain.handle('save-room', async (event, roomData) => {
+ipcMain.handle("save-room", async (event, roomData) => {
   try {
     const result = db.saveRoom(roomData);
     return result;
   } catch (error) {
-    console.error('Error saving room:', error);
+    console.error("Error saving room:", error);
     throw error;
   }
 });
 
-ipcMain.handle('get-all-rooms', async () => {
+ipcMain.handle("get-all-rooms", async () => {
   try {
     const rooms = db.getAllRooms();
     return rooms;
   } catch (error) {
-    console.error('Error getting rooms:', error);
+    console.error("Error getting rooms:", error);
     throw error;
   }
 });
 
-ipcMain.handle('update-room', async (event, { id, updateData }) => {
+ipcMain.handle("update-room", async (event, { id, updateData }) => {
   try {
     const result = db.updateRoom(id, updateData);
     return result;
   } catch (error) {
-    console.error('Error updating room:', error);
+    console.error("Error updating room:", error);
     throw error;
   }
 });
 
-ipcMain.handle('get-all-activity-logs', async () => {
+ipcMain.handle("get-all-activity-logs", async () => {
   try {
     const logs = db.getAllActivityLogs();
     return logs;
   } catch (error) {
-    console.error('Error getting activity logs:', error);
+    console.error("Error getting activity logs:", error);
     throw error;
   }
 });
 
-ipcMain.handle('add-activity-log', async (event, logData) => {
+ipcMain.handle("add-activity-log", async (event, logData) => {
   try {
     const result = db.addActivityLog(logData);
     return result;
   } catch (error) {
-    console.error('Error adding activity log:', error);
+    console.error("Error adding activity log:", error);
     throw error;
   }
 });
 
-ipcMain.handle('clear-activity-logs', async () => {
+ipcMain.handle("clear-activity-logs", async () => {
   try {
     const result = db.clearActivityLogs();
     return result;
   } catch (error) {
-    console.error('Error clearing activity logs:', error);
+    console.error("Error clearing activity logs:", error);
+    throw error;
+  }
+});
+
+// File operations IPC handlers
+ipcMain.handle("open-file", async (event, filepath) => {
+  try {
+    console.log(`📂 Opening file: ${filepath}`);
+    const { shell } = require("electron");
+    await shell.openPath(filepath);
+    return { success: true };
+  } catch (error) {
+    console.error("Error opening file:", error);
     throw error;
   }
 });
 
 // Invoice Food Items IPC handlers
-ipcMain.handle('get-invoice-food-items', async (event, invoiceId) => {
+ipcMain.handle("get-invoice-food-items", async (event, invoiceId) => {
   try {
     const items = db.getInvoiceFoodItems(invoiceId);
     return items;
   } catch (error) {
-    console.error('Error getting invoice food items:', error);
+    console.error("Error getting invoice food items:", error);
     throw error;
   }
 });

@@ -34,16 +34,15 @@ interface InvoiceListProps {
   invoices: Invoice[];
   onInvoiceClick?: (invoice: Invoice) => void;
   onPrintInvoice?: (invoiceId: string) => void;
+  loading?: boolean;
 }
 
 const InvoiceList: React.FC<InvoiceListProps> = ({
   invoices,
   onInvoiceClick,
   onPrintInvoice,
+  loading = false,
 }) => {
-
-
-
   console.log("Invoices rendered", invoices);
 
   // Transform invoice data for the table
@@ -122,9 +121,10 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
                 onPrintInvoice?.(invoiceId);
               }}
               className="print-btn"
-              title="Print Invoice PDF"
+              title="Create and Open Invoice PDF"
+              disabled={loading}
             >
-              🖨️ Create Invoice
+              {loading ? "⏳ Creating..." : "🖨️ Create & Open"}
             </button>
           </div>
         );

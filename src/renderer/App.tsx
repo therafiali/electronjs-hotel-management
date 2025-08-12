@@ -35,6 +35,7 @@ declare global {
         type: string,
         invoiceId?: string
       ) => Promise<{ success: boolean; filepath: string }>;
+      openFile: (filepath: string) => Promise<{ success: boolean }>;
       saveItem: (itemData: any) => Promise<any>;
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
@@ -143,8 +144,10 @@ const App: React.FC = () => {
 
       const result = await window.electronAPI.createPDF("invoice", invoiceId);
       if (result.success) {
+        // Open the PDF file after creation
+        await window.electronAPI.openFile(result.filepath);
         alert(
-          `✅ Invoice PDF created successfully!\nSaved to: ${result.filepath}`
+          `✅ Invoice PDF created and opened successfully!\nSaved to: ${result.filepath}`
         );
       } else {
         alert("❌ Failed to create invoice PDF");
