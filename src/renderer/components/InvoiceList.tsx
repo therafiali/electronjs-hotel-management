@@ -3,6 +3,7 @@ import DynamicTable from "./DynamicTable";
 
 interface Invoice {
   id: string;
+  invoiceId: string;
   guestInfo: {
     name: string;
     phone: string;
@@ -40,6 +41,11 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   onInvoiceClick,
   onPrintInvoice,
 }) => {
+
+
+
+  console.log("Invoices rendered", invoices);
+
   // Transform invoice data for the table
   const tableData = invoices.map((invoice) => ({
     id: invoice.id,
@@ -100,9 +106,9 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
           (invoice) =>
             invoice.id === row.id || invoice.guestInfo.name === row.guestName
         );
-
-        const invoiceId = originalInvoice?.id || row.id;
-
+        console.log("Original invoice", originalInvoice);
+        const invoiceId = originalInvoice?.invoiceId || row.id;
+        console.log("Invoice ID", invoiceId);
         if (!invoiceId) {
           console.error("Could not find invoice ID for row:", row);
           return <div>Error: Invalid data</div>;
@@ -118,7 +124,7 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
               className="print-btn"
               title="Print Invoice PDF"
             >
-              🖨️ Print
+              🖨️ Create Invoice
             </button>
           </div>
         );
