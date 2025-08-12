@@ -1,6 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
+import {
+  Box,
+  Drawer,
+  List,
+  Typography,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  Receipt as InvoiceIcon,
+  History as HistoryIcon,
+  Inventory as ItemsIcon,
+  Hotel as RoomIcon,
+  Assessment as ActivityIcon
+} from '@mui/icons-material';
 
 interface DashboardProps {
+  onNavigateToDashboard: () => void;
   onNavigateToInvoice: () => void;
   onNavigateToList: () => void;
   onNavigateToItems: () => void;
@@ -8,122 +27,133 @@ interface DashboardProps {
   onNavigateToActivityLogs: () => void;
 }
 
+const drawerWidth = 280;
+
 const Dashboard: React.FC<DashboardProps> = ({
+  onNavigateToDashboard,
   onNavigateToInvoice,
   onNavigateToList,
   onNavigateToItems,
   onNavigateToRooms,
   onNavigateToActivityLogs,
 }) => {
-  return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>🏨 Skardu Serenity Inn</h1>
-        <p className="dashboard-subtitle">Hotel Management System</p>
-      </div>
+  const [selectedItem, setSelectedItem] = useState('dashboard');
 
-      <div className="dashboard-content">
-        <div className="stats-section">
-          <div className="stat-card">
-            <div className="stat-icon">🏠</div>
-            <div className="stat-content">
-              <div className="stat-number">25/30</div>
-              <div className="stat-label">Rooms Available</div>
-              <div className="stat-trend positive">+2 from yesterday</div>
-            </div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">📅</div>
-            <div className="stat-content">
-              <div className="stat-number">8</div>
-              <div className="stat-label">Check-ins Today</div>
-              <div className="stat-trend positive">+3 from yesterday</div>
-            </div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">💰</div>
-            <div className="stat-content">
-              <div className="stat-number">$12.5K</div>
-              <div className="stat-label">Monthly Revenue</div>
-              <div className="stat-trend positive">+15% this month</div>
-            </div>
-          </div>
-          
-          <div className="stat-card">
-            <div className="stat-icon">⭐</div>
-            <div className="stat-content">
-              <div className="stat-number">4.8</div>
-              <div className="stat-label">Guest Rating</div>
-              <div className="stat-trend positive">+0.2 this week</div>
-            </div>
-          </div>
-        </div>
+  const menuItems = [
+    {
+      text: 'Dashboard',
+      icon: <DashboardIcon />,
+      id: 'dashboard',
+      action: onNavigateToDashboard
+    },
+    {
+      text: 'Create Invoice',
+      icon: <InvoiceIcon />,
+      id: 'invoice',
+      action: onNavigateToInvoice
+    },
+    {
+      text: 'Invoice History',
+      icon: <HistoryIcon />,
+      id: 'history',
+      action: onNavigateToList
+    },
+    {
+      text: 'Items Management',
+      icon: <ItemsIcon />,
+      id: 'items',
+      action: onNavigateToItems
+    },
+    {
+      text: 'Room Management',
+      icon: <RoomIcon />,
+      id: 'rooms',
+      action: onNavigateToRooms
+    },
+    {
+      text: 'Activity Logs',
+      icon: <ActivityIcon />,
+      id: 'activity',
+      action: onNavigateToActivityLogs
+    }
+  ];
 
-        <div className="welcome-section">
-          <h2>Welcome to Skardu Serenity Inn</h2>
-          <p>Manage your hotel operations efficiently</p>
-        </div>
 
-        <div className="dashboard-actions">
-          <div className="action-card">
-            <h3>📋 Invoice Management</h3>
-            <p>Create and manage hotel invoices</p>
-            <button
-              onClick={onNavigateToInvoice}
-              className="dashboard-btn primary"
+
+    return (
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: drawerWidth,
+        flexShrink: 0,
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          backgroundColor: '#1a1d29',
+          color: 'white',
+          border: 'none'
+        },
+      }}
+    >
+      {/* Logo Section */}
+      <Box sx={{ p: 3, borderBottom: '1px solid #2d3748' }}>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#6366f1' }}>
+          🏨 Hotel Paradise
+        </Typography>
+        <Typography variant="body2" sx={{ color: '#a0aec0', mt: 0.5 }}>
+          Management System
+        </Typography>
+      </Box>
+
+      {/* Navigation Menu */}
+      <List sx={{ mt: 2 }}>
+        {menuItems.map((item) => (
+          <ListItem key={item.id} disablePadding sx={{ mb: 0.5 }}>
+            <ListItemButton
+              selected={selectedItem === item.id}
+              onClick={() => {
+                setSelectedItem(item.id);
+                item.action();
+              }}
+              sx={{
+                mx: 2,
+                borderRadius: 2,
+                color: selectedItem === item.id ? '#6366f1' : '#a0aec0',
+                backgroundColor: selectedItem === item.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
+                '&:hover': {
+                  backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                  color: '#6366f1'
+                },
+                '&.Mui-selected': {
+                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                  color: '#6366f1',
+                  '&:hover': {
+                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                  }
+                }
+              }}
             >
-              Create New Invoice
-            </button>
-          </div>
-
-          <div className="action-card">
-            <h3>📊 Invoice History</h3>
-            <p>View all created invoices</p>
-            <button
-              onClick={onNavigateToList}
-              className="dashboard-btn secondary"
-            >
-              View Invoice List
-            </button>
-          </div>
-
-          <div className="action-card">
-            <h3>🛍️ Items Management</h3>
-            <p>Manage hotel items and services</p>
-            <button
-              onClick={onNavigateToItems}
-              className="dashboard-btn primary"
-            >
-              Manage Items
-            </button>
-          </div>
-
-          <div className="action-card">
-            <h3>🏠 Room Management</h3>
-            <p>Create and manage room types</p>
-            <button
-              onClick={onNavigateToRooms}
-              className="dashboard-btn secondary"
-            >
-              Create Room Type
-            </button>
-          </div>
-
-          <div className="action-card">
-            <h3>📊 Activity Logs</h3>
-            <p>View all system activity and changes</p>
-            <button
-              onClick={onNavigateToActivityLogs}
-              className="dashboard-btn primary"
-            >
-              View Activity Logs
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+              <ListItemIcon sx={{ 
+                color: 'inherit',
+                minWidth: 40,
+                '& .MuiSvgIcon-root': {
+                  fontSize: '1.2rem'
+                }
+              }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText 
+                primary={item.text}
+                primaryTypographyProps={{
+                  fontSize: '0.9rem',
+                  fontWeight: selectedItem === item.id ? 600 : 400
+                }}
+              />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Drawer>
   );
 };
 

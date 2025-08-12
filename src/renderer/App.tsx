@@ -81,6 +81,7 @@ const App: React.FC = () => {
     // Load rooms and items when component mounts
     loadRooms();
     loadItems();
+    loadInvoices(); // Load invoices for dashboard stats
   }, []);
 
   const handleSendMessage = () => {
@@ -394,58 +395,353 @@ const App: React.FC = () => {
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>🏨 Hotel Paradise Management System</h1>
-          <div className="header-right">
-            <div className="user-info">
-              <span className="user-greeting">
-                Welcome, <strong>{currentUser?.name}</strong>
-              </span>
-              <span className="user-role">({currentUser?.role})</span>
+      <Dashboard
+        onNavigateToDashboard={() => setCurrentView("dashboard")}
+        onNavigateToInvoice={() => setCurrentView("form")}
+        onNavigateToList={async () => {
+          await loadInvoices();
+          setCurrentView("list");
+        }}
+        onNavigateToItems={async () => {
+          await loadItems();
+          setCurrentView("items");
+        }}
+        onNavigateToRooms={async () => {
+          await loadRooms();
+          setCurrentView("rooms");
+        }}
+        onNavigateToActivityLogs={() => setCurrentView("activityLogs")}
+      />
+      
+      {/* Header */}
+      <header style={{
+        position: 'fixed',
+        top: 0,
+        left: '280px',
+        right: 0,
+        height: '80px',
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 40px',
+        zIndex: 1000,
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center'
+        }}>
+          <h1 style={{
+            margin: 0,
+            fontSize: '26px',
+            color: '#111827',
+            fontWeight: '700',
+            letterSpacing: '-0.025em'
+          }}>
+            🏨 Hotel Paradise Management System
+          </h1>
+        </div>
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px'
+        }}>
+          {/* User Profile Section */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '10px 16px',
+            backgroundColor: '#f9fafb',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb'
+          }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              borderRadius: '50%',
+              backgroundColor: '#6366f1',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontWeight: '600',
+              fontSize: '16px',
+              boxShadow: '0 2px 4px rgba(99, 102, 241, 0.3)'
+            }}>
+              {currentUser?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <button
-              onClick={() => setCurrentView("pdf")}
-              className="pdf-button"
-              title="Create PDF Documents"
-            >
-              📄 PDF Creator
-            </button>
-            <button onClick={handleLogout} className="logout-button">
-              🚪 Logout
-            </button>
-            <div className="status-indicator">
-              <span
-                className={`status-dot ${
-                  isConnected ? "connected" : "disconnected"
-                }`}
-              ></span>
-              <span className="status-text">
-                {isConnected ? "Connected" : "Disconnected"}
-              </span>
+            <div>
+              <div style={{
+                fontSize: '15px',
+                fontWeight: '600',
+                color: '#111827',
+                lineHeight: '1.2'
+              }}>
+                Welcome, {currentUser?.name || 'User'}
+              </div>
+              <div style={{
+                fontSize: '13px',
+                color: '#6b7280',
+                fontWeight: '500',
+                textTransform: 'capitalize'
+              }}>
+                {currentUser?.role || 'Role'}
+              </div>
             </div>
           </div>
+          
+          {/* PDF Creator Button */}
+          <button
+            onClick={() => setCurrentView("pdf")}
+            style={{
+              backgroundColor: '#6366f1',
+              color: 'white',
+              border: 'none',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.25)'
+            }}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLButtonElement;
+              target.style.backgroundColor = '#5856eb';
+              target.style.transform = 'translateY(-1px)';
+              target.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLButtonElement;
+              target.style.backgroundColor = '#6366f1';
+              target.style.transform = 'translateY(0)';
+              target.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.25)';
+            }}
+          >
+            📄 PDF Creator
+          </button>
+          
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: '#dc2626',
+              color: 'white',
+              border: 'none',
+              padding: '12px 20px',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)'
+            }}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLButtonElement;
+              target.style.backgroundColor = '#b91c1c';
+              target.style.transform = 'translateY(-1px)';
+              target.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.35)';
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLButtonElement;
+              target.style.backgroundColor = '#dc2626';
+              target.style.transform = 'translateY(0)';
+              target.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.25)';
+            }}
+          >
+            🚪 Logout
+          </button>
+          
+
         </div>
       </header>
 
-      <main className="app-main">
+      <main className="app-main" style={{ 
+        marginLeft: '280px',
+        marginTop: '80px',
+        padding: '20px',
+        backgroundColor: '#f5f5f5',
+        minHeight: 'calc(100vh - 80px)'
+      }}>
         {currentView === "dashboard" ? (
-          <Dashboard
-            onNavigateToInvoice={() => setCurrentView("form")}
-            onNavigateToList={async () => {
-              await loadInvoices();
-              setCurrentView("list");
-            }}
-            onNavigateToItems={async () => {
-              await loadItems();
-              setCurrentView("items");
-            }}
-            onNavigateToRooms={async () => {
-              await loadRooms();
-              setCurrentView("rooms");
-            }}
-            onNavigateToActivityLogs={() => setCurrentView("activityLogs")}
-          />
+          <div>
+            {/* Welcome Section */}
+            <div style={{
+              backgroundColor: 'white',
+              padding: '40px',
+              borderRadius: '15px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+              maxWidth: '800px',
+              margin: '0 auto 30px auto',
+              textAlign: 'center'
+            }}>
+              <h2 style={{ 
+                color: '#111827',
+                fontSize: '32px',
+                fontWeight: '700',
+                marginBottom: '15px'
+              }}>
+                Welcome to Hotel Paradise
+              </h2>
+              <p style={{
+                color: '#6b7280',
+                fontSize: '18px',
+                lineHeight: '1.6',
+                marginBottom: '0'
+              }}>
+                Use the sidebar navigation to manage your hotel operations efficiently.
+              </p>
+            </div>
+
+            {/* Dashboard Statistics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '20px',
+              maxWidth: '1000px',
+              margin: '0 auto'
+            }}>
+              {/* Total Sales */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '40px',
+                  marginBottom: '15px'
+                }}>💰</div>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '8px'
+                }}>
+                  ${invoices.reduce((total, invoice) => total + (invoice.total || 0), 0).toFixed(2)}
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#6b7280',
+                  fontWeight: '500',
+                  margin: '0'
+                }}>
+                  Today's Sales
+                </p>
+              </div>
+
+              {/* Room Revenue */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '40px',
+                  marginBottom: '15px'
+                }}>🏨</div>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '8px'
+                }}>
+                  ${invoices.reduce((total, invoice) => {
+                    const roomTotal = (invoice.roomInfo?.pricePerNight || 0) * (invoice.roomInfo?.numberOfNights || 0);
+                    return total + roomTotal;
+                  }, 0).toFixed(2)}
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#6b7280',
+                  fontWeight: '500',
+                  margin: '0'
+                }}>
+                  Room Revenue
+                </p>
+              </div>
+
+              {/* Food Revenue */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '40px',
+                  marginBottom: '15px'
+                }}>🍽️</div>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '8px'
+                }}>
+                  ${invoices.reduce((total, invoice) => {
+                    const foodTotal = (invoice.foodItems || []).reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+                    return total + foodTotal;
+                  }, 0).toFixed(2)}
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#6b7280',
+                  fontWeight: '500',
+                  margin: '0'
+                }}>
+                  Food Revenue
+                </p>
+              </div>
+
+              {/* Total Invoices */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '40px',
+                  marginBottom: '15px'
+                }}>📋</div>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '8px'
+                }}>
+                  {invoices.length}
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#6b7280',
+                  fontWeight: '500',
+                  margin: '0'
+                }}>
+                  Total Invoices
+                </p>
+              </div>
+            </div>
+          </div>
         ) : currentView === "form" ? (
           <div>
             <InvoiceForm onSubmit={handleInvoiceSubmit} rooms={rooms} items={items} />
