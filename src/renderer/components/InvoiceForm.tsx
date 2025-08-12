@@ -247,8 +247,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <label>Number of Nights:</label>
               <input
                 type="number"
-                value={roomInfo.nights}
-                onChange={(e) => setRoomInfo({...roomInfo, nights: Number(e.target.value)})}
+                value={roomInfo.nights || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setRoomInfo({...roomInfo, nights: 0});
+                  } else {
+                    setRoomInfo({...roomInfo, nights: Number(value)});
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="1"
                 required
               />
@@ -285,8 +293,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <label>Quantity:</label>
               <input
                 type="number"
-                value={newFoodItem.quantity}
-                onChange={(e) => setNewFoodItem({...newFoodItem, quantity: Number(e.target.value)})}
+                value={newFoodItem.quantity || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setNewFoodItem({...newFoodItem, quantity: 0});
+                  } else {
+                    setNewFoodItem({...newFoodItem, quantity: Number(value)});
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="1"
               />
             </div>
@@ -294,8 +310,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <label>Price:</label>
               <input
                 type="number"
-                value={newFoodItem.price}
-                onChange={(e) => setNewFoodItem({...newFoodItem, price: Number(e.target.value)})}
+                value={newFoodItem.price || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setNewFoodItem({...newFoodItem, price: 0});
+                  } else {
+                    setNewFoodItem({...newFoodItem, price: Number(value)});
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="0"
                 readOnly
               />
@@ -338,8 +362,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <label>Tax Rate (%):</label>
               <input
                 type="number"
-                value={taxRate}
-                onChange={(e) => setTaxRate(Number(e.target.value))}
+                value={taxRate || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setTaxRate(0);
+                  } else {
+                    setTaxRate(Number(value));
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="0"
                 max="100"
               />
@@ -348,8 +380,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <label>Discount Amount:</label>
               <input
                 type="number"
-                value={discount}
-                onChange={(e) => setDiscount(Number(e.target.value))}
+                value={discount || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setDiscount(0);
+                  } else {
+                    setDiscount(Number(value));
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
                 min="0"
               />
             </div>
