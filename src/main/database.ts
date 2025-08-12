@@ -409,21 +409,18 @@ class HotelDatabase {
       const invoiceRows = stmt.all() as any[];
       
       return invoiceRows.map(row => {
-        const parsedRoomInfo = JSON.parse(row.roomInfo || '{}');
-        
-        // Enhance roomInfo with foreign key data if missing
-        const enhancedRoomInfo = {
-          ...parsedRoomInfo,
-          // Use linked data from foreign key if roomType is missing
-          roomType: parsedRoomInfo.roomType || row.linked_roomType || '',
-          roomNumber: parsedRoomInfo.roomNumber || row.linked_roomNumber || '',
-          pricePerNight: parsedRoomInfo.pricePerNight || row.linked_pricePerNight || row.room_price || 0
+        // Build roomInfo from foreign key relationship data
+        const roomInfo = {
+          roomType: row.linked_roomType || '',
+          roomNumber: row.linked_roomNumber || '',
+          pricePerNight: row.linked_pricePerNight || row.room_price || 0,
+          roomId: row.room_id  // Include room ID for compatibility
         };
         
         return {
           invoiceId: row.invoiceId,
           guestInfo: JSON.parse(row.guestInfo || '{}'),
-          roomInfo: enhancedRoomInfo,  // Enhanced with foreign key data
+          roomInfo: roomInfo,  // Built from foreign key data with room ID
           foodItems: JSON.parse(row.foodItems || '{}'),
           taxRate: row.taxRate,
           discount: row.discount,

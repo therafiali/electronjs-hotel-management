@@ -135,17 +135,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       return;
     }
     
-    // Enhanced roomInfo with foreign key data
-    const enhancedRoomInfo = {
-      ...roomInfo,
-      roomType: selectedRoom.roomType,
-      pricePerNight: selectedRoom.pricePerNight
-    };
-    
     const invoiceData = {
       invoiceId: generateUniqueId(), // Add unique ID
       guestInfo,
-      roomInfo: enhancedRoomInfo,  // Use enhanced room info with foreign key data
+      roomInfo: selectedRoom.roomId,  // Store room ID directly
       foodItems,
       taxRate,
       discount,
