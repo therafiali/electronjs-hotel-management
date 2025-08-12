@@ -45,6 +45,7 @@ declare global {
       getAllActivityLogs: () => Promise<any[]>;
       addActivityLog: (logData: any) => Promise<any>;
       clearActivityLogs: () => Promise<any>;
+      getInvoiceFoodItems: (invoiceId: string) => Promise<any[]>;
     };
   }
 }
@@ -273,8 +274,8 @@ const App: React.FC = () => {
       console.log("Updating room price:", roomId, newPrice);
 
       // Get current room to get old price for logging
-      const currentRoom = rooms.find(room => room.id === roomId);
-      const oldPrice = currentRoom ? currentRoom.price : 'Unknown';
+      const currentRoom = rooms.find(room => room.roomId === roomId);
+      const oldPrice = currentRoom ? currentRoom.pricePerNight : 'Unknown';
 
       // Update room price in database
       const result = await window.electronAPI.updateRoom(roomId, { pricePerNight: newPrice });

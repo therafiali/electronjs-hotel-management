@@ -45,8 +45,8 @@ class HotelDatabase {
         console.log('🔍 Database path:', this.dbPath);
         // Initialize SQLite database
         this.db = new better_sqlite3_1.default(this.dbPath);
-        // Disable foreign key constraints to avoid conflicts
-        this.db.pragma('foreign_keys = OFF');
+        // Enable foreign key constraints for data integrity
+        this.db.pragma('foreign_keys = ON');
         this.initializeTables();
         this.initializeDefaultUser();
     }
@@ -243,38 +243,100 @@ class HotelDatabase {
     // Invoice methods (updated to work with SQLite)
     saveInvoice(invoice) {
         try {
-            const stmt = this.db.prepare(`
-        INSERT OR REPLACE INTO invoices 
-        (invoiceId, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date, room_id, room_price)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `);
-            stmt.run(invoice.invoiceId, JSON.stringify(invoice.guestInfo), JSON.stringify(invoice.roomInfo), JSON.stringify(invoice.foodItems), invoice.taxRate, invoice.discount, invoice.subtotal, invoice.tax, invoice.total, invoice.date, invoice.room_id, invoice.room_price);
-            console.log(`✅ Invoice saved: ${invoice.invoiceId}`);
+            // Start transaction for atomic operation
+            const transaction = this.db.transaction(() => {
+                // 1. Save main invoice record
+                const invoiceStmt = this.db.prepare(`
+          INSERT OR REPLACE INTO invoices 
+          (invoiceId, guestInfo, roomInfo, foodItems, taxRate, discount, subtotal, tax, total, date, room_id, room_price)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+                invoiceStmt.run(invoice.invoiceId, JSON.stringify(invoice.guestInfo), JSON.stringify(invoice.roomInfo), JSON.stringify(invoice.foodItems), invoice.taxRate, invoice.discount, invoice.subtotal, invoice.tax, invoice.total, invoice.date, invoice.room_id, invoice.room_price);
+                // 2. Clear existing food items for this invoice (for updates)
+                const deleteStmt = this.db.prepare('DELETE FROM invoiceFoodItems WHERE invoiceId = ?');
+                deleteStmt.run(invoice.invoiceId);
+                // 3. Save individual food items with foreign keys
+                if (invoice.foodItems && Array.isArray(invoice.foodItems)) {
+                    const foodItemStmt = this.db.prepare(`
+            INSERT INTO invoiceFoodItems (invoiceFoodItemId, invoiceId, itemId, quantity, subtotal, priceAtTime, createdAt)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+          `);
+                    invoice.foodItems.forEach((foodItem) => {
+                        // Use itemId directly from foodItem (foreign key)
+                        if (foodItem.itemId) {
+                            const invoiceFoodItemId = `invfood_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                            const subtotal = foodItem.quantity * foodItem.price;
+                            foodItemStmt.run(invoiceFoodItemId, invoice.invoiceId, // Foreign key to invoices table
+                            foodItem.itemId, // Foreign key to items table (direct reference)
+                            foodItem.quantity, subtotal, foodItem.price, // Price at time of invoice
+                            new Date().toISOString());
+                            console.log(`🍽️ Food item saved with foreign keys: ${foodItem.name} (itemId: ${foodItem.itemId})`);
+                        }
+                        else {
+                            // Fallback: try to find by name for backward compatibility
+                            const item = this.getAllItems().find(item => item.name === foodItem.name);
+                            if (item) {
+                                const invoiceFoodItemId = `invfood_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                                const subtotal = foodItem.quantity * foodItem.price;
+                                foodItemStmt.run(invoiceFoodItemId, invoice.invoiceId, item.id, foodItem.quantity, subtotal, foodItem.price, new Date().toISOString());
+                                console.log(`🍽️ Food item saved (fallback): ${foodItem.name} (itemId: ${item.id})`);
+                            }
+                            else {
+                                console.warn(`⚠️ Food item not found in items table: ${foodItem.name}`);
+                            }
+                        }
+                    });
+                }
+            });
+            // Execute transaction
+            transaction();
+            console.log(`✅ Invoice and food items saved with foreign keys: ${invoice.invoiceId}`);
             return { success: true, id: invoice.invoiceId };
         }
         catch (error) {
-            console.error('Error saving invoice:', error);
+            console.error('Error saving invoice with food items:', error);
             return { success: false, id: invoice.invoiceId };
         }
     }
     getAllInvoices() {
         try {
-            const stmt = this.db.prepare('SELECT * FROM invoices ORDER BY date DESC');
+            // Join with rooms table to get room details via foreign key
+            const stmt = this.db.prepare(`
+        SELECT 
+          i.*, 
+          r.roomNumber as linked_roomNumber,
+          r.roomType as linked_roomType,
+          r.pricePerNight as linked_pricePerNight
+        FROM invoices i
+        LEFT JOIN rooms r ON i.room_id = r.roomId
+        ORDER BY i.date DESC
+      `);
             const invoiceRows = stmt.all();
-            return invoiceRows.map(row => ({
-                invoiceId: row.invoiceId,
-                guestInfo: JSON.parse(row.guestInfo || '{}'),
-                roomInfo: JSON.parse(row.roomInfo || '{}'),
-                foodItems: JSON.parse(row.foodItems || '{}'),
-                taxRate: row.taxRate,
-                discount: row.discount,
-                subtotal: row.subtotal,
-                tax: row.tax,
-                total: row.total,
-                date: row.date,
-                room_id: row.room_id,
-                room_price: row.room_price
-            }));
+            return invoiceRows.map(row => {
+                const parsedRoomInfo = JSON.parse(row.roomInfo || '{}');
+                // Enhance roomInfo with foreign key data if missing
+                const enhancedRoomInfo = {
+                    ...parsedRoomInfo,
+                    // Use linked data from foreign key if roomType is missing
+                    roomType: parsedRoomInfo.roomType || row.linked_roomType || '',
+                    roomNumber: parsedRoomInfo.roomNumber || row.linked_roomNumber || '',
+                    pricePerNight: parsedRoomInfo.pricePerNight || row.linked_pricePerNight || row.room_price || 0
+                };
+                return {
+                    invoiceId: row.invoiceId,
+                    guestInfo: JSON.parse(row.guestInfo || '{}'),
+                    roomInfo: enhancedRoomInfo, // Enhanced with foreign key data
+                    foodItems: JSON.parse(row.foodItems || '{}'),
+                    taxRate: row.taxRate,
+                    discount: row.discount,
+                    subtotal: row.subtotal,
+                    tax: row.tax,
+                    total: row.total,
+                    date: row.date,
+                    room_id: row.room_id,
+                    room_price: row.room_price
+                };
+            });
         }
         catch (error) {
             console.error('Error getting invoices:', error);
@@ -397,11 +459,10 @@ class HotelDatabase {
             const stmt = this.db.prepare('SELECT * FROM rooms ORDER BY createdAt DESC');
             const roomRows = stmt.all();
             return roomRows.map(row => ({
-                id: row.roomId,
+                roomId: row.roomId, // Frontend expects roomId
                 roomNumber: row.roomNumber,
-                roomType: row.roomType,
-                price: row.pricePerNight,
-                pricePerNight: row.pricePerNight,
+                roomType: row.roomType, // Include roomType for foreign key relationships
+                pricePerNight: row.pricePerNight, // Frontend expects pricePerNight
                 createdDate: row.createdAt
             }));
         }
@@ -528,7 +589,17 @@ class HotelDatabase {
     }
     getInvoiceFoodItems(invoiceId) {
         try {
-            const stmt = this.db.prepare('SELECT * FROM invoiceFoodItems WHERE invoiceId = ? ORDER BY createdAt DESC');
+            // Join with items table to get item details via foreign key
+            const stmt = this.db.prepare(`
+        SELECT 
+          ifi.*,
+          i.name as itemName,
+          i.category as itemCategory
+        FROM invoiceFoodItems ifi
+        LEFT JOIN items i ON ifi.itemId = i.id
+        WHERE ifi.invoiceId = ?
+        ORDER BY ifi.createdAt DESC
+      `);
             const itemRows = stmt.all(invoiceId);
             return itemRows.map(row => ({
                 invoiceFoodItemId: row.invoiceFoodItemId,
@@ -537,7 +608,10 @@ class HotelDatabase {
                 quantity: row.quantity,
                 subtotal: row.subtotal,
                 priceAtTime: row.priceAtTime,
-                createdAt: row.createdAt
+                createdAt: row.createdAt,
+                // Enhanced data from foreign key relationship
+                itemName: row.itemName,
+                itemCategory: row.itemCategory
             }));
         }
         catch (error) {

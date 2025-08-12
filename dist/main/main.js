@@ -231,6 +231,17 @@ electron_1.ipcMain.handle('clear-activity-logs', async () => {
         throw error;
     }
 });
+// Invoice Food Items IPC handlers
+electron_1.ipcMain.handle('get-invoice-food-items', async (event, invoiceId) => {
+    try {
+        const items = db.getInvoiceFoodItems(invoiceId);
+        return items;
+    }
+    catch (error) {
+        console.error('Error getting invoice food items:', error);
+        throw error;
+    }
+});
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

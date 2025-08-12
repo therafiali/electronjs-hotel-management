@@ -16,6 +16,7 @@ interface RoomInfo {
 interface Room {
   roomId: string;
   roomNumber: string;
+  roomType: string;
   pricePerNight: number;
 }
 
@@ -23,6 +24,7 @@ interface FoodItem {
   name: string;
   quantity: number;
   price: number;
+  itemId?: string;  // Add itemId for foreign key reference
 }
 
 interface Item {
@@ -58,7 +60,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
   const [newFoodItem, setNewFoodItem] = useState<FoodItem>({
     name: '',
     quantity: 1,
-    price: 0
+    price: 0,
+    itemId: ''
   });
 
   const handleItemSelect = (itemId: string) => {
@@ -67,7 +70,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       setNewFoodItem({
         name: selectedItem.name,
         quantity: 1,
-        price: selectedItem.price
+        price: selectedItem.price,
+        itemId: selectedItem.id  // Store itemId for foreign key
       });
     }
   };
@@ -76,9 +80,11 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
   const [discount, setDiscount] = useState<number>(0);
 
   const addFoodItem = () => {
-    if (newFoodItem.name && newFoodItem.price > 0) {
+    if (newFoodItem.name && newFoodItem.price > 0 && newFoodItem.itemId) {
       setFoodItems([...foodItems, newFoodItem]);
-      setNewFoodItem({ name: '', quantity: 1, price: 0 });
+      setNewFoodItem({ name: '', quantity: 1, price: 0, itemId: '' });
+    } else {
+      alert('Please select a food item from the dropdown');
     }
   };
 
@@ -117,10 +123,29 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
+    
+    // Validate required fields
+    if (!guestInfo.name.trim()) {
+      alert('Please enter guest name');
+      return;
+    }
+    
+    if (!selectedRoom) {
+      alert('Please select a room');
+      return;
+    }
+    
+    // Enhanced roomInfo with foreign key data
+    const enhancedRoomInfo = {
+      ...roomInfo,
+      roomType: selectedRoom.roomType,
+      pricePerNight: selectedRoom.pricePerNight
+    };
+    
     const invoiceData = {
       invoiceId: generateUniqueId(), // Add unique ID
       guestInfo,
-      roomInfo,
+      roomInfo: enhancedRoomInfo,  // Use enhanced room info with foreign key data
       foodItems,
       taxRate,
       discount,
@@ -128,9 +153,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       tax: calculateTax(),
       total: calculateTotal(),
       date: new Date().toISOString(),
-      room_id: selectedRoom?.roomId || '',
-      room_price: selectedRoom?.pricePerNight || 0
+      room_id: selectedRoom.roomId,       // Foreign key to rooms table
+      room_price: selectedRoom.pricePerNight
     };
+    
+    console.log('🏨 Invoice created with room foreign key:', {
+      room_id: selectedRoom.roomId,
+      roomType: selectedRoom.roomType,
+      room_price: selectedRoom.pricePerNight
+    });
+    
     onSubmit(invoiceData);
   };
 

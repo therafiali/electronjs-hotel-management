@@ -134,17 +134,17 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, on
               </thead>
               <tbody>
                 {rooms.map((room) => (
-                                     <tr key={room.id} style={{ borderBottom: "1px solid #eee" }}>
+                                     <tr key={room.roomId} style={{ borderBottom: "1px solid #eee" }}>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomNumber}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomType}</td>
-                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${room.price}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${room.pricePerNight}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(room.createdDate).toLocaleDateString()}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>
                        {onUpdateRoomPrice && (
                          <EditButton
-                           value={room.price}
+                           value={room.pricePerNight}
                            onSave={async (newPrice) => {
-                             await onUpdateRoomPrice(room.id, newPrice as number);
+                             await onUpdateRoomPrice(room.roomId, newPrice as number);
                              onRefreshRooms(); // Refresh to show updated price
                            }}
                            fieldType="number"
