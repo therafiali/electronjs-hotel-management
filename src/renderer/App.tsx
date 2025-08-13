@@ -8,6 +8,8 @@ import ItemsForm from "./components/ItemsForm";
 import ItemsList from "./components/ItemsList";
 import RoomForm from "./components/RoomForm";
 import ActivityLogs from "./components/ActivityLogs";
+import ReportDashboard from "./components/ReportDashboard";
+import AdminChartsSection from "./components/AdminChartsSection";
 
 // User interface
 interface User {
@@ -56,7 +58,7 @@ const App: React.FC = () => {
   const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [currentView, setCurrentView] = useState<
-    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "rooms" | "activityLogs"
+    "dashboard" | "form" | "list" | "debug" | "pdf" | "items" | "rooms" | "activityLogs" | "reports"
   >("dashboard");
   const [invoices, setInvoices] = useState<any[]>([]);
   const [items, setItems] = useState<any[]>([]);
@@ -121,7 +123,6 @@ const App: React.FC = () => {
 
       // Switch to list view
       setCurrentView("list");
-      alert("Invoice created and saved to database successfully!");
     } catch (error) {
       console.error("Error saving invoice:", error);
       alert("Error saving invoice to database!");
@@ -146,11 +147,6 @@ const App: React.FC = () => {
       if (result.success) {
         // Open the PDF file after creation
         await window.electronAPI.openFile(result.filepath);
-        alert(
-          `✅ Invoice PDF created and opened successfully!\nSaved to: ${result.filepath}`
-        );
-      } else {
-        alert("❌ Failed to create invoice PDF");
       }
     } catch (error) {
       console.error("Error printing invoice:", error);
@@ -221,13 +217,10 @@ const App: React.FC = () => {
       // Refresh items list
       await loadItems();
 
-      alert("Item created and saved to database successfully!");
-
       // Return success to indicate form should be reset
       return { success: true };
     } catch (error) {
       console.error("Error saving item:", error);
-      alert("Error saving item to database!");
       return { success: false };
     } finally {
       setLoading(false);
@@ -262,7 +255,6 @@ const App: React.FC = () => {
       // Refresh items list to show updated price
       await loadItems();
 
-      alert("Item price updated successfully!");
     } catch (error) {
       console.error("Error updating item price:", error);
       alert("Error updating item price!");
@@ -300,7 +292,6 @@ const App: React.FC = () => {
       // Refresh rooms list to show updated price
       await loadRooms();
 
-      alert("Room price updated successfully!");
     } catch (error) {
       console.error("Error updating room price:", error);
       alert("Error updating room price!");
@@ -328,8 +319,6 @@ const App: React.FC = () => {
         description: `New room "${roomData.roomNumber}" (${roomData.roomType}) created with price $${roomData.price}`,
         userId: 'Admin'
       });
-
-      alert("Room type created and saved to database successfully!");
 
       // Return success to indicate form should be reset
       return { success: true };
@@ -414,6 +403,8 @@ const App: React.FC = () => {
           setCurrentView("rooms");
         }}
         onNavigateToActivityLogs={() => setCurrentView("activityLogs")}
+        onNavigateToReports={() => setCurrentView("reports")}
+        currentUser={currentUser!}
       />
       
       {/* Header */}
@@ -443,7 +434,7 @@ const App: React.FC = () => {
             fontWeight: '700',
             letterSpacing: '-0.025em'
           }}>
-            🏨 Hotel Paradise Management System
+            🏨 Hotel Management System
           </h1>
         </div>
         
@@ -744,6 +735,15 @@ const App: React.FC = () => {
                 </p>
               </div>
             </div>
+            
+            {/* Admin Analytics Charts - Only show for admin users */}
+            {currentUser?.role === "admin" && (
+              <AdminChartsSection 
+                invoices={invoices} 
+                rooms={rooms} 
+                items={items} 
+              />
+            )}
           </div>
         ) : currentView === "form" ? (
           <div>
@@ -900,10 +900,79 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : currentView === "activityLogs" ? (
-          <div>
-            <ActivityLogs onBackToDashboard={() => setCurrentView("dashboard")} />
-          </div>
-
+          currentUser?.role === "admin" ? (
+            <div>
+              <ActivityLogs onBackToDashboard={() => setCurrentView("dashboard")} />
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center', 
+              color: '#f1f5f9',
+              background: '#0f1419',
+              minHeight: '400px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>🚫 Access Denied</h2>
+              <p style={{ marginBottom: '2rem', color: '#94a3b8' }}>
+                Activity logs are only accessible to administrators.
+              </p>
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          )
+        ) : currentView === "reports" ? (
+          currentUser?.role === "admin" ? (
+            <div>
+              <ReportDashboard onBack={() => setCurrentView("dashboard")} />
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '2rem', 
+              textAlign: 'center', 
+              color: '#f1f5f9',
+              background: '#0f1419',
+              minHeight: '400px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <h2 style={{ color: '#ef4444', marginBottom: '1rem' }}>🚫 Access Denied</h2>
+              <p style={{ marginBottom: '2rem', color: '#94a3b8' }}>
+                Revenue reports are only accessible to administrators.
+              </p>
+              <button
+                onClick={() => setCurrentView("dashboard")}
+                style={{
+                  background: 'linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)',
+                  border: 'none',
+                  color: 'white',
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          )
         ) : (
           <div>
             <div style={{ textAlign: "center", marginBottom: "20px" }}>

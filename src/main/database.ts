@@ -207,7 +207,13 @@ class HotelDatabase {
       const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
       
       if (userCount.count === 0) {
-        const defaultUser: User = {
+        const insertUser = this.db.prepare(`
+          INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        
+        // Create default admin user
+        const defaultAdmin: User = {
           id: 'user_001',
           username: 'admin',
           password: 'hotel123', // In production, this should be hashed
@@ -218,10 +224,22 @@ class HotelDatabase {
           createdDate: new Date().toISOString()
         };
         
-        const insertUser = this.db.prepare(`
-          INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
+        insertUser.run(
+          defaultAdmin.id, defaultAdmin.username, defaultAdmin.password, defaultAdmin.email,
+          defaultAdmin.role, defaultAdmin.name, defaultAdmin.isActive ? 1 : 0, defaultAdmin.createdDate
+        );
+        
+        // Create additional user called "user"
+        const defaultUser: User = {
+          id: 'user_002',
+          username: 'user',
+          password: 'user123', // In production, this should be hashed
+          email: 'user@hotel.com',
+          role: 'staff',
+          name: 'Hotel User',
+          isActive: true,
+          createdDate: new Date().toISOString()
+        };
         
         insertUser.run(
           defaultUser.id, defaultUser.username, defaultUser.password, defaultUser.email,
@@ -229,9 +247,10 @@ class HotelDatabase {
         );
         
         console.log('✅ Default admin user created: username=admin, password=hotel123');
+        console.log('✅ Default user created: username=user, password=user123');
       }
     } catch (error) {
-      console.error('❌ Error initializing default user:', error);
+      console.error('❌ Error initializing default users:', error);
     }
   }
 
@@ -297,6 +316,57 @@ class HotelDatabase {
     } catch (error) {
       console.error('Error getting users:', error);
       return [];
+    }
+  }
+
+  createUser(userData: Omit<User, 'id' | 'createdDate'>): { success: boolean; id: string; message: string } {
+    try {
+      // Check if username already exists
+      const existingUser = this.db.prepare('SELECT id FROM users WHERE username = ?').get(userData.username);
+      if (existingUser) {
+        return {
+          success: false,
+          id: '',
+          message: `Username '${userData.username}' already exists`
+        };
+      }
+
+      // Create new user with generated ID
+      const newUser: User = {
+        id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        ...userData,
+        createdDate: new Date().toISOString()
+      };
+      
+      const stmt = this.db.prepare(`
+        INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      stmt.run(
+        newUser.id,
+        newUser.username,
+        newUser.password,
+        newUser.email,
+        newUser.role,
+        newUser.name,
+        newUser.isActive ? 1 : 0,
+        newUser.createdDate
+      );
+      
+      console.log(`✅ User created: ${newUser.username} (${newUser.role})`);
+      return {
+        success: true,
+        id: newUser.id,
+        message: `User '${newUser.username}' created successfully`
+      };
+    } catch (error) {
+      console.error('Error creating user:', error);
+      return {
+        success: false,
+        id: '',
+        message: 'Error creating user'
+      };
     }
   }
 

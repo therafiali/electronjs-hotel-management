@@ -90,7 +90,6 @@ const ActivityLogs: React.FC<ActivityLogsProps> = ({ onBackToDashboard }) => {
                 try {
                   await window.electronAPI.clearActivityLogs();
                   await loadActivityLogs(); // Refresh the logs
-                  alert('Activity logs cleared successfully!');
                 } catch (error) {
                   console.error('Error clearing activity logs:', error);
                   alert('Error clearing activity logs!');

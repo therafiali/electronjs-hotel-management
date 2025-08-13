@@ -156,7 +156,12 @@ class HotelDatabase {
             // Check if any users exist
             const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get();
             if (userCount.count === 0) {
-                const defaultUser = {
+                const insertUser = this.db.prepare(`
+          INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+                // Create default admin user
+                const defaultAdmin = {
                     id: 'user_001',
                     username: 'admin',
                     password: 'hotel123', // In production, this should be hashed
@@ -166,16 +171,25 @@ class HotelDatabase {
                     isActive: true,
                     createdDate: new Date().toISOString()
                 };
-                const insertUser = this.db.prepare(`
-          INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
+                insertUser.run(defaultAdmin.id, defaultAdmin.username, defaultAdmin.password, defaultAdmin.email, defaultAdmin.role, defaultAdmin.name, defaultAdmin.isActive ? 1 : 0, defaultAdmin.createdDate);
+                // Create additional user called "user"
+                const defaultUser = {
+                    id: 'user_002',
+                    username: 'user',
+                    password: 'user123', // In production, this should be hashed
+                    email: 'user@hotel.com',
+                    role: 'staff',
+                    name: 'Hotel User',
+                    isActive: true,
+                    createdDate: new Date().toISOString()
+                };
                 insertUser.run(defaultUser.id, defaultUser.username, defaultUser.password, defaultUser.email, defaultUser.role, defaultUser.name, defaultUser.isActive ? 1 : 0, defaultUser.createdDate);
                 console.log('✅ Default admin user created: username=admin, password=hotel123');
+                console.log('✅ Default user created: username=user, password=user123');
             }
         }
         catch (error) {
-            console.error('❌ Error initializing default user:', error);
+            console.error('❌ Error initializing default users:', error);
         }
     }
     // Authentication methods
@@ -238,6 +252,44 @@ class HotelDatabase {
         catch (error) {
             console.error('Error getting users:', error);
             return [];
+        }
+    }
+    createUser(userData) {
+        try {
+            // Check if username already exists
+            const existingUser = this.db.prepare('SELECT id FROM users WHERE username = ?').get(userData.username);
+            if (existingUser) {
+                return {
+                    success: false,
+                    id: '',
+                    message: `Username '${userData.username}' already exists`
+                };
+            }
+            // Create new user with generated ID
+            const newUser = {
+                id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                ...userData,
+                createdDate: new Date().toISOString()
+            };
+            const stmt = this.db.prepare(`
+        INSERT INTO users (id, username, password, email, role, name, isActive, createdDate)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+            stmt.run(newUser.id, newUser.username, newUser.password, newUser.email, newUser.role, newUser.name, newUser.isActive ? 1 : 0, newUser.createdDate);
+            console.log(`✅ User created: ${newUser.username} (${newUser.role})`);
+            return {
+                success: true,
+                id: newUser.id,
+                message: `User '${newUser.username}' created successfully`
+            };
+        }
+        catch (error) {
+            console.error('Error creating user:', error);
+            return {
+                success: false,
+                id: '',
+                message: 'Error creating user'
+            };
         }
     }
     // Invoice methods (updated to work with SQLite)

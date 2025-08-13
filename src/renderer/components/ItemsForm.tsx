@@ -42,7 +42,6 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, 
     e.preventDefault();
     
     if (!itemName.trim() || !category || price === '' || price <= 0) {
-      alert('Please fill all fields with valid data');
       return;
     }
 
@@ -77,7 +76,7 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, 
 
   return (
     <div>
-      {/* Form Card */}
+      {/* Form Car  */}
       <div className="items-form" style={{ marginBottom: "30px" }}>
         <h2>Add New Item</h2>
         <form onSubmit={handleSubmit}>

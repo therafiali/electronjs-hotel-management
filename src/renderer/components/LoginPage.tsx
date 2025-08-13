@@ -20,6 +20,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
+  const [showUserSelection, setShowUserSelection] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +56,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setError('');
   };
 
+  const switchUser = (newUsername: string) => {
+    setUsername(newUsername);
+    setPassword('');
+    setError('');
+    setShowUserSelection(false);
+  };
+
   return (
     <div className="elegant-login-container">
       <div className="elegant-login-content">
@@ -67,7 +75,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         {/* User Name */}
         <div className="user-display-name">
-          Hotel Administrator
+          {username === 'admin' ? 'Hotel Administrator' : username === 'user' ? 'Hotel User' : username}
+        </div>
+        
+        {/* User Switch Button */}
+        <div className="user-switch-section">
+          <button 
+            type="button" 
+            onClick={() => setShowUserSelection(!showUserSelection)}
+            className="user-switch-btn"
+          >
+            Switch User 👤
+          </button>
         </div>
 
         {/* Login Form */}
@@ -136,11 +155,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </button>
         </div>
 
+        {/* User Selection (Hidden by default) */}
+        {showUserSelection && (
+          <div className="user-selection-panel">
+            <div className="user-option" onClick={() => switchUser('admin')}>
+              <div className="user-avatar">👨‍💼</div>
+              <div className="user-info">
+                <div className="user-name">Administrator</div>
+                <div className="user-role">Admin</div>
+              </div>
+            </div>
+            <div className="user-option" onClick={() => switchUser('user')}>
+              <div className="user-avatar">👤</div>
+              <div className="user-info">
+                <div className="user-name">Hotel User</div>
+                <div className="user-role">Staff</div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Demo Info (Hidden by default) */}
         {showDemo && (
           <div className="demo-info-simple">
             <div className="demo-hint">
-              <p>Demo PIN: <span className="demo-pin">hotel123</span></p>
+              <p>Demo PINs:</p>
+              <p>Admin: <span className="demo-pin">hotel123</span></p>
+              <p>User: <span className="demo-pin">user123</span></p>
               <button 
                 type="button"
                 onClick={() => {
@@ -150,7 +191,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 }}
                 className="use-demo-btn-simple"
               >
-                Use Demo PIN
+                Use Admin PIN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  setUsername('user');
+                  setPassword('user123');
+                  setError('');
+                }}
+                className="use-demo-btn-simple"
+              >
+                Use User PIN
               </button>
             </div>
           </div>

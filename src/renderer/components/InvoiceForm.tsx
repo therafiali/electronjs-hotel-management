@@ -83,8 +83,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     if (newFoodItem.name && newFoodItem.price > 0 && newFoodItem.itemId) {
       setFoodItems([...foodItems, newFoodItem]);
       setNewFoodItem({ name: '', quantity: 1, price: 0, itemId: '' });
-    } else {
-      alert('Please select a food item from the dropdown');
     }
   };
 

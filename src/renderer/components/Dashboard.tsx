@@ -15,8 +15,19 @@ import {
   History as HistoryIcon,
   Inventory as ItemsIcon,
   Hotel as RoomIcon,
-  Assessment as ActivityIcon
+  Assessment as ActivityIcon,
+  Analytics as ReportsIcon
 } from '@mui/icons-material';
+
+interface User {
+  id: string;
+  username: string;
+  email: string;
+  role: "admin" | "staff" | "manager";
+  name: string;
+  isActive: boolean;
+  createdDate: string;
+}
 
 interface DashboardProps {
   onNavigateToDashboard: () => void;
@@ -25,6 +36,8 @@ interface DashboardProps {
   onNavigateToItems: () => void;
   onNavigateToRooms: () => void;
   onNavigateToActivityLogs: () => void;
+  onNavigateToReports: () => void;
+  currentUser: User;
 }
 
 const drawerWidth = 280;
@@ -36,10 +49,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToItems,
   onNavigateToRooms,
   onNavigateToActivityLogs,
+  onNavigateToReports,
+  currentUser,
 }) => {
   const [selectedItem, setSelectedItem] = useState('dashboard');
 
-  const menuItems = [
+  // Base menu items available to all users
+  const baseMenuItems = [
     {
       text: 'Dashboard',
       icon: <DashboardIcon />,
@@ -69,14 +85,29 @@ const Dashboard: React.FC<DashboardProps> = ({
       icon: <RoomIcon />,
       id: 'rooms',
       action: onNavigateToRooms
-    },
+    }
+  ];
+
+  // Admin-only menu items
+  const adminMenuItems = [
     {
       text: 'Activity Logs',
       icon: <ActivityIcon />,
       id: 'activity',
       action: onNavigateToActivityLogs
+    },
+    {
+      text: 'Revenue Reports',
+      icon: <ReportsIcon />,
+      id: 'reports',
+      action: onNavigateToReports
     }
   ];
+
+  // Combine menu items based on user role
+  const menuItems = currentUser.role === 'admin' 
+    ? [...baseMenuItems, ...adminMenuItems]
+    : baseMenuItems;
 
 
 

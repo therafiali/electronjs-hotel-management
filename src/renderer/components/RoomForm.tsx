@@ -40,7 +40,6 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, on
         setPrice(0);
         // Refresh rooms list to show new room
         onRefreshRooms();
-        alert('Room type created successfully!');
       }
     } catch (error) {
       console.error('Error creating room:', error);
@@ -82,8 +81,6 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, on
                 <option value="Deluxe">Deluxe</option>
                 <option value="Suite">Suite</option>
                 <option value="Family">Family</option>
-                <option value="Executive">Executive</option>
-                <option value="Presidential">Presidential</option>
               </select>
             </div>
 
