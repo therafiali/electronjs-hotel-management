@@ -236,7 +236,7 @@ const PDFCreator: React.FC = () => {
                         ).toLocaleDateString();
                         return (
                           <option key={invoice.id} value={invoice.id}>
-                            {guestName} - ${invoice.total} - {date}
+                            {guestName} - Rs. {invoice.total} - {date}
                           </option>
                         );
                       })}
@@ -276,7 +276,7 @@ const PDFCreator: React.FC = () => {
                           <div className="preview-item">
                             <span className="preview-label">Total Amount:</span>
                             <span className="preview-value amount">
-                              ${selectedInvoice.invoice.total}
+                              Rs. {selectedInvoice.invoice.total}
                             </span>
                           </div>
                         </div>

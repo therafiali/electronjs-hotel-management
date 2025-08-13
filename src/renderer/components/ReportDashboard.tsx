@@ -171,10 +171,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
   const itemSalesData = getItemSalesData();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return `Rs. ${amount.toFixed(2)}`;
   };
 
   const formatDate = (dateString: string) => {

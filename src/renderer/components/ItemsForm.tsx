@@ -166,7 +166,7 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, 
                                      <tr key={item.id} style={{ borderBottom: "1px solid #eee" }}>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.name}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{item.category}</td>
-                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${item.price}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>Rs. {item.price}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(item.createdDate).toLocaleDateString()}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>
                        {onUpdateItemPrice && (

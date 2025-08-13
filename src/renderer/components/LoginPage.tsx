@@ -19,7 +19,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showDemo, setShowDemo] = useState(false);
   const [showUserSelection, setShowUserSelection] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -50,12 +49,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     }
   };
 
-  const fillDemoCredentials = () => {
-    setUsername('admin');
-    setPassword('hotel123');
-    setError('');
-  };
-
   const switchUser = (newUsername: string) => {
     setUsername(newUsername);
     setPassword('');
@@ -69,13 +62,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
         {/* Profile Avatar */}
         <div className="profile-avatar">
           <div className="avatar-circle">
-            <div className="hotel-icon">🏨</div>
+            👤
           </div>
         </div>
 
         {/* User Name */}
         <div className="user-display-name">
-          {username === 'admin' ? 'Hotel Administrator' : username === 'user' ? 'Hotel User' : username}
+          <div style={{ fontSize: '2.2rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+            Rama Resort
+          </div>
+          <div style={{ fontSize: '1.2rem', fontWeight: '400', opacity: '0.8' }}>
+            Luxury & Comfort
+          </div>
         </div>
         
         {/* User Switch Button */}
@@ -85,7 +83,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             onClick={() => setShowUserSelection(!showUserSelection)}
             className="user-switch-btn"
           >
-            Switch User 👤
+            Switch User
           </button>
         </div>
 
@@ -101,7 +99,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           {/* Password/PIN Input */}
           <div className="pin-input-container">
             <div className="pin-input-wrapper">
-              <span className="pin-icon">🔒</span>
+              {/* Padlock icon removed */}
               <input
                 type="password"
                 value={password}
@@ -144,16 +142,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </button>
         </form>
 
-        {/* Forgot PIN Link */}
-        <div className="forgot-pin-section">
-          <button 
-            type="button" 
-            onClick={() => setShowDemo(!showDemo)}
-            className="forgot-pin-link"
-          >
-            Forgot your PIN?
-          </button>
-        </div>
+        {/* Forgot PIN Link - Removed for security reasons */}
+        {/* Demo Info - Removed for security reasons */}
 
         {/* User Selection (Hidden by default) */}
         {showUserSelection && (
@@ -171,39 +161,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                 <div className="user-name">Hotel User</div>
                 <div className="user-role">Staff</div>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Demo Info (Hidden by default) */}
-        {showDemo && (
-          <div className="demo-info-simple">
-            <div className="demo-hint">
-              <p>Demo PINs:</p>
-              <p>Admin: <span className="demo-pin">hotel123</span></p>
-              <p>User: <span className="demo-pin">user123</span></p>
-              <button 
-                type="button"
-                onClick={() => {
-                  setUsername('admin');
-                  setPassword('hotel123');
-                  setError('');
-                }}
-                className="use-demo-btn-simple"
-              >
-                Use Admin PIN
-              </button>
-              <button 
-                type="button"
-                onClick={() => {
-                  setUsername('user');
-                  setPassword('user123');
-                  setError('');
-                }}
-                className="use-demo-btn-simple"
-              >
-                Use User PIN
-              </button>
             </div>
           </div>
         )}

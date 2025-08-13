@@ -258,9 +258,9 @@ class PDFCreator {
             .font("Helvetica")
             .text(invoiceData.roomInfo.roomNumber || "N/A", roomValueX, roomY)
             .text(invoiceData.roomInfo.roomType || "N/A", roomValueX, roomY + 18)
-            .text(`$${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, roomValueX, roomY + 36)
+            .text(`Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, roomValueX, roomY + 36)
             .text((invoiceData.roomInfo.nights || 1).toString(), roomValueX, roomY + 54)
-            .text(`$${(invoiceData.roomInfo.pricePerNight *
+            .text(`Rs. ${(invoiceData.roomInfo.pricePerNight *
             (invoiceData.roomInfo.nights || 1)).toFixed(2)}`, roomValueX, roomY + 72);
     }
     drawChargesTable(doc, invoiceData) {
@@ -302,8 +302,8 @@ class PDFCreator {
             .text(`${invoiceData.roomInfo.roomType || "N/A"} - Room ${invoiceData.roomInfo.roomNumber || "N/A"}`, col1 + 10, currentY + 8)
             .font("Helvetica")
             .text((invoiceData.roomInfo.nights || 1).toString(), col2 + 10, currentY + 8)
-            .text(`$${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-            .text(`$${(invoiceData.roomInfo.pricePerNight *
+            .text(`Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, col3 + 10, currentY + 8)
+            .text(`Rs. ${(invoiceData.roomInfo.pricePerNight *
             (invoiceData.roomInfo.nights || 1)).toFixed(2)}`, col4 + 10, currentY + 8);
         currentY += 25;
         // Food items section
@@ -335,8 +335,8 @@ class PDFCreator {
                     .font("Helvetica")
                     .text(item.name || "N/A", col1 + 10, currentY + 8)
                     .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
-                    .text(`$${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-                    .text(`$${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
+                    .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
+                    .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
                 currentY += 25;
             });
         }
@@ -352,7 +352,7 @@ class PDFCreator {
             .fillColor("#374151")
             .font("Helvetica-Bold")
             .text("Subtotal", col3 + 10, currentY + 8)
-            .text(`$${(invoiceData.subtotal || 0).toFixed(2)}`, col4 + 10, currentY + 8);
+            .text(`Rs. ${(invoiceData.subtotal || 0).toFixed(2)}`, col4 + 10, currentY + 8);
         currentY += 25;
         // Tax row
         doc
@@ -366,7 +366,7 @@ class PDFCreator {
             .fillColor("#374151")
             .font("Helvetica-Bold")
             .text(`Tax (${invoiceData.taxRate || 0}%)`, col3 + 10, currentY + 8)
-            .text(`$${(invoiceData.tax || 0).toFixed(2)}`, col4 + 10, currentY + 8);
+            .text(`Rs. ${(invoiceData.tax || 0).toFixed(2)}`, col4 + 10, currentY + 8);
         currentY += 25;
         // Discount row (if applicable)
         if ((invoiceData.discount || 0) > 0) {
@@ -381,7 +381,7 @@ class PDFCreator {
                 .fillColor("#dc2626")
                 .font("Helvetica-Bold")
                 .text("Discount", col3 + 10, currentY + 8)
-                .text(`-$${(invoiceData.discount || 0).toFixed(2)}`, col4 + 10, currentY + 8);
+                .text(`-Rs. ${(invoiceData.discount || 0).toFixed(2)}`, col4 + 10, currentY + 8);
             currentY += 25;
         }
         // Total row
@@ -396,7 +396,7 @@ class PDFCreator {
             .fillColor("#ffffff")
             .font("Helvetica-Bold")
             .text("TOTAL AMOUNT", col3 + 10, currentY + 10)
-            .text(`$${(invoiceData.total || 0).toFixed(2)}`, col4 + 10, currentY + 10);
+            .text(`Rs. ${(invoiceData.total || 0).toFixed(2)}`, col4 + 10, currentY + 10);
     }
     drawFooter(doc) {
         const pageHeight = 842;
@@ -512,8 +512,8 @@ class PDFCreator {
             .text("Total Rooms: 50")
             .text("Occupied Rooms: 42")
             .text("Occupancy Rate: 84%")
-            .text("Total Revenue: $25,680.00")
-            .text("Average Daily Rate: $305.71")
+            .text("Total Revenue: Rs. 25,680.00")
+            .text("Average Daily Rate: Rs. 305.71")
             .moveDown(1);
         doc
             .fontSize(14)
@@ -526,7 +526,7 @@ class PDFCreator {
             .font("Helvetica")
             .fillColor("#374151")
             .text("Total Bookings: 156")
-            .text("Revenue Generated: $789,450.00")
+            .text("Revenue Generated: Rs. 789,450.00")
             .text("Average Guest Rating: 4.8/5")
             .text("Most Popular Room Type: Deluxe Mountain View")
             .moveDown(1);

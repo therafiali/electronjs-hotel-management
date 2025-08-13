@@ -20,7 +20,7 @@ const ItemsList: React.FC<ItemsListProps> = ({ items, onItemClick }) => {
     name: item.name,
     category: item.category,
     price: item.price,
-    formattedPrice: `$${item.price.toFixed(2)}`
+            formattedPrice: `Rs. ${item.price.toFixed(2)}`
   }));
 
   const columns = [

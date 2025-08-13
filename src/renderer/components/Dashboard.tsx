@@ -37,6 +37,7 @@ interface DashboardProps {
   onNavigateToRooms: () => void;
   onNavigateToActivityLogs: () => void;
   onNavigateToReports: () => void;
+  onLogout: () => void;
   currentUser: User;
 }
 
@@ -50,6 +51,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToRooms,
   onNavigateToActivityLogs,
   onNavigateToReports,
+  onLogout,
   currentUser,
 }) => {
   const [selectedItem, setSelectedItem] = useState('dashboard');
@@ -129,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* Logo Section */}
       <Box sx={{ p: 3, borderBottom: '1px solid #2d3748' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#6366f1' }}>
-          🏨 Hotel Paradise
+          🏨 Rama Resort
         </Typography>
         <Typography variant="body2" sx={{ color: '#a0aec0', mt: 0.5 }}>
           Management System
@@ -184,6 +186,47 @@ const Dashboard: React.FC<DashboardProps> = ({
           </ListItem>
         ))}
       </List>
+
+      {/* Logout Button - Bottom of Sidebar */}
+      <Box sx={{ 
+        position: 'absolute', 
+        bottom: 0, 
+        left: 0, 
+        right: 0, 
+        p: 2,
+        borderTop: '1px solid #2d3748',
+        backgroundColor: '#1a1d29'
+      }}>
+        <ListItemButton
+          onClick={onLogout}
+          sx={{
+            borderRadius: 2,
+            color: '#ef4444',
+            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+            '&:hover': {
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
+              color: '#dc2626'
+            }
+          }}
+        >
+          <ListItemIcon sx={{ 
+            color: 'inherit',
+            minWidth: 40,
+            '& .MuiSvgIcon-root': {
+              fontSize: '1.2rem'
+            }
+          }}>
+            🚪
+          </ListItemIcon>
+          <ListItemText 
+            primary="Logout"
+            primaryTypographyProps={{
+              fontSize: '0.9rem',
+              fontWeight: 600
+            }}
+          />
+        </ListItemButton>
+      </Box>
     </Drawer>
   );
 };

@@ -229,7 +229,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
                 <option value="">Select Room</option>
                 {rooms.map(room => (
                   <option key={room.roomId} value={room.roomNumber}>
-                    {room.roomNumber} - ${room.pricePerNight}/night
+                    {room.roomNumber} - Rs. {room.pricePerNight}/night
                   </option>
                 ))}
               </select>
@@ -256,8 +256,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           {roomInfo.roomNumber && (
             <div className="room-info-display">
               <p>Selected Room: {roomInfo.roomNumber}</p>
-              <p>Price per Night: ${rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
-              <p>Room Total: ${calculateRoomTotal()}</p>
+                              <p>Price per Night: Rs. {rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
+                              <p>Room Total: Rs. {calculateRoomTotal()}</p>
             </div>
           )}
         </div>
@@ -275,7 +275,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
                 <option value="">Select Food Item</option>
                 {items.map(item => (
                   <option key={item.id} value={item.id}>
-                    {item.name} - ${item.price}
+                    {item.name} - Rs. {item.price}
                   </option>
                 ))}
               </select>
@@ -324,8 +324,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           {newFoodItem.name && (
             <div className="room-info-display">
               <p>Selected Item: {newFoodItem.name}</p>
-              <p>Price per Item: ${newFoodItem.price}</p>
-              <p>Item Total: ${newFoodItem.price * newFoodItem.quantity}</p>
+                              <p>Price per Item: Rs. {newFoodItem.price}</p>
+                              <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
             </div>
           )}
 
@@ -335,7 +335,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <h4>Added Food Items:</h4>
               {foodItems.map((item, index) => (
                 <div key={index} className="food-item">
-                  <span>{item.name} - Qty: {item.quantity} - Price: ${item.price}</span>
+                  <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
                   <button type="button" onClick={() => removeFoodItem(index)} className="remove-btn">
                     Remove
                   </button>
@@ -392,27 +392,27 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           <h3>Invoice Summary</h3>
           <div className="summary-row">
             <span>Room Total:</span>
-            <span>${calculateRoomTotal()}</span>
+                            <span>Rs. {calculateRoomTotal()}</span>
           </div>
           <div className="summary-row">
             <span>Food Total:</span>
-            <span>${calculateFoodTotal()}</span>
+                            <span>Rs. {calculateFoodTotal()}</span>
           </div>
           <div className="summary-row">
             <span>Subtotal:</span>
-            <span>${calculateSubtotal()}</span>
+                            <span>Rs. {calculateSubtotal()}</span>
           </div>
           <div className="summary-row">
             <span>Tax ({taxRate}%):</span>
-            <span>${calculateTax()}</span>
+                            <span>Rs. {calculateTax()}</span>
           </div>
           <div className="summary-row">
             <span>Discount:</span>
-            <span>-${discount}</span>
+                            <span>-Rs. {discount}</span>
           </div>
           <div className="summary-row total">
             <span>Total:</span>
-            <span>${calculateTotal()}</span>
+                            <span>Rs. {calculateTotal()}</span>
           </div>
         </div>
 

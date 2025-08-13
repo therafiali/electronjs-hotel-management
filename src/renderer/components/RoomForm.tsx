@@ -142,7 +142,7 @@ const RoomForm: React.FC<RoomFormProps> = ({ onSubmit, rooms, onRefreshRooms, on
                                      <tr key={room.roomId} style={{ borderBottom: "1px solid #eee" }}>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomNumber}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{room.roomType}</td>
-                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>${room.pricePerNight}</td>
+                     <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>Rs. {room.pricePerNight}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>{new Date(room.createdDate).toLocaleDateString()}</td>
                      <td style={{ padding: "12px", borderBottom: "1px solid #eee" }}>
                        {onUpdateRoomPrice && (

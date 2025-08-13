@@ -86,7 +86,7 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
 
     switch (column.type) {
       case "currency":
-        return `$${Number(value).toFixed(2)}`;
+        return `Rs. ${Number(value).toFixed(2)}`;
       case "number":
         return Number(value).toLocaleString();
       case "date":

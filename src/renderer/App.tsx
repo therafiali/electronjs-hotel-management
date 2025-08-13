@@ -114,7 +114,7 @@ const App: React.FC = () => {
         tableName: 'invoices',
         recordId: result.id,
         action: 'CREATE',
-        description: `New invoice created for ${invoiceData.guestInfo?.name || 'Guest'} with total $${invoiceData.total}`,
+        description: `New invoice created for ${invoiceData.guestInfo?.name || 'Guest'} with total Rs. ${invoiceData.total}`,
         userId: 'Admin'
       });
 
@@ -131,12 +131,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleInvoiceClick = (invoice: any) => {
-    console.log("Invoice clicked:", invoice);
-    alert(
-      `Invoice ${invoice.id} details:\nGuest: ${invoice.guestInfo.name}\nTotal: $${invoice.total}`
-    );
-  };
+      const handleInvoiceClick = (invoice: any) => {
+      console.log("Invoice clicked:", invoice);
+    };
 
   const handlePrintInvoice = async (invoiceId: string) => {
     try {
@@ -210,7 +207,7 @@ const App: React.FC = () => {
         tableName: 'items',
         recordId: result.id,
         action: 'CREATE',
-        description: `New item "${itemData.name}" (${itemData.category}) created with price $${itemData.price}`,
+        description: `New item "${itemData.name}" (${itemData.category}) created with price Rs. ${itemData.price}`,
         userId: 'Admin'
       });
 
@@ -248,7 +245,7 @@ const App: React.FC = () => {
         fieldName: 'price',
         oldValue: oldPrice.toString(),
         newValue: newPrice.toString(),
-        description: `Item "${currentItem?.name || itemId}" price updated from $${oldPrice} to $${newPrice}`,
+        description: `Item "${currentItem?.name || itemId}" price updated from Rs. ${oldPrice} to Rs. ${newPrice}`,
         userId: 'Admin'
       });
 
@@ -285,7 +282,7 @@ const App: React.FC = () => {
         fieldName: 'price',
         oldValue: oldPrice.toString(),
         newValue: newPrice.toString(),
-        description: `Room ${currentRoom?.roomNumber || roomId} price updated from $${oldPrice} to $${newPrice}`,
+        description: `Room ${currentRoom?.roomNumber || roomId} price updated from Rs. ${oldPrice} to Rs. ${newPrice}`,
         userId: 'Admin'
       });
 
@@ -316,7 +313,7 @@ const App: React.FC = () => {
         tableName: 'rooms',
         recordId: result.id,
         action: 'CREATE',
-        description: `New room "${roomData.roomNumber}" (${roomData.roomType}) created with price $${roomData.price}`,
+        description: `New room "${roomData.roomNumber}" (${roomData.roomType}) created with price Rs. ${roomData.price}`,
         userId: 'Admin'
       });
 
@@ -334,9 +331,9 @@ const App: React.FC = () => {
   const handleItemClick = (item: any) => {
     console.log("Item clicked:", item);
     alert(
-      `Item Details:\nName: ${item.name}\nCategory: ${
-        item.category
-      }\nPrice: $${item.price.toFixed(2)}`
+              `Item Details:\nName: ${item.name}\nCategory: ${
+          item.category
+        }\nPrice: Rs. ${item.price.toFixed(2)}`
     );
   };
 
@@ -404,6 +401,7 @@ const App: React.FC = () => {
         }}
         onNavigateToActivityLogs={() => setCurrentView("activityLogs")}
         onNavigateToReports={() => setCurrentView("reports")}
+        onLogout={handleLogout}
         currentUser={currentUser!}
       />
       
@@ -434,7 +432,7 @@ const App: React.FC = () => {
             fontWeight: '700',
             letterSpacing: '-0.025em'
           }}>
-            🏨 Hotel Management System
+            🏨 Rama Resort Management System
           </h1>
         </div>
         
@@ -487,76 +485,6 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-          
-          {/* PDF Creator Button */}
-          <button
-            onClick={() => setCurrentView("pdf")}
-            style={{
-              backgroundColor: '#6366f1',
-              color: 'white',
-              border: 'none',
-              padding: '12px 20px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.25)'
-            }}
-            onMouseEnter={(e) => {
-              const target = e.target as HTMLButtonElement;
-              target.style.backgroundColor = '#5856eb';
-              target.style.transform = 'translateY(-1px)';
-              target.style.boxShadow = '0 4px 12px rgba(99, 102, 241, 0.35)';
-            }}
-            onMouseLeave={(e) => {
-              const target = e.target as HTMLButtonElement;
-              target.style.backgroundColor = '#6366f1';
-              target.style.transform = 'translateY(0)';
-              target.style.boxShadow = '0 2px 8px rgba(99, 102, 241, 0.25)';
-            }}
-          >
-            📄 PDF Creator
-          </button>
-          
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            style={{
-              backgroundColor: '#dc2626',
-              color: 'white',
-              border: 'none',
-              padding: '12px 20px',
-              borderRadius: '10px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.25)'
-            }}
-            onMouseEnter={(e) => {
-              const target = e.target as HTMLButtonElement;
-              target.style.backgroundColor = '#b91c1c';
-              target.style.transform = 'translateY(-1px)';
-              target.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.35)';
-            }}
-            onMouseLeave={(e) => {
-              const target = e.target as HTMLButtonElement;
-              target.style.backgroundColor = '#dc2626';
-              target.style.transform = 'translateY(0)';
-              target.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.25)';
-            }}
-          >
-            🚪 Logout
-          </button>
-          
-
         </div>
       </header>
 
@@ -585,7 +513,7 @@ const App: React.FC = () => {
                 fontWeight: '700',
                 marginBottom: '15px'
               }}>
-                Welcome to Hotel Paradise
+                Welcome to Rama Resort
               </h2>
               <p style={{
                 color: '#6b7280',
@@ -624,7 +552,7 @@ const App: React.FC = () => {
                   color: '#111827',
                   marginBottom: '8px'
                 }}>
-                  ${invoices.reduce((total, invoice) => total + (invoice.total || 0), 0).toFixed(2)}
+                  Rs. {invoices.reduce((total, invoice) => total + (invoice.total || 0), 0).toFixed(2)}
                 </h3>
                 <p style={{
                   fontSize: '16px',
@@ -655,9 +583,8 @@ const App: React.FC = () => {
                   color: '#111827',
                   marginBottom: '8px'
                 }}>
-                  ${invoices.reduce((total, invoice) => {
-                    const roomTotal = (invoice.roomInfo?.pricePerNight || 0) * (invoice.roomInfo?.numberOfNights || 0);
-                    return total + roomTotal;
+                  Rs. {invoices.reduce((total, invoice) => {
+                    return total + (invoice.room_price || 0);
                   }, 0).toFixed(2)}
                 </h3>
                 <p style={{
@@ -689,7 +616,7 @@ const App: React.FC = () => {
                   color: '#111827',
                   marginBottom: '8px'
                 }}>
-                  ${invoices.reduce((total, invoice) => {
+                  Rs. {invoices.reduce((total, invoice) => {
                     const foodTotal = (invoice.foodItems || []).reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
                     return total + foodTotal;
                   }, 0).toFixed(2)}
