@@ -13,12 +13,16 @@ electron_1.contextBridge.exposeInMainWorld("electronAPI", {
     authenticateUser: (username, password) => electron_1.ipcRenderer.invoke("authenticate-user", { username, password }),
     getAllUsers: () => electron_1.ipcRenderer.invoke("get-all-users"),
     // Database API methods
+    getDatabasePath: () => electron_1.ipcRenderer.invoke("get-database-path"),
     saveInvoice: (invoice) => electron_1.ipcRenderer.invoke("save-invoice", invoice),
     getAllInvoices: () => electron_1.ipcRenderer.invoke("get-all-invoices"),
     // PDF Creator API methods
     getPDFTypes: () => electron_1.ipcRenderer.invoke("get-pdf-types"),
     createPDF: (type, invoiceId) => electron_1.ipcRenderer.invoke("create-pdf", { type, invoiceId }),
     openFile: (filepath) => electron_1.ipcRenderer.invoke("open-file", filepath),
+    selectDatabaseFile: () => electron_1.ipcRenderer.invoke("select-database-file"),
+    uploadDatabase: (filePath) => electron_1.ipcRenderer.invoke("upload-database", filePath),
+    exportDatabase: () => electron_1.ipcRenderer.invoke("export-database"),
     // Items API methods
     saveItem: (itemData) => electron_1.ipcRenderer.invoke("save-item", itemData),
     getAllItems: () => electron_1.ipcRenderer.invoke("get-all-items"),

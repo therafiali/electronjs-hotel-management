@@ -37,12 +37,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __importStar(require("path"));
+const electron_1 = require("electron");
 const better_sqlite3_1 = __importDefault(require("better-sqlite3"));
 class HotelDatabase {
     constructor() {
-        // Fix the database path to use the project root directory
-        this.dbPath = path.join(process.cwd(), 'hotel.db');
+        // Use proper Electron app paths for database location
+        // In dev mode: project directory, in release: user data directory
+        // 
+        // Why this matters:
+        // - Development: process.cwd() = project folder (where you can see the file)
+        // - Release: app.getPath('userData') = app's data directory (hidden from user)
+        // 
+        // This ensures the database is always accessible to the app regardless of
+        // where the user runs the executable from.
+        if (process.env.NODE_ENV === 'development') {
+            this.dbPath = path.join(process.cwd(), 'hotel.db');
+        }
+        else {
+            // In production, use the user data directory
+            this.dbPath = path.join(electron_1.app.getPath('userData'), 'hotel.db');
+        }
         console.log('🔍 Database path:', this.dbPath);
+        console.log('🔍 Environment:', process.env.NODE_ENV || 'production');
         // Initialize SQLite database
         this.db = new better_sqlite3_1.default(this.dbPath);
         // Enable foreign key constraints for data integrity
@@ -200,6 +216,7 @@ class HotelDatabase {
         WHERE username = ? AND password = ? AND isActive = 1
       `);
             const userRow = stmt.get(username, password);
+            console.log(userRow);
             if (userRow) {
                 const user = {
                     id: userRow.id,
@@ -214,12 +231,13 @@ class HotelDatabase {
                 console.log(`✅ User authenticated successfully: ${user.name} (${user.role})`);
                 return {
                     success: true,
-                    user: { ...user, password: '' }, // Don't send password back
+                    user: { ...user }, // Don't send password back
                     message: 'Login successful'
                 };
             }
             else {
                 console.log(`❌ Authentication failed for username: ${username}`);
+                console.log(userRow);
                 return {
                     success: false,
                     message: 'Invalid username or password'
@@ -733,6 +751,10 @@ class HotelDatabase {
         catch (error) {
             console.error('❌ Error closing database:', error);
         }
+    }
+    // Get the current database path
+    getDatabasePath() {
+        return this.dbPath;
     }
 }
 exports.default = HotelDatabase;

@@ -13,6 +13,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("authenticate-user", { username, password }),
   getAllUsers: () => ipcRenderer.invoke("get-all-users"),
   // Database API methods
+  getDatabasePath: () => ipcRenderer.invoke("get-database-path"),
   saveInvoice: (invoice: any) => ipcRenderer.invoke("save-invoice", invoice),
   getAllInvoices: () => ipcRenderer.invoke("get-all-invoices"),
   // PDF Creator API methods
@@ -20,6 +21,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   createPDF: (type: string, invoiceId?: string) =>
     ipcRenderer.invoke("create-pdf", { type, invoiceId }),
   openFile: (filepath: string) => ipcRenderer.invoke("open-file", filepath),
+  selectDatabaseFile: () => ipcRenderer.invoke("select-database-file"),
+  uploadDatabase: (filePath: string) => ipcRenderer.invoke("upload-database", filePath),
+  exportDatabase: () => ipcRenderer.invoke("export-database"),
   // Items API methods
   saveItem: (itemData: any) => ipcRenderer.invoke("save-item", itemData),
   getAllItems: () => ipcRenderer.invoke("get-all-items"),

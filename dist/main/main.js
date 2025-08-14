@@ -86,6 +86,16 @@ electron_1.ipcMain.handle("get-all-users", async () => {
     }
 });
 // Database IPC handlers
+electron_1.ipcMain.handle("get-database-path", async () => {
+    try {
+        const dbPath = db.getDatabasePath();
+        return { success: true, path: dbPath };
+    }
+    catch (error) {
+        console.error("Error getting database path:", error);
+        throw error;
+    }
+});
 electron_1.ipcMain.handle("save-invoice", async (event, invoice) => {
     try {
         const result = await db.saveInvoice(invoice);
@@ -244,6 +254,102 @@ electron_1.ipcMain.handle("open-file", async (event, filepath) => {
         throw error;
     }
 });
+electron_1.ipcMain.handle("upload-database", async (event, filePath) => {
+    try {
+        console.log(`📁 Uploading new database from: ${filePath}`);
+        // Close current database connection
+        if (db) {
+            db.close();
+        }
+        // Copy the new database file to replace the current one
+        const fs = require('fs');
+        const currentDbPath = db.getDatabasePath();
+        // Backup the current database (optional safety measure)
+        const backupPath = currentDbPath.replace('.db', '_backup_' + Date.now() + '.db');
+        if (fs.existsSync(currentDbPath)) {
+            fs.copyFileSync(currentDbPath, backupPath);
+            console.log(`💾 Backup created at: ${backupPath}`);
+        }
+        // Copy the new database file
+        fs.copyFileSync(filePath, currentDbPath);
+        console.log(`✅ Database replaced successfully from: ${filePath}`);
+        // Reinitialize the database with the new file
+        db = new database_1.default();
+        return {
+            success: true,
+            message: 'Database updated successfully!',
+            backupPath: backupPath
+        };
+    }
+    catch (error) {
+        console.error("Error uploading database:", error);
+        // Try to reinitialize the database if something went wrong
+        try {
+            db = new database_1.default();
+        }
+        catch (reinitError) {
+            console.error("Failed to reinitialize database:", reinitError);
+        }
+        throw error;
+    }
+});
+electron_1.ipcMain.handle("select-database-file", async () => {
+    try {
+        const { dialog } = require("electron");
+        const result = await dialog.showOpenDialog({
+            title: 'Select Database File',
+            filters: [
+                { name: 'SQLite Database', extensions: ['db'] },
+                { name: 'All Files', extensions: ['*'] }
+            ],
+            properties: ['openFile']
+        });
+        if (!result.canceled && result.filePaths.length > 0) {
+            return { success: true, filePath: result.filePaths[0] };
+        }
+        else {
+            return { success: false, message: 'No file selected' };
+        }
+    }
+    catch (error) {
+        console.error("Error selecting database file:", error);
+        throw error;
+    }
+});
+electron_1.ipcMain.handle("export-database", async () => {
+    try {
+        const { dialog } = require("electron");
+        const fs = require('fs');
+        // Get the current database path
+        const currentDbPath = db.getDatabasePath();
+        // Open save dialog for user to choose where to save
+        const result = await dialog.showSaveDialog({
+            title: 'Export Database',
+            defaultPath: 'hotel_export.db',
+            filters: [
+                { name: 'SQLite Database', extensions: ['db'] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+        if (!result.canceled && result.filePath) {
+            // Copy the database to the selected location
+            fs.copyFileSync(currentDbPath, result.filePath);
+            console.log(`📤 Database exported to: ${result.filePath}`);
+            return {
+                success: true,
+                message: 'Database exported successfully!',
+                filePath: result.filePath
+            };
+        }
+        else {
+            return { success: false, message: 'Export cancelled' };
+        }
+    }
+    catch (error) {
+        console.error("Error exporting database:", error);
+        throw error;
+    }
+});
 // Invoice Food Items IPC handlers
 electron_1.ipcMain.handle("get-invoice-food-items", async (event, invoiceId) => {
     try {
@@ -262,6 +368,10 @@ electron_1.app.whenReady().then(() => {
     // Initialize database and PDF creator
     db = new database_1.default();
     pdfCreator = new pdfCreator_1.default();
+    // Log database path for easy access
+    console.log('🚀 App started successfully!');
+    console.log('📁 Database location:', db.getDatabasePath());
+    console.log('💡 Check this path to find your hotel.db file');
     createWindow();
 });
 // Quit when all windows are closed.

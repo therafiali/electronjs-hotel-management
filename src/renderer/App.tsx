@@ -32,12 +32,16 @@ declare global {
       getAllUsers: () => Promise<User[]>;
       saveInvoice: (invoice: any) => Promise<any>;
       getAllInvoices: () => Promise<any[]>;
+      getDatabasePath: () => Promise<{ success: boolean; path: string }>;
       getPDFTypes: () => Promise<any[]>;
       createPDF: (
         type: string,
         invoiceId?: string
       ) => Promise<{ success: boolean; filepath: string }>;
       openFile: (filepath: string) => Promise<{ success: boolean }>;
+      selectDatabaseFile: () => Promise<{ success: boolean; filePath?: string; message?: string }>;
+      uploadDatabase: (filePath: string) => Promise<{ success: boolean; message: string; backupPath: string }>;
+      exportDatabase: () => Promise<{ success: boolean; message: string; filePath: string }>;
       saveItem: (itemData: any) => Promise<any>;
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
@@ -65,6 +69,7 @@ const App: React.FC = () => {
   const [rooms, setRooms] = useState<any[]>([]);
   const [debugData, setDebugData] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [databasePath, setDatabasePath] = useState<string>("");
 
   // Authentication state
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -85,6 +90,7 @@ const App: React.FC = () => {
     loadRooms();
     loadItems();
     loadInvoices(); // Load invoices for dashboard stats
+    loadDatabasePath(); // Load database path
   }, []);
 
   const handleSendMessage = () => {
@@ -169,26 +175,27 @@ const App: React.FC = () => {
   const loadDebugData = async () => {
     try {
       setLoading(true);
-      console.log("Loading real data from database...");
-
-      // Get real data from database
-      const realData = await window.electronAPI.getAllInvoices();
-
-      // Log to console for easy viewing
-      console.log("🔍 Real getAllInvoices() Data:", realData);
-      console.log("📊 Total invoices in database:", realData.length);
-      if (realData.length > 0) {
-        console.log("📋 First invoice details:", realData[0]);
-      }
-
-      setDebugData(JSON.stringify(realData, null, 2));
-    } catch (error) {
+      const invoices = await window.electronAPI.getAllInvoices();
+      setDebugData(JSON.stringify(invoices, null, 2));
+    } catch (error: any) {
       console.error("Error loading debug data:", error);
-      setDebugData(
-        "Error loading data from database: " + (error as Error).message
-      );
+      setDebugData("Error loading data from database: " + error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadDatabasePath = async () => {
+    try {
+      const result = await window.electronAPI.getDatabasePath();
+      if (result.success) {
+        setDatabasePath(result.path);
+      } else {
+        setDatabasePath("Error getting database path");
+      }
+    } catch (error: any) {
+      console.error("Error getting database path:", error);
+      setDatabasePath("Error: " + error.message);
     }
   };
 
@@ -671,6 +678,168 @@ const App: React.FC = () => {
                 items={items} 
               />
             )}
+
+            {/* Database Path Info */}
+            <div style={{
+              background: "#f8f9fa",
+              border: "1px solid #dee2e6",
+              borderRadius: "12px",
+              padding: "20px",
+              margin: "20px 0",
+              textAlign: "left"
+            }}>
+              <h4 style={{ 
+                margin: "0 0 15px 0", 
+                color: "#495057",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}>
+                📁 Database Location
+                <button
+                  onClick={loadDatabasePath}
+                  style={{
+                    background: "#6c757d",
+                    color: "white",
+                    border: "none",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "11px",
+                    marginLeft: "auto"
+                  }}
+                >
+                  Refresh
+                </button>
+              </h4>
+              <p style={{ 
+                margin: "0", 
+                fontFamily: "monospace", 
+                fontSize: "12px", 
+                color: "#6c757d", 
+                wordBreak: "break-all",
+                background: "#e9ecef",
+                padding: "10px",
+                borderRadius: "6px",
+                border: "1px solid #ced4da"
+              }}>
+                {databasePath || "Loading database path..."}
+              </p>
+              <p style={{ 
+                margin: "10px 0 0 0", 
+                fontSize: "12px", 
+                color: "#6c757d",
+                fontStyle: "italic"
+              }}>
+                💡 This shows where your hotel.db file is located. In development mode, it's in your project folder. In release mode, it's in the app's user data directory.
+              </p>
+            </div>
+
+            {/* Admin Database Management - Only show for admin users */}
+            {currentUser?.role === "admin" && (
+              <div style={{
+                background: "#ffffff",
+                border: "1px solid #e5e7eb",
+                borderRadius: "12px",
+                padding: "25px",
+                margin: "20px 0",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+              }}>
+                <h4 style={{ 
+                  margin: "0 0 15px 0", 
+                  color: "#111827",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  textAlign: "center"
+                }}>
+                  🗄️ Database Management
+                </h4>
+                <p style={{ 
+                  margin: "0 0 20px 0", 
+                  fontSize: "14px", 
+                  color: "#6b7280",
+                  textAlign: "center"
+                }}>
+                  Upload updated database files or export current database for backup
+                </p>
+                
+                <div style={{ 
+                  display: "flex", 
+                  gap: "15px", 
+                  justifyContent: "center",
+                  flexWrap: "wrap"
+                }}>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const result = await window.electronAPI.selectDatabaseFile();
+                        if (result.success && result.filePath) {
+                          const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
+                          if (uploadResult.success) {
+                            alert(`✅ ${uploadResult.message}\nBackup created at: ${uploadResult.backupPath}`);
+                            // Refresh data after database update
+                            await loadInvoices();
+                            await loadItems();
+                            await loadRooms();
+                          } else {
+                            alert(`❌ ${uploadResult.message}`);
+                          }
+                        } else {
+                          alert('ℹ️ No file selected');
+                        }
+                      } catch (error: any) {
+                        alert(`❌ Error: ${error.message}`);
+                      }
+                    }}
+                    style={{
+                      background: "#28a745",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 18px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px"
+                    }}
+                  >
+                    📁 Upload Database
+                  </button>
+                  
+                  <button
+                    onClick={async () => {
+                      try {
+                        const result = await window.electronAPI.exportDatabase();
+                        if (result.success) {
+                          alert(`✅ ${result.message}\nExported to: ${result.filePath}`);
+                        } else {
+                          alert(`ℹ️ ${result.message}`);
+                        }
+                      } catch (error: any) {
+                        alert(`❌ Error: ${error.message}`);
+                      }
+                    }}
+                    style={{
+                      background: "#17a2b8",
+                      color: "white",
+                      border: "none",
+                      padding: "10px 18px",
+                      borderRadius: "8px",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px"
+                    }}
+                  >
+                    📤 Export Database
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         ) : currentView === "form" ? (
           <div>
@@ -698,6 +867,7 @@ const App: React.FC = () => {
                 onClick={async () => {
                   setCurrentView("debug");
                   await loadDebugData();
+                  await loadDatabasePath();
                 }}
                 style={{
                   background: "#e74c3c",
@@ -740,6 +910,7 @@ const App: React.FC = () => {
                 onClick={async () => {
                   setCurrentView("debug");
                   await loadDebugData();
+                  await loadDatabasePath();
                 }}
                 style={{
                   background: "#e74c3c",
@@ -908,6 +1079,34 @@ const App: React.FC = () => {
                 This shows the actual data from getAllInvoices() in your
                 database
               </p>
+              <div style={{ 
+                background: "#e8f4fd", 
+                border: "1px solid #bee5eb", 
+                borderRadius: "8px", 
+                padding: "15px", 
+                margin: "15px 0",
+                textAlign: "left"
+              }}>
+                <h4 style={{ margin: "0 0 10px 0", color: "#0c5460" }}>📁 Database Location:</h4>
+                <p style={{ margin: "0", fontFamily: "monospace", fontSize: "12px", color: "#0c5460", wordBreak: "break-all" }}>
+                  {databasePath || "Loading database path..."}
+                </p>
+                <button
+                  onClick={loadDatabasePath}
+                  style={{
+                    background: "#6c757d",
+                    color: "white",
+                    border: "none",
+                    padding: "5px 10px",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    marginTop: "10px"
+                  }}
+                >
+                  Refresh Path
+                </button>
+              </div>
             </div>
             {loading && (
               <div style={{ textAlign: "center", margin: "20px" }}>
