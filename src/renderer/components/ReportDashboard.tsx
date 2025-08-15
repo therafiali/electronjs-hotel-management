@@ -199,7 +199,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
           <button onClick={onBack} className="back-button">
             ← Back
           </button>
-          <h1 className="report-title">📊 Revenue Reports</h1>
+          <h1 className="report-title"> Revenue Reports</h1>
         </div>
       </div>
 

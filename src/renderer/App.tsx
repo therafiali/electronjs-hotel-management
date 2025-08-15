@@ -432,7 +432,7 @@ const App: React.FC = () => {
             fontWeight: '700',
             letterSpacing: '-0.025em'
           }}>
-            🏨 Rama Resort Management System
+             Rama Resort Management System
           </h1>
         </div>
         

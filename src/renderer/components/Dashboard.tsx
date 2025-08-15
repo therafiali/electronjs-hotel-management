@@ -131,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       {/* Logo Section */}
       <Box sx={{ p: 3, borderBottom: '1px solid #2d3748' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#6366f1' }}>
-          🏨 Rama Resort
+         Rama Resort
         </Typography>
         <Typography variant="body2" sx={{ color: '#a0aec0', mt: 0.5 }}>
           Management System
