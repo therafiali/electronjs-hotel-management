@@ -584,7 +584,16 @@ const App: React.FC = () => {
                   marginBottom: '8px'
                 }}>
                   Rs. {invoices.reduce((total, invoice) => {
-                    return total + (invoice.room_price || 0);
+                    if (invoice.room_id && invoice.guestInfo?.checkIn && invoice.guestInfo?.checkOut) {
+                      // Calculate nights from check-in/check-out dates
+                      const checkIn = new Date(invoice.guestInfo.checkIn);
+                      const checkOut = new Date(invoice.guestInfo.checkOut);
+                      const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+                      
+                      // Calculate room revenue: price per night × number of nights
+                      return total + ((invoice.room_price || 0) * (nights > 0 ? nights : 1));
+                    }
+                    return total;
                   }, 0).toFixed(2)}
                 </h3>
                 <p style={{

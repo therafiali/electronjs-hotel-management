@@ -56,7 +56,18 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
   const getRevenueDistribution = () => {
     const filteredInvoices = getFilteredInvoices();
     
-    const roomRevenue = filteredInvoices.reduce((sum, inv) => sum + (inv.room_price || 0), 0);
+    const roomRevenue = filteredInvoices.reduce((sum, inv) => {
+      if (inv.room_id && inv.guestInfo?.checkIn && inv.guestInfo?.checkOut) {
+        // Calculate nights from check-in/check-out dates
+        const checkIn = new Date(inv.guestInfo.checkIn);
+        const checkOut = new Date(inv.guestInfo.checkOut);
+        const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Calculate room revenue: price per night × number of nights
+        return sum + ((inv.room_price || 0) * (nights > 0 ? nights : 1));
+      }
+      return sum;
+    }, 0);
     const foodRevenue = filteredInvoices.reduce((sum, inv) => {
       if (inv.foodItems && Array.isArray(inv.foodItems)) {
         return sum + inv.foodItems.reduce((itemSum: number, item: any) => 

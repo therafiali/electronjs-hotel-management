@@ -111,7 +111,15 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
             };
           }
           roomData[invoice.room_id].invoices.push(invoice);
-          roomData[invoice.room_id].total += invoice.room_price || 0;
+          
+          // Calculate nights from check-in/check-out dates
+          const checkIn = new Date(invoice.guestInfo.checkIn);
+          const checkOut = new Date(invoice.guestInfo.checkOut);
+          const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+          
+          // Calculate room revenue: price per night × number of nights
+          const roomRevenue = (invoice.room_price || 0) * (nights > 0 ? nights : 1);
+          roomData[invoice.room_id].total += roomRevenue;
         }
       }
     });
@@ -153,7 +161,18 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
   // Calculate totals
   const calculateTotals = () => {
     const filteredInvoices = getFilteredInvoices();
-    const roomTotal = filteredInvoices.reduce((sum, inv) => sum + (inv.room_price || 0), 0);
+    const roomTotal = filteredInvoices.reduce((sum, inv) => {
+      if (inv.room_id && inv.guestInfo.checkIn && inv.guestInfo.checkOut) {
+        // Calculate nights from check-in/check-out dates
+        const checkIn = new Date(inv.guestInfo.checkIn);
+        const checkOut = new Date(inv.guestInfo.checkOut);
+        const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Calculate room revenue: price per night × number of nights
+        return sum + ((inv.room_price || 0) * (nights > 0 ? nights : 1));
+      }
+      return sum;
+    }, 0);
     const itemTotal = filteredInvoices.reduce((sum, inv) => {
       if (inv.foodItems && Array.isArray(inv.foodItems)) {
         return sum + inv.foodItems.reduce((itemSum: number, item: any) => 
