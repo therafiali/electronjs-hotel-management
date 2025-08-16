@@ -64,6 +64,9 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     itemId: ''
   });
 
+  // Add stay option state
+  const [withStay, setWithStay] = useState<boolean>(true);
+
   const handleItemSelect = (itemId: string) => {
     const selectedItem = items.find(item => item.id === itemId);
     if (selectedItem) {
@@ -113,6 +116,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
   };
 
   const calculateRoomTotal = () => {
+    if (!withStay) return 0; // No room charge if no stay
     const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
     return selectedRoom ? selectedRoom.pricePerNight * roomInfo.nights : 0;
   };
@@ -142,33 +146,35 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
     
     // Validate required fields
     if (!guestInfo.name.trim()) {
       alert('Please enter guest name');
       return;
     }
+
+    if (withStay) {
+      // Validate room selection only if staying
+      if (!roomInfo.roomNumber) {
+        alert('Please select a room');
+        return;
+      }
+      if (!guestInfo.checkIn || !guestInfo.checkOut) {
+        alert('Please select both check-in and check-out dates');
+        return;
+      }
+      if (roomInfo.nights < 1) {
+        alert('Check-out date must be after check-in date');
+        return;
+      }
+    }
     
-    if (!selectedRoom) {
-      alert('Please select a room');
-      return;
-    }
-
-    if (!guestInfo.checkIn || !guestInfo.checkOut) {
-      alert('Please select both check-in and check-out dates');
-      return;
-    }
-
-    if (roomInfo.nights < 1) {
-      alert('Check-out date must be after check-in date');
-      return;
-    }
+    const selectedRoom = withStay ? rooms.find(room => room.roomNumber === roomInfo.roomNumber) : null;
     
     const invoiceData = {
       invoiceId: generateUniqueId(),
-      guestInfo,
-      roomInfo: selectedRoom.roomId,
+      guestInfo: withStay ? guestInfo : { ...guestInfo, checkIn: '', checkOut: '' },
+      roomInfo: withStay ? selectedRoom?.roomId : null,
       foodItems,
       taxRate,
       discount,
@@ -176,15 +182,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       tax: calculateTax(),
       total: calculateTotal(),
       date: new Date().toISOString(),
-      room_id: selectedRoom.roomId,
-      room_price: selectedRoom.pricePerNight
+      room_id: withStay ? selectedRoom?.roomId : null,
+      room_price: withStay ? (selectedRoom?.pricePerNight || 0) : 0
     };
     
-    console.log('🏨 Invoice created with room foreign key:', {
-      room_id: selectedRoom.roomId,
-      roomType: selectedRoom.roomType,
-      room_price: selectedRoom.pricePerNight,
-      nights: roomInfo.nights
+    console.log('🏨 Invoice created:', {
+      withStay,
+      room_id: invoiceData.room_id,
+      room_price: invoiceData.room_price,
+      nights: withStay ? roomInfo.nights : 0
     });
     
     onSubmit(invoiceData);
@@ -195,6 +201,24 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       <h2>Create New Invoice</h2>
       
       <form onSubmit={handleSubmit}>
+        {/* Stay Option Toggle */}
+        <div className="form-section">
+          <div className="form-group">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={withStay}
+                onChange={(e) => setWithStay(e.target.checked)}
+                style={{ width: '18px', height: '18px' }}
+              />
+              ☑️ With Stay (Room + Food)
+            </label>
+            <p style={{ margin: '8px 0 0 26px', fontSize: '14px', color: '#6b7280' }}>
+              {withStay ? 'Customer will stay in a room' : 'Customer only wants food (no room)'}
+            </p>
+          </div>
+        </div>
+
         {/* Guest Information */}
         <div className="form-section">
           <h3>Guest Information</h3>
@@ -218,65 +242,61 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               />
             </div>
           </div>
-          <div className="form-group">
-            <label>Address:</label>
-            <textarea
-              value={guestInfo.address}
-              onChange={(e) => setGuestInfo({...guestInfo, address: e.target.value})}
-              required
-            />
-          </div>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Check-in Date:</label>
-              <input
-                type="date"
-                value={guestInfo.checkIn}
-                onChange={(e) => handleDateChange('checkIn', e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Check-out Date:</label>
-              <input
-                type="date"
-                value={guestInfo.checkOut}
-                onChange={(e) => handleDateChange('checkOut', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Room Information */}
-        <div className="form-section">
-          <h3>Room Information</h3>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Room Number:</label>
-              <select
-                value={roomInfo.roomNumber}
-                onChange={(e) => setRoomInfo({...roomInfo, roomNumber: e.target.value})}
-                required
-              >
-                <option value="">Select Room</option>
-                {rooms.map(room => (
-                  <option key={room.roomId} value={room.roomNumber}>
-                    {room.roomNumber} - Rs. {room.pricePerNight}/night
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          {roomInfo.roomNumber && (
-            <div className="room-info-display">
-              <p>Selected Room: {roomInfo.roomNumber}</p>
-              <p>Price per Night: Rs. {rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
-              <p>Number of Nights: {roomInfo.nights}</p>
-              <p>Room Total: Rs. {calculateRoomTotal()}</p>
+          {withStay && (
+            <div className="form-row">
+              <div className="form-group">
+                <label>Check-in Date:</label>
+                <input
+                  type="date"
+                  value={guestInfo.checkIn}
+                  onChange={(e) => handleDateChange('checkIn', e.target.value)}
+                  required={withStay}
+                />
+              </div>
+              <div className="form-group">
+                <label>Check-out Date:</label>
+                <input
+                  type="date"
+                  value={guestInfo.checkOut}
+                  onChange={(e) => handleDateChange('checkOut', e.target.value)}
+                  required={withStay}
+                />
+              </div>
             </div>
           )}
         </div>
+
+        {/* Room Information - Only show if withStay */}
+        {withStay && (
+          <div className="form-section">
+            <h3>Room Information</h3>
+            <div className="form-row">
+              <div className="form-group">
+                <label>Room Number:</label>
+                <select
+                  value={roomInfo.roomNumber}
+                  onChange={(e) => setRoomInfo({...roomInfo, roomNumber: e.target.value})}
+                  required={withStay}
+                >
+                  <option value="">Select Room</option>
+                  {rooms.map(room => (
+                    <option key={room.roomId} value={room.roomNumber}>
+                      {room.roomNumber} - Rs. {room.pricePerNight}/night
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {roomInfo.roomNumber && (
+              <div className="room-info-display">
+                <p>Selected Room: {roomInfo.roomNumber}</p>
+                <p>Price per Night: Rs. {rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
+                <p>Number of Nights: {roomInfo.nights}</p>
+                <p>Room Total: Rs. {calculateRoomTotal()}</p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Food Items */}
         <div className="form-section">
@@ -406,10 +426,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
         {/* Summary */}
         <div className="form-section summary">
           <h3>Invoice Summary</h3>
-          <div className="summary-row">
-            <span>Room Total:</span>
-            <span>Rs. {calculateRoomTotal()}</span>
-          </div>
+          {withStay && (
+            <div className="summary-row">
+              <span>Room Total:</span>
+              <span>Rs. {calculateRoomTotal()}</span>
+            </div>
+          )}
           <div className="summary-row">
             <span>Food Total:</span>
             <span>Rs. {calculateFoodTotal()}</span>

@@ -90,7 +90,14 @@ const DynamicTable: React.FC<DynamicTableProps> = ({
       case "number":
         return Number(value).toLocaleString();
       case "date":
-        return new Date(value).toLocaleDateString();
+        // Check if date value exists and is valid
+        if (!value || value === '') return "N/A";
+        try {
+          const date = new Date(value);
+          return isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString();
+        } catch {
+          return "N/A";
+        }
       default:
         return value.toString();
     }

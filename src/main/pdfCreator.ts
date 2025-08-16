@@ -229,9 +229,10 @@ class PDFCreator {
       .font("Helvetica-Bold")
       .text("Guest Information", 50, 340);
 
-    // Guest details box
+    // Guest details box - Adjust height based on whether room exists
+    const boxHeight = invoiceData.roomInfo?.roomNumber ? 72 : 36; // 36 for food-only (2 fields), 72 for room+food (4 fields)
     doc
-      .rect(50, 360, 250, 90)
+      .rect(50, 360, 250, boxHeight)
       .fill("#f8fafc")
       .strokeColor("#e5e7eb")
       .lineWidth(1)
@@ -246,86 +247,99 @@ class PDFCreator {
       .fillColor("#374151")
       .font("Helvetica-Bold")
       .text("Guest Name:", guestLabelX, guestY)
-      .text("Phone Number:", guestLabelX, guestY + 18)
-      .text("Address:", guestLabelX, guestY + 36)
-      .text("Check-in Date:", guestLabelX, guestY + 54)
-      .text("Check-out Date:", guestLabelX, guestY + 72);
+      .text("Phone Number:", guestLabelX, guestY + 18);
 
     doc
       .fontSize(11)
       .fillColor("#111827")
       .font("Helvetica")
       .text(invoiceData.guestInfo.name || "N/A", guestValueX, guestY)
-      .text(invoiceData.guestInfo.phone || "N/A", guestValueX, guestY + 18)
-      .text(invoiceData.guestInfo.address || "N/A", guestValueX, guestY + 36)
-      .text(
-        invoiceData.guestInfo.checkIn
-          ? new Date(invoiceData.guestInfo.checkIn).toLocaleDateString()
-          : "N/A",
-        guestValueX,
-        guestY + 54
-      )
-      .text(
-        invoiceData.guestInfo.checkOut
-          ? new Date(invoiceData.guestInfo.checkOut).toLocaleDateString()
-          : "N/A",
-        guestValueX,
-        guestY + 72
-      );
+      .text(invoiceData.guestInfo.phone || "N/A", guestValueX, guestY + 18);
 
-    // Room Information Section
-    doc
-      .fontSize(16)
-      .fillColor("#1e3a8a")
-      .font("Helvetica-Bold")
-      .text("Room Information", 330, 340);
+    // Only show check-in/check-out dates if room exists
+    if (invoiceData.roomInfo?.roomNumber) {
+      doc
+        .fontSize(11)
+        .fillColor("#374151")
+        .font("Helvetica-Bold")
+        .text("Check-in Date:", guestLabelX, guestY + 36)
+        .text("Check-out Date:", guestLabelX, guestY + 54);
 
-    // Room details box
-    doc
-      .rect(330, 360, 215, 90)
-      .fill("#f8fafc")
-      .strokeColor("#e5e7eb")
-      .lineWidth(1)
-      .stroke();
+      doc
+        .fontSize(11)
+        .fillColor("#111827")
+        .font("Helvetica")
+        .text(
+          invoiceData.guestInfo.checkIn
+            ? new Date(invoiceData.guestInfo.checkIn).toLocaleDateString()
+            : "N/A",
+          guestValueX,
+          guestY + 36
+        )
+        .text(
+          invoiceData.guestInfo.checkOut
+            ? new Date(invoiceData.guestInfo.checkOut).toLocaleDateString()
+            : "N/A",
+          guestValueX,
+          guestY + 54
+        );
+    }
 
-    let roomY = 370;
-    const roomLabelX = 340;
-    const roomValueX = 440;
+    // Room Information Section - Only show if room exists
+    if (invoiceData.roomInfo?.roomNumber) {
+      doc
+        .fontSize(16)
+        .fillColor("#1e3a8a")
+        .font("Helvetica-Bold")
+        .text("Room Information", 330, 340);
 
-    doc
-      .fontSize(11)
-      .fillColor("#374151")
-      .font("Helvetica-Bold")
-      .text("Room Number:", roomLabelX, roomY)
-      .text("Room Type:", roomLabelX, roomY + 18)
-      .text("Price per Night:", roomLabelX, roomY + 36)
-      .text("Number of Nights:", roomLabelX, roomY + 54)
-      .text("Total Room Cost:", roomLabelX, roomY + 72);
+      // Room details box
+      doc
+        .rect(330, 360, 215, 90)
+        .fill("#f8fafc")
+        .strokeColor("#e5e7eb")
+        .lineWidth(1)
+        .stroke();
 
-    doc
-      .fontSize(11)
-      .fillColor("#111827")
-      .font("Helvetica")
-      .text(invoiceData.roomInfo.roomNumber || "N/A", roomValueX, roomY)
-      .text(invoiceData.roomInfo.roomType || "N/A", roomValueX, roomY + 18)
-      .text(
-        `Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`,
-        roomValueX,
-        roomY + 36
-      )
-      .text(
-        (invoiceData.roomInfo.nights || 1).toString(),
-        roomValueX,
-        roomY + 54
-      )
-      .text(
-        `Rs. ${(
-          invoiceData.roomInfo.pricePerNight *
-          (invoiceData.roomInfo.nights || 1)
-        ).toFixed(2)}`,
-        roomValueX,
-        roomY + 72
-      );
+      let roomY = 370;
+      const roomLabelX = 340;
+      const roomValueX = 440;
+
+      doc
+        .fontSize(11)
+        .fillColor("#374151")
+        .font("Helvetica-Bold")
+        .text("Room Number:", roomLabelX, roomY)
+        .text("Room Type:", roomLabelX, roomY + 18)
+        .text("Price per Night:", roomLabelX, roomY + 36)
+        .text("Number of Nights:", roomLabelX, roomY + 54)
+        .text("Total Room Cost:", roomLabelX, roomY + 72);
+
+      doc
+        .fontSize(11)
+        .fillColor("#111827")
+        .font("Helvetica")
+        .text(invoiceData.roomInfo.roomNumber || "N/A", roomValueX, roomY)
+        .text(invoiceData.roomInfo.roomType || "N/A", roomValueX, roomY + 18)
+        .text(
+          `Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`,
+          roomValueX,
+          roomY + 36
+        )
+        .text(
+          (invoiceData.roomInfo.nights || 1).toString(),
+          roomValueX,
+          roomY + 54
+        )
+        .text(
+          `Rs. ${(
+            invoiceData.roomInfo.pricePerNight *
+            (invoiceData.roomInfo.nights || 1)
+          ).toFixed(2)}`,
+          roomValueX,
+          roomY + 72
+        );
+    }
   }
 
   private drawChargesTable(doc: PDFKit.PDFDocument, invoiceData: InvoiceData) {
@@ -358,46 +372,48 @@ class PDFCreator {
 
     let currentY = tableStartY + 25;
 
-    // Room charges
-    doc
-      .rect(col1, currentY, 495, 25)
-      .fill("#ffffff")
-      .strokeColor("#e5e7eb")
-      .lineWidth(0.5)
-      .stroke();
+    // Room charges - Only show if room exists
+    if (invoiceData.roomInfo?.roomNumber) {
+      doc
+        .rect(col1, currentY, 495, 25)
+        .fill("#ffffff")
+        .strokeColor("#e5e7eb")
+        .lineWidth(0.5)
+        .stroke();
 
-    doc
-      .fontSize(11)
-      .fillColor("#111827")
-      .font("Helvetica-Bold")
-      .text(
-        `${invoiceData.roomInfo.roomType || "N/A"} - Room ${
-          invoiceData.roomInfo.roomNumber || "N/A"
-        }`,
-        col1 + 10,
-        currentY + 8
-      )
-      .font("Helvetica")
-      .text(
-        (invoiceData.roomInfo.nights || 1).toString(),
-        col2 + 10,
-        currentY + 8
-      )
-      .text(
-        `Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`,
-        col3 + 10,
-        currentY + 8
-      )
-      .text(
-        `Rs. ${(
-          invoiceData.roomInfo.pricePerNight *
-          (invoiceData.roomInfo.nights || 1)
-        ).toFixed(2)}`,
-        col4 + 10,
-        currentY + 8
-      );
+      doc
+        .fontSize(11)
+        .fillColor("#111827")
+        .font("Helvetica-Bold")
+        .text(
+          `${invoiceData.roomInfo.roomType || "N/A"} - Room ${
+            invoiceData.roomInfo.roomNumber || "N/A"
+          }`,
+          col1 + 10,
+          currentY + 8
+        )
+        .font("Helvetica")
+        .text(
+          (invoiceData.roomInfo.nights || 1).toString(),
+          col2 + 10,
+          currentY + 8
+        )
+        .text(
+          `Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`,
+          col3 + 10,
+          currentY + 8
+        )
+        .text(
+          `Rs. ${(
+            invoiceData.roomInfo.pricePerNight *
+            (invoiceData.roomInfo.nights || 1)
+          ).toFixed(2)}`,
+          col4 + 10,
+          currentY + 8
+        );
 
-    currentY += 25;
+      currentY += 25;
+    }
 
     // Food items section
     if (invoiceData.foodItems && invoiceData.foodItems.length > 0) {
