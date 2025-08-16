@@ -90,6 +90,28 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     setFoodItems(foodItems.filter((_, i) => i !== index));
   };
 
+  // Calculate nights from check-in and check-out dates
+  const calculateNights = (checkIn: string, checkOut: string): number => {
+    if (!checkIn || !checkOut) return 1;
+    
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays > 0 ? diffDays : 1;
+  };
+
+  // Update nights when check-in or check-out changes
+  const handleDateChange = (field: 'checkIn' | 'checkOut', value: string) => {
+    const newGuestInfo = { ...guestInfo, [field]: value };
+    setGuestInfo(newGuestInfo);
+    
+    // Auto-calculate nights
+    const calculatedNights = calculateNights(newGuestInfo.checkIn, newGuestInfo.checkOut);
+    setRoomInfo({ ...roomInfo, nights: calculatedNights });
+  };
+
   const calculateRoomTotal = () => {
     const selectedRoom = rooms.find(room => room.roomNumber === roomInfo.roomNumber);
     return selectedRoom ? selectedRoom.pricePerNight * roomInfo.nights : 0;
@@ -132,11 +154,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       alert('Please select a room');
       return;
     }
+
+    if (!guestInfo.checkIn || !guestInfo.checkOut) {
+      alert('Please select both check-in and check-out dates');
+      return;
+    }
+
+    if (roomInfo.nights < 1) {
+      alert('Check-out date must be after check-in date');
+      return;
+    }
     
     const invoiceData = {
-      invoiceId: generateUniqueId(), // Add unique ID
+      invoiceId: generateUniqueId(),
       guestInfo,
-      roomInfo: selectedRoom.roomId,  // Store room ID directly
+      roomInfo: selectedRoom.roomId,
       foodItems,
       taxRate,
       discount,
@@ -144,14 +176,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       tax: calculateTax(),
       total: calculateTotal(),
       date: new Date().toISOString(),
-      room_id: selectedRoom.roomId,       // Foreign key to rooms table
+      room_id: selectedRoom.roomId,
       room_price: selectedRoom.pricePerNight
     };
     
     console.log('🏨 Invoice created with room foreign key:', {
       room_id: selectedRoom.roomId,
       roomType: selectedRoom.roomType,
-      room_price: selectedRoom.pricePerNight
+      room_price: selectedRoom.pricePerNight,
+      nights: roomInfo.nights
     });
     
     onSubmit(invoiceData);
@@ -199,7 +232,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <input
                 type="date"
                 value={guestInfo.checkIn}
-                onChange={(e) => setGuestInfo({...guestInfo, checkIn: e.target.value})}
+                onChange={(e) => handleDateChange('checkIn', e.target.value)}
                 required
               />
             </div>
@@ -208,7 +241,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               <input
                 type="date"
                 value={guestInfo.checkOut}
-                onChange={(e) => setGuestInfo({...guestInfo, checkOut: e.target.value})}
+                onChange={(e) => handleDateChange('checkOut', e.target.value)}
                 required
               />
             </div>
@@ -234,30 +267,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
                 ))}
               </select>
             </div>
-            <div className="form-group">
-              <label>Number of Nights:</label>
-              <input
-                type="number"
-                value={roomInfo.nights || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    setRoomInfo({...roomInfo, nights: 0});
-                  } else {
-                    setRoomInfo({...roomInfo, nights: Number(value)});
-                  }
-                }}
-                onFocus={(e) => e.target.select()}
-                min="1"
-                required
-              />
-            </div>
           </div>
           {roomInfo.roomNumber && (
             <div className="room-info-display">
               <p>Selected Room: {roomInfo.roomNumber}</p>
-                              <p>Price per Night: Rs. {rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
-                              <p>Room Total: Rs. {calculateRoomTotal()}</p>
+              <p>Price per Night: Rs. {rooms.find(r => r.roomNumber === roomInfo.roomNumber)?.pricePerNight || 0}</p>
+              <p>Number of Nights: {roomInfo.nights}</p>
+              <p>Room Total: Rs. {calculateRoomTotal()}</p>
             </div>
           )}
         </div>
@@ -324,8 +340,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           {newFoodItem.name && (
             <div className="room-info-display">
               <p>Selected Item: {newFoodItem.name}</p>
-                              <p>Price per Item: Rs. {newFoodItem.price}</p>
-                              <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
+              <p>Price per Item: Rs. {newFoodItem.price}</p>
+              <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
             </div>
           )}
 
@@ -392,27 +408,27 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           <h3>Invoice Summary</h3>
           <div className="summary-row">
             <span>Room Total:</span>
-                            <span>Rs. {calculateRoomTotal()}</span>
+            <span>Rs. {calculateRoomTotal()}</span>
           </div>
           <div className="summary-row">
             <span>Food Total:</span>
-                            <span>Rs. {calculateFoodTotal()}</span>
+            <span>Rs. {calculateFoodTotal()}</span>
           </div>
           <div className="summary-row">
             <span>Subtotal:</span>
-                            <span>Rs. {calculateSubtotal()}</span>
+            <span>Rs. {calculateSubtotal()}</span>
           </div>
           <div className="summary-row">
             <span>Tax ({taxRate}%):</span>
-                            <span>Rs. {calculateTax()}</span>
+            <span>Rs. {calculateTax()}</span>
           </div>
           <div className="summary-row">
             <span>Discount:</span>
-                            <span>-Rs. {discount}</span>
+            <span>-Rs. {discount}</span>
           </div>
           <div className="summary-row total">
             <span>Total:</span>
-                            <span>Rs. {calculateTotal()}</span>
+            <span>Rs. {calculateTotal()}</span>
           </div>
         </div>
 
