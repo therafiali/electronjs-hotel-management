@@ -1,4 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  Analytics, 
+  Hotel, 
+  Restaurant, 
+  Assessment,
+  TrendingUp,
+  PieChart,
+  BarChart,
+  Star
+} from '@mui/icons-material';
 
 interface Invoice {
   invoiceId: string;
@@ -156,7 +166,20 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
   return (
     <div className="admin-charts-section">
       <div className="charts-header">
-        <h2>📊 Analytics Dashboard</h2>
+        <h2>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            borderRadius: '12px',
+            padding: '8px 16px',
+            marginRight: '16px',
+            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+          }}>
+            <Analytics style={{ color: 'white', fontSize: '24px' }} />
+          </div>
+          Analytics Dashboard
+        </h2>
         <div className="time-filter">
           <button 
             className={timeFilter === '7d' ? 'active' : ''}
@@ -192,7 +215,20 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
         {/* Revenue Distribution Pie Chart */}
         {revenueDistribution.total > 0 && (
           <div className="chart-card revenue-distribution">
-            <h3>🥧 Revenue Distribution</h3>
+            <h3>
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                borderRadius: '10px',
+                padding: '6px 12px',
+                marginRight: '12px',
+                boxShadow: '0 3px 12px rgba(240, 147, 251, 0.3)'
+              }}>
+                <PieChart style={{ color: 'white', fontSize: '20px' }} />
+              </div>
+              Revenue Distribution
+            </h3>
             <div className="pie-chart">
               <div className="pie-container">
                 <svg width="150" height="150" viewBox="0 0 150 150">
@@ -239,9 +275,22 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
         {/* Room Occupancy Chart */}
         {rooms.length > 0 && (
           <div className="chart-card room-occupancy">
-            <h3>🏨 Room Occupancy Rate</h3>
+            <h3>
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                borderRadius: '10px',
+                padding: '6px 12px',
+                marginRight: '12px',
+                boxShadow: '0 3px 12px rgba(79, 172, 254, 0.3)'
+              }}>
+                <Hotel style={{ color: 'white', fontSize: '20px' }} />
+              </div>
+              Room Occupancy Rate
+            </h3>
             <div className="bar-chart">
-              {occupancyData.slice(0, 6).map((room, index) => (
+              {occupancyData.map((room, index) => (
                 <div key={room.roomId} className="occupancy-bar">
                   <div className="bar-container">
                     <div 
@@ -261,7 +310,20 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
         {/* Top Selling Items */}
         {topItems.length > 0 && (
           <div className="chart-card top-items">
-            <h3>🏆 Top Selling Items</h3>
+            <h3>
+              <div style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                borderRadius: '10px',
+                padding: '6px 12px',
+                marginRight: '12px',
+                boxShadow: '0 3px 12px rgba(250, 112, 154, 0.3)'
+              }}>
+                <Star style={{ color: 'white', fontSize: '20px' }} />
+              </div>
+              Top Selling Items
+            </h3>
             <div className="items-chart">
               {topItems.map((item, index) => (
                 <div key={index} className="item-bar">

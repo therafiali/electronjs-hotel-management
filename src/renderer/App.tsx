@@ -409,9 +409,9 @@ const App: React.FC = () => {
       <header style={{
         position: 'fixed',
         top: 0,
-        left: '280px',
+        left: '320px',
         right: 0,
-        height: '80px',
+                 height: '100px',
         backgroundColor: 'white',
         borderBottom: '1px solid #e5e7eb',
         display: 'flex',
@@ -489,43 +489,15 @@ const App: React.FC = () => {
       </header>
 
       <main className="app-main" style={{ 
-        marginLeft: '280px',
-        marginTop: '80px',
+        marginLeft: '320px',
+                 marginTop: '100px',
         padding: '20px',
         backgroundColor: '#f5f5f5',
         minHeight: 'calc(100vh - 80px)'
       }}>
-        {currentView === "dashboard" ? (
-          <div>
-            {/* Welcome Section */}
-            <div style={{
-              backgroundColor: 'white',
-              padding: '40px',
-              borderRadius: '15px',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-              maxWidth: '800px',
-              margin: '0 auto 30px auto',
-              textAlign: 'center'
-            }}>
-              <h2 style={{ 
-                color: '#111827',
-                fontSize: '32px',
-                fontWeight: '700',
-                marginBottom: '15px'
-              }}>
-                Welcome to Rama Resort
-              </h2>
-              <p style={{
-                color: '#6b7280',
-                fontSize: '18px',
-                lineHeight: '1.6',
-                marginBottom: '0'
-              }}>
-                Use the sidebar navigation to manage your hotel operations efficiently.
-              </p>
-            </div>
-
-            {/* Dashboard Statistics */}
+                 {currentView === "dashboard" ? (
+           <div>
+             {/* Dashboard Statistics */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',

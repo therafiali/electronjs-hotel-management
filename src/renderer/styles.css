@@ -1733,7 +1733,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid #e5e7eb;
   font-size: 0.875rem;
 }
 
@@ -1742,12 +1742,12 @@ body {
 }
 
 .detail-date {
-  color: #94a3b8;
+  color: #6b7280;
   font-weight: 500;
 }
 
 .detail-guest, .detail-qty {
-  color: #f1f5f9;
+  color: #111827;
 }
 
 .detail-amount {
@@ -1774,14 +1774,15 @@ body {
 }
 
 .combined-section {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: white;
   border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 .combined-section h4 {
-  color: #f1f5f9;
+  color: #111827;
   font-size: 1.125rem;
   margin: 0 0 1rem 0;
   font-weight: 600;
@@ -1792,7 +1793,7 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .performance-row:last-child {
@@ -1814,7 +1815,7 @@ body {
 
 .performance-row .name {
   flex: 1;
-  color: #f1f5f9;
+  color: #111827;
   font-weight: 500;
 }
 
@@ -1824,14 +1825,15 @@ body {
 }
 
 .grand-total-breakdown {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: white;
   border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
 .grand-total-breakdown h4 {
-  color: #f1f5f9;
+  color: #111827;
   font-size: 1.25rem;
   margin: 0 0 1.5rem 0;
   font-weight: 600;
@@ -1858,7 +1860,7 @@ body {
 .breakdown-bar {
   flex: 1;
   height: 24px;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f3f4f6;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1887,9 +1889,9 @@ body {
 .breakdown-total {
   text-align: center;
   padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid #e5e7eb;
   margin-top: 1rem;
-  color: #f1f5f9;
+  color: #111827;
   font-size: 1.25rem;
 }
 
@@ -1945,7 +1947,7 @@ body {
 }
 
 .charts-header h2 {
-  color: #f1f5f9;
+  color: #111827;
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0;
@@ -1954,7 +1956,8 @@ body {
 .time-filter {
   display: flex;
   gap: 0.5rem;
-  background: rgba(15, 20, 25, 0.8);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
   border-radius: 12px;
   padding: 0.25rem;
 }
@@ -1962,7 +1965,7 @@ body {
 .time-filter button {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #6b7280;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
@@ -1972,8 +1975,8 @@ body {
 }
 
 .time-filter button:hover {
-  color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.05);
+  color: #111827;
+  background: #f3f4f6;
 }
 
 .time-filter button.active {
@@ -1988,15 +1991,15 @@ body {
 }
 
 .chart-card {
-  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  background: white;
   border-radius: 16px;
   padding: 1.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .chart-card h3 {
-  color: #f1f5f9;
+  color: #111827;
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0 0 1.5rem 0;
@@ -2015,7 +2018,7 @@ body {
 }
 
 .sample-note {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
   font-size: 0.875rem;
   font-style: italic;
 }
@@ -2031,7 +2034,7 @@ body {
   gap: 0.25rem;
   height: 200px;
   padding: 1rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #e5e7eb;
   overflow-x: auto;
   overflow-y: visible;
   scroll-behavior: smooth;
@@ -2072,7 +2075,7 @@ body {
 }
 
 .trend-label {
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 0.625rem;
   margin-top: 0.5rem;
   transform: rotate(-45deg);
@@ -2102,8 +2105,8 @@ body {
   height: 150px;
   border-radius: 50%;
   position: relative;
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc;
+  border: 2px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2130,7 +2133,8 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
 }
 
@@ -2149,12 +2153,12 @@ body {
 }
 
 .legend-item span {
-  color: #f1f5f9;
+  color: #111827;
   font-weight: 500;
 }
 
 .percentage {
-  color: #94a3b8 !important;
+  color: #6b7280 !important;
   margin-left: auto;
   font-size: 0.875rem;
 }
@@ -2179,7 +2183,7 @@ body {
 .bar-container {
   flex: 1;
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f3f4f6;
   border-radius: 8px;
   position: relative;
   display: flex;
@@ -2189,7 +2193,7 @@ body {
 
 .occupancy-fill {
   width: 100%;
-  background: linear-gradient(45deg, #10b981, #059669);
+  background: linear-gradient(45deg, #3b82f6, #1d4ed8);
   border-radius: 0 0 8px 8px;
   transition: all 0.5s ease;
   position: relative;
@@ -2200,20 +2204,20 @@ body {
   top: -1.5rem;
   left: 50%;
   transform: translateX(-50%);
-  color: #f1f5f9;
+  color: #111827;
   font-size: 0.75rem;
   font-weight: 600;
 }
 
 .room-label {
-  color: #f1f5f9;
+  color: #111827;
   font-size: 0.75rem;
   font-weight: 600;
   margin-top: 0.5rem;
 }
 
 .booking-count {
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 0.625rem;
   margin-top: 0.25rem;
 }
@@ -2230,14 +2234,16 @@ body {
   flex-direction: column;
   gap: 0.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .item-bar:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #f1f5f9;
   transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .item-info {
@@ -2260,7 +2266,7 @@ body {
 }
 
 .item-name {
-  color: #f1f5f9;
+  color: #111827;
   font-weight: 600;
   flex: 1;
 }
@@ -2278,13 +2284,13 @@ body {
 }
 
 .item-quantity {
-  color: #94a3b8;
+  color: #6b7280;
   font-size: 0.875rem;
 }
 
 .item-progress {
   height: 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e5e7eb;
   border-radius: 3px;
   overflow: hidden;
 }

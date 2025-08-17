@@ -41,7 +41,7 @@ interface DashboardProps {
   currentUser: User;
 }
 
-const drawerWidth = 280;
+const drawerWidth = 320;
 
 const Dashboard: React.FC<DashboardProps> = ({
   onNavigateToDashboard,
@@ -122,18 +122,19 @@ const Dashboard: React.FC<DashboardProps> = ({
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
-          backgroundColor: '#1a1d29',
-          color: 'white',
-          border: 'none'
+          backgroundColor: '#ffffff',
+          color: '#333333',
+          border: '1px solid #e2e8f0',
+          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.1)'
         },
       }}
     >
       {/* Logo Section */}
-      <Box sx={{ p: 3, borderBottom: '1px solid #2d3748' }}>
+      <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
         <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#6366f1' }}>
          Rama Resort
         </Typography>
-        <Typography variant="body2" sx={{ color: '#a0aec0', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
           Management System
         </Typography>
       </Box>
@@ -151,7 +152,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               sx={{
                 mx: 2,
                 borderRadius: 2,
-                color: selectedItem === item.id ? '#6366f1' : '#a0aec0',
+                color: selectedItem === item.id ? '#6366f1' : '#64748b',
                 backgroundColor: selectedItem === item.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                 '&:hover': {
                   backgroundColor: 'rgba(99, 102, 241, 0.05)',
@@ -194,8 +195,8 @@ const Dashboard: React.FC<DashboardProps> = ({
         left: 0, 
         right: 0, 
         p: 2,
-        borderTop: '1px solid #2d3748',
-        backgroundColor: '#1a1d29'
+        borderTop: '1px solid #e2e8f0',
+        backgroundColor: '#f8fafc'
       }}>
         <ListItemButton
           onClick={onLogout}
