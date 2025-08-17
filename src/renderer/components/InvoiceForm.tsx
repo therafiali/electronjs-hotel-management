@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatInvoiceIdForDisplay } from '../utils/invoiceUtils';
 
 interface GuestInfo {
   name: string;
@@ -143,6 +144,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     const random = Math.random().toString(36).substring(2, 8);
     return `invoice_${timestamp}_${random}`;
   };
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

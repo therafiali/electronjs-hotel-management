@@ -1,5 +1,6 @@
 import React from "react";
 import DynamicTable from "./DynamicTable";
+import { formatInvoiceIdForDisplay } from "../utils/invoiceUtils";
 
 interface Invoice {
   id: string;
@@ -45,9 +46,12 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
 }) => {
   console.log("Invoices rendered", invoices);
 
+
+
   // Transform invoice data for the table
   const tableData = invoices.map((invoice) => ({
     id: invoice.id,
+    invoiceNumber: formatInvoiceIdForDisplay(invoice.invoiceId),
     guestName: invoice.guestInfo.name,
     checkIn: invoice.guestInfo.checkIn,
     checkOut: invoice.guestInfo.checkOut,
@@ -57,6 +61,12 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
   }));
 
   const columns = [
+    {
+      key: "invoiceNumber",
+      label: "Invoice #",
+      type: "text" as const,
+      sortable: true,
+    },
     {
       key: "guestName",
       label: "Guest Name",
