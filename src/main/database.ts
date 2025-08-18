@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { app } from 'electron';
 import Database from 'better-sqlite3';
 
 interface InvoiceRow {
@@ -76,10 +77,17 @@ class HotelDatabase {
   private dbPath: string;
 
   constructor() {
-    // Fix the database path to use the project root directory
-    this.dbPath = path.join(process.cwd(), 'hotel.db');
+    // Use proper Electron app paths for database location
+    // In dev mode: project directory, in release: user data directory
+    if (process.env.NODE_ENV === 'development') {
+      this.dbPath = path.join(process.cwd(), 'hotel.db');
+    } else {
+      // In production, use the user data directory
+      this.dbPath = path.join(app.getPath('userData'), 'hotel.db');
+    }
     
     console.log('🔍 Database path:', this.dbPath);
+    console.log('🔍 Environment:', process.env.NODE_ENV || 'production');
     
     // Initialize SQLite database
     this.db = new Database(this.dbPath);
@@ -912,6 +920,11 @@ class HotelDatabase {
     } catch (error) {
       console.error('❌ Error closing database:', error);
     }
+  }
+
+  // Get the current database path
+  getDatabasePath(): string {
+    return this.dbPath;
   }
 }
 
