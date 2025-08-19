@@ -757,21 +757,21 @@ const App: React.FC = () => {
                         setLoading(true);
                         const result = await window.electronAPI.selectDatabaseFile();
                         if (result.success && result.filePath) {
-                          const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
-                          if (uploadResult.success) {
-                            alert(`✅ ${uploadResult.message}\nBackup created at: ${uploadResult.backupPath}`);
-                            await loadInvoices();
-                            await loadItems();
-                            await loadRooms();
-                            await loadDatabasePath();
-                          } else {
-                            alert(`❌ ${uploadResult.message}`);
-                          }
+                                                  const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
+                        if (uploadResult.success) {
+                          console.log(`✅ ${uploadResult.message}\nBackup created at: ${uploadResult.backupPath}`);
+                          await loadInvoices();
+                          await loadItems();
+                          await loadRooms();
+                          await loadDatabasePath();
                         } else {
-                          alert('ℹ️ No file selected');
+                          console.error(`❌ ${uploadResult.message}`);
+                        }
+                        } else {
+                          console.log('ℹ️ No file selected');
                         }
                       } catch (error: any) {
-                        alert(`❌ Error: ${error.message}`);
+                        console.error(`❌ Error: ${error.message}`);
                       } finally {
                         setLoading(false);
                       }
@@ -801,12 +801,12 @@ const App: React.FC = () => {
                         setLoading(true);
                         const result = await window.electronAPI.exportDatabase();
                         if (result.success) {
-                          alert(`✅ ${result.message}\nExported to: ${result.filePath}`);
+                          console.log(`✅ ${result.message}\nExported to: ${result.filePath}`);
                         } else {
-                          alert(`ℹ️ ${result.message}`);
+                          console.log(`ℹ️ ${result.message}`);
                         }
                       } catch (error: any) {
-                        alert(`❌ Error: ${error.message}`);
+                        console.error(`❌ Error: ${error.message}`);
                       } finally {
                         setLoading(false);
                       }
