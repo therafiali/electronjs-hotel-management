@@ -32,10 +32,14 @@ const PDFCreator: React.FC = () => {
     orientation: "portrait",
     colorScheme: "blue",
   });
+  const [databasePath, setDatabasePath] = useState<string>("");
+  const [dbMessage, setDbMessage] = useState<string>("");
+  const [dbLoading, setDbLoading] = useState(false);
 
   useEffect(() => {
     loadPDFTypes();
     loadInvoices();
+    loadDatabasePath();
   }, []);
 
   const loadPDFTypes = async () => {
@@ -61,6 +65,69 @@ const PDFCreator: React.FC = () => {
     } catch (error) {
       console.error("Error loading invoices:", error);
       setMessage({ text: "Failed to load invoices", type: "error" });
+    }
+  };
+
+  const loadDatabasePath = async () => {
+    try {
+      const result = await window.electronAPI.getDatabasePath();
+      if (result.success) {
+        setDatabasePath(result.path);
+      } else {
+        setDatabasePath("Error getting database path");
+      }
+    } catch (error: any) {
+      console.error("Error getting database path:", error);
+      setDatabasePath("Error: " + error.message);
+    }
+  };
+
+  const handleUploadDatabase = async () => {
+    try {
+      setDbLoading(true);
+      setDbMessage("");
+      
+      const result = await window.electronAPI.selectDatabaseFile();
+      
+      if (result.success && result.filePath) {
+        try {
+          const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
+          if (uploadResult.success) {
+            setDbMessage(`✅ ${uploadResult.message} Backup created at: ${uploadResult.backupPath}`);
+            await loadInvoices();
+            await loadDatabasePath();
+          } else {
+            setDbMessage(`❌ ${uploadResult.message}`);
+          }
+        } catch (error: any) {
+          setDbMessage(`❌ Error: ${error.message}`);
+        }
+      } else {
+        setDbMessage("ℹ️ No file selected");
+      }
+      
+    } catch (error: any) {
+      setDbMessage(`❌ Error: ${error.message}`);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const handleExportDatabase = async () => {
+    try {
+      setDbLoading(true);
+      setDbMessage("");
+      
+      const result = await window.electronAPI.exportDatabase();
+      if (result.success) {
+        setDbMessage(`✅ ${result.message} Exported to: ${result.filePath}`);
+      } else {
+        setDbMessage(`ℹ️ ${result.message}`);
+      }
+    } catch (error: any) {
+      setDbMessage(`❌ Error: ${error.message}`);
+    } finally {
+      setDbLoading(false);
     }
   };
 
@@ -151,6 +218,143 @@ const PDFCreator: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Database Management Section */}
+      <div className="database-management-section" style={{
+        background: "#ffffff",
+        border: "1px solid #e5e7eb",
+        borderRadius: "12px",
+        padding: "25px",
+        margin: "20px 0",
+        boxShadow: "0 4px 15px rgba(0,0,0,0.1)"
+      }}>
+        <h3 style={{ 
+          margin: "0 0 15px 0", 
+          color: "#111827",
+          fontSize: "18px",
+          fontWeight: "600",
+          textAlign: "center"
+        }}>
+          🗄️ Database Management
+        </h3>
+        <p style={{ 
+          margin: "0 0 20px 0", 
+          fontSize: "14px", 
+          color: "#6b7280",
+          textAlign: "center"
+        }}>
+          Upload updated database files or export current database for backup
+        </p>
+        
+        {/* Database Path Display */}
+        <div style={{
+          background: "#f8f9fa",
+          border: "1px solid #dee2e6",
+          borderRadius: "8px",
+          padding: "15px",
+          margin: "15px 0",
+          textAlign: "left"
+        }}>
+          <h4 style={{ margin: "0 0 10px 0", color: "#0c5460" }}>📁 Current Database Location:</h4>
+          <p style={{ 
+            margin: "0", 
+            fontFamily: "monospace", 
+            fontSize: "12px", 
+            color: "#0c5460", 
+            wordBreak: "break-all",
+            background: "#e9ecef",
+            padding: "10px",
+            borderRadius: "6px",
+            border: "1px solid #ced4da"
+          }}>
+            {databasePath || "Loading database path..."}
+          </p>
+          <button
+            onClick={loadDatabasePath}
+            style={{
+              background: "#6c757d",
+              color: "white",
+              border: "none",
+              padding: "5px 10px",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "12px",
+              marginTop: "10px"
+            }}
+          >
+            Refresh Path
+          </button>
+        </div>
+        
+        {/* Database Management Buttons */}
+        <div style={{ 
+          display: "flex", 
+          gap: "15px", 
+          justifyContent: "center",
+          flexWrap: "wrap"
+        }}>
+          <button
+            onClick={handleUploadDatabase}
+            disabled={dbLoading}
+            style={{
+              background: "#28a745",
+              color: "white",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              cursor: dbLoading ? "not-allowed" : "pointer",
+              fontSize: "13px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              opacity: dbLoading ? 0.6 : 1
+            }}
+          >
+            📁 Upload Database
+          </button>
+          
+          <button
+            onClick={handleExportDatabase}
+            disabled={dbLoading}
+            style={{
+              background: "#17a2b8",
+              color: "white",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "8px",
+              cursor: dbLoading ? "not-allowed" : "pointer",
+              fontSize: "13px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              opacity: dbLoading ? 0.6 : 1
+            }}
+          >
+            📤 Export Database
+          </button>
+        </div>
+        
+        {/* Database Message */}
+        {dbMessage && (
+          <div style={{
+            marginTop: "15px",
+            padding: "12px",
+            borderRadius: "8px",
+            fontSize: "14px",
+            textAlign: "center",
+            background: dbMessage.includes('✅') ? "#d4edda" : 
+                        dbMessage.includes('❌') ? "#f8d7da" : "#d1ecf1",
+            color: dbMessage.includes('✅') ? "#155724" : 
+                   dbMessage.includes('❌') ? "#721c24" : "#0c5460",
+            border: `1px solid ${dbMessage.includes('✅') ? "#c3e6cb" : 
+                                dbMessage.includes('❌') ? "#f5c6cb" : "#bee5eb"}`
+          }}>
+            {dbMessage}
+          </div>
+        )}
       </div>
 
       <div className="pdf-creator-content">
