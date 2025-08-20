@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import hotelImage from './img/images.jpeg';
+import logo from './img/Rama Resort Logo White without BG .png';
 
 interface User {
   id: string;
@@ -63,14 +64,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       <div className="login-grid">
         {/* Left Column */}
         <div className="login-left-column">
-          <div className="login-image-wrapper">
-            <img
-              src={hotelImage}
-              alt="Hotel"
-              className="login-image"
-            />
+          <div className="login-image-wrapper" style={{
+            background: 'linear-gradient(135deg, #0B6623 0%, #0F5132 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}>
             <div className="login-overlay">
               <div className="login-branding">
+                <img 
+                  src={logo} 
+                  alt="Rama Resort Logo" 
+                  className="login-logo"
+                  style={{ 
+                    width: '250px', 
+                    height: 'auto', 
+                    marginBottom: '30px',
+                    filter: 'drop-shadow(0 6px 12px rgba(0,0,0,0.4))'
+                  }}
+                />
                 <h1 className="login-hotel-name">Rama Resort</h1>
                 <p className="login-hotel-tagline">Luxury & Comfort</p>
               </div>

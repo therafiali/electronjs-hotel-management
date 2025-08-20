@@ -18,6 +18,7 @@ import {
   Assessment as ActivityIcon,
   Analytics as ReportsIcon
 } from '@mui/icons-material';
+import logo from './img/Rama Resort Logo White without BG .png';
 
 interface User {
   id: string;
@@ -130,11 +131,26 @@ const Dashboard: React.FC<DashboardProps> = ({
       }}
     >
       {/* Logo Section */}
-      <Box sx={{ p: 3, borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#6366f1' }}>
+      <Box sx={{ 
+        p: 4, 
+        borderBottom: '1px solid #e2e8f0', 
+        background: 'linear-gradient(135deg, #0B6623 0%, #0F5132 100%)',
+        textAlign: 'center' 
+      }}>
+        <img 
+          src={logo} 
+          alt="Rama Resort Logo" 
+          style={{ 
+            width: '60px', 
+            height: 'auto', 
+            marginBottom: '10px',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+          }}
+        />
+        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#ffffff' }}>
          Rama Resort
         </Typography>
-        <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+        <Typography variant="body2" sx={{ color: '#e2e8f0', mt: 0.5 }}>
           Management System
         </Typography>
       </Box>
