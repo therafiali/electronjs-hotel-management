@@ -47,9 +47,17 @@ class PDFCreator {
             name: "RAMA RESORT",
             tagline: "Luxury & Comfort in the Heart of Paradise",
             address: "Skardu Valley, Gilgit-Baltistan, Pakistan",
-            phone: "+92-581-123456",
-            email: "info@ramaresort.com",
+            phone: "+92-347-2930903",
+            email: "ramaresortofficial@gmail.com",
             website: "www.ramaresort.com",
+        };
+        // === Monochrome palette ===
+        this.mono = {
+            text: "#111111",
+            muted: "#555555",
+            hair: "#E6E6E6",
+            light: "#F7F7F7",
+            dark: "#000000",
         };
         this.ensureDownloadsDirectory();
     }
@@ -84,8 +92,7 @@ class PDFCreator {
         if (!invoice) {
             throw new Error(`Invoice with ID ${invoiceId} not found`);
         }
-        // Transform the data to match the expected interface
-        return {
+        const transformedData = {
             id: invoice.invoiceId,
             guestInfo: invoice.guestInfo,
             roomInfo: {
@@ -102,6 +109,7 @@ class PDFCreator {
             total: invoice.total,
             date: invoice.date,
         };
+        return transformedData;
     }
     calculateNights(checkIn, checkOut) {
         try {
@@ -116,394 +124,375 @@ class PDFCreator {
             return 1;
         }
     }
+    getPossibleLogoPaths() {
+        return [
+            path.join(__dirname, "../renderer/components/img/logo.png"),
+            path.join(__dirname, "../../src/renderer/components/img/logo.png"),
+            path.join(__dirname, "../renderer/components/img/Rama Resort Logo White without BG .png"),
+            path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo White without BG .png"),
+            path.join(__dirname, "../renderer/components/img/Rama Resort Logo White without BG.png"),
+            path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo White without BG.png"),
+            path.join(__dirname, "../renderer/components/img/Rama Resort Logo.png"),
+            path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo.png"),
+            path.join(__dirname, "../renderer/components/img/images.jpeg"),
+            path.join(__dirname, "../../src/renderer/components/img/images.jpeg"),
+        ];
+    }
+    tryLoadLogo(doc) {
+        const paths = this.getPossibleLogoPaths();
+        for (const p of paths) {
+            if (fs.existsSync(p)) {
+                try {
+                    const buf = fs.readFileSync(p);
+                    const ext = path.extname(p).toLowerCase();
+                    if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
+                        // Draw a white background rectangle first to avoid transparency
+                        doc.rect(50, 34, 64, 64).fill("#000000");
+                        doc.image(buf, 50, 34, { width: 64, height: 64, fit: [64, 64] });
+                        return true;
+                    }
+                }
+                catch {
+                    // ignore and try next path
+                }
+            }
+        }
+        return false;
+    }
     drawHeader(doc) {
-        // Hotel name and tagline
+        if (!this.tryLoadLogo(doc)) {
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(20)
+                .fillColor(this.mono.text)
+                .text("🏨", 50, 40);
+        }
+        // Right-side INVOICE tag (solid black)
+        const tagW = 180, tagH = 28, x = 545 - 50 - tagW, y = 44;
         doc
-            .fontSize(28)
-            .fillColor("#1e3a8a")
+            .save()
+            .rect(x, y, tagW, tagH)
+            .fill(this.mono.dark)
+            .fillColor("#FFFFFF")
             .font("Helvetica-Bold")
-            .text(this.hotelInfo.name, 50, 60, { align: "center" });
+            .fontSize(15)
+            .text("INVOICE", x, y + 6, { width: tagW, align: "center" })
+            .restore();
+        // Divider line
         doc
-            .fontSize(14)
-            .fillColor("#64748b")
-            .font("Helvetica")
-            .text(this.hotelInfo.tagline, 50, 90, { align: "center" });
-        // Hotel contact information
-        doc
-            .fontSize(11)
-            .fillColor("#374151")
-            .font("Helvetica")
-            .text(this.hotelInfo.address, 50, 115, { align: "center" })
-            .text(`Phone: ${this.hotelInfo.phone} | Email: ${this.hotelInfo.email}`, 50, 135, { align: "center" })
-            .text(`Website: ${this.hotelInfo.website}`, 50, 155, { align: "center" });
-        // Separator line
-        doc
-            .moveTo(50, 180)
-            .lineTo(545, 180)
-            .strokeColor("#e5e7eb")
-            .lineWidth(1)
+            .moveTo(50, 110)
+            .lineTo(595 - 50, 110)
+            .lineWidth(0.8)
+            .strokeColor("#000000")
             .stroke();
     }
+    // === Invoice meta (same fields, cleaner style) ===
     drawInvoiceTitle(doc, invoiceData) {
-        // Invoice title
+        const left = 50, top = 120, lh = 16;
         doc
-            .fontSize(24)
-            .fillColor("#1e3a8a")
             .font("Helvetica-Bold")
-            .text("INVOICE", 50, 200, { align: "center" });
-        // Invoice details in two columns
-        const leftCol = 50;
-        const rightCol = 320;
-        let currentY = 240;
-        // Left column - Invoice details
-        doc
-            .fontSize(12)
-            .fillColor("#374151")
-            .font("Helvetica-Bold")
-            .text("Invoice Details:", leftCol, currentY);
-        currentY += 20;
-        doc
             .fontSize(11)
-            .fillColor("#6b7280")
+            .fillColor(this.mono.text)
+            .text("Invoice Number", left, top);
+        doc
             .font("Helvetica")
-            .text("Invoice Number:", leftCol, currentY)
-            .text("Issue Date:", leftCol, currentY + 18)
-            .text("Payment Status:", leftCol, currentY + 36);
+            .fillColor(this.mono.muted)
+            .text(this.formatInvoiceIdForDisplay(invoiceData.id) || "N/A", left, top + lh);
+        doc.font("Helvetica-Bold").fillColor(this.mono.text).text("Date", left, top + 2 * lh);
         doc
-            .fontSize(11)
-            .fillColor("#111827")
-            .font("Helvetica-Bold")
-            .text(this.formatInvoiceIdForDisplay(invoiceData.id) || "N/A", leftCol + 100, currentY)
+            .font("Helvetica")
+            .fillColor(this.mono.muted)
             .text(invoiceData.date
             ? new Date(invoiceData.date).toLocaleDateString()
-            : "N/A", leftCol + 100, currentY + 18)
-            .text("PAID", leftCol + 100, currentY + 36);
-        // Right column - System details
+            : "N/A", left, top + 3 * lh);
         doc
-            .fontSize(12)
-            .fillColor("#374151")
             .font("Helvetica-Bold")
-            .text("System Information:", rightCol, 240);
+            .fillColor(this.mono.text)
+            .text("Payment Status", left, top + 4 * lh);
+        doc.font("Helvetica").fillColor(this.mono.muted).text("PAID", left, top + 5 * lh);
+        // divider line
         doc
-            .fontSize(11)
-            .fillColor("#6b7280")
-            .font("Helvetica")
-            .text("Generated By:", rightCol, currentY)
-            .text("Generated On:", rightCol, currentY + 18)
-            .text("System Version:", rightCol, currentY + 36);
-        doc
-            .fontSize(11)
-            .fillColor("#111827")
-            .font("Helvetica-Bold")
-            .text("Hotel Management System", rightCol + 100, currentY)
-            .text(new Date().toLocaleString(), rightCol + 100, currentY + 18)
-            .text("v2.0", rightCol + 100, currentY + 36);
+            .moveTo(50, 230)
+            .lineTo(595 - 50, 230)
+            .lineWidth(0.8)
+            .strokeColor("#000000")
+            .stroke();
     }
+    // === Guest & Room sections (same logic, refined visuals) ===
     drawGuestInformation(doc, invoiceData) {
         // Guest Information Section
         doc
-            .fontSize(16)
-            .fillColor("#1e3a8a")
             .font("Helvetica-Bold")
-            .text("Guest Information", 50, 340);
-        // Guest details box - Adjust height based on whether room exists
-        const boxHeight = invoiceData.roomInfo?.roomNumber ? 72 : 36; // 36 for food-only (2 fields), 72 for room+food (4 fields)
+            .fontSize(14)
+            .fillColor(this.mono.dark)
+            .text("Guest Information", 50, 250);
+        const guestBoxH = invoiceData.roomInfo?.roomNumber ? 72 : 36; // 2 lines vs 4 lines
         doc
-            .rect(50, 360, 250, boxHeight)
-            .fill("#f8fafc")
-            .strokeColor("#e5e7eb")
-            .lineWidth(1)
-            .stroke();
-        let guestY = 370;
-        const guestLabelX = 60;
-        const guestValueX = 160;
+            .rect(50, 270, 250, guestBoxH)
+            .fillAndStroke("#ffffff");
+        let y = 270;
+        const labelX = 50;
+        const valueX = 160;
         doc
-            .fontSize(11)
-            .fillColor("#374151")
-            .font("Helvetica-Bold")
-            .text("Guest Name:", guestLabelX, guestY)
-            .text("Phone Number:", guestLabelX, guestY + 18);
-        doc
-            .fontSize(11)
-            .fillColor("#111827")
             .font("Helvetica")
-            .text(invoiceData.guestInfo.name || "N/A", guestValueX, guestY)
-            .text(invoiceData.guestInfo.phone || "N/A", guestValueX, guestY + 18);
+            .fontSize(11)
+            .fillColor(this.mono.text)
+            .text("Guest Name:", labelX, y)
+            .text("Phone Number:", labelX, y + 18);
+        doc
+            .font("Helvetica")
+            .fillColor(this.mono.muted)
+            .text(invoiceData.guestInfo.name || "N/A", valueX, y)
+            .text(invoiceData.guestInfo.phone || "N/A", valueX, y + 18);
         // Only show check-in/check-out dates if room exists
         if (invoiceData.roomInfo?.roomNumber) {
             doc
-                .fontSize(11)
-                .fillColor("#374151")
-                .font("Helvetica-Bold")
-                .text("Check-in Date:", guestLabelX, guestY + 36)
-                .text("Check-out Date:", guestLabelX, guestY + 54);
-            doc
-                .fontSize(11)
-                .fillColor("#111827")
                 .font("Helvetica")
+                .fillColor(this.mono.text)
+                .text("Check-in Date:", labelX, y + 36)
+                .text("Check-out Date:", labelX, y + 54);
+            doc
+                .font("Helvetica")
+                .fillColor(this.mono.muted)
                 .text(invoiceData.guestInfo.checkIn
                 ? new Date(invoiceData.guestInfo.checkIn).toLocaleDateString()
-                : "N/A", guestValueX, guestY + 36)
+                : "N/A", valueX, y + 36)
                 .text(invoiceData.guestInfo.checkOut
                 ? new Date(invoiceData.guestInfo.checkOut).toLocaleDateString()
-                : "N/A", guestValueX, guestY + 54);
+                : "N/A", valueX, y + 54);
         }
         // Room Information Section - Only show if room exists
         if (invoiceData.roomInfo?.roomNumber) {
             doc
-                .fontSize(16)
-                .fillColor("#1e3a8a")
                 .font("Helvetica-Bold")
-                .text("Room Information", 330, 340);
+                .fontSize(14)
+                .fillColor(this.mono.text)
+                .text("Room Information", 330, 250);
             // Room details box
             doc
-                .rect(330, 360, 215, 90)
-                .fill("#f8fafc")
-                .strokeColor("#e5e7eb")
-                .lineWidth(1)
-                .stroke();
-            let roomY = 370;
-            const roomLabelX = 340;
-            const roomValueX = 440;
+                .rect(330, 270, 215, 90)
+                .fillAndStroke("#ffffff");
+            const l = 330, v = 440;
+            y = 270;
             doc
-                .fontSize(11)
-                .fillColor("#374151")
-                .font("Helvetica-Bold")
-                .text("Room Number:", roomLabelX, roomY)
-                .text("Room Type:", roomLabelX, roomY + 18)
-                .text("Price per Night:", roomLabelX, roomY + 36)
-                .text("Number of Nights:", roomLabelX, roomY + 54)
-                .text("Total Room Cost:", roomLabelX, roomY + 72);
-            doc
-                .fontSize(11)
-                .fillColor("#111827")
                 .font("Helvetica")
-                .text(invoiceData.roomInfo.roomNumber || "N/A", roomValueX, roomY)
-                .text(invoiceData.roomInfo.roomType || "N/A", roomValueX, roomY + 18)
-                .text(`Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, roomValueX, roomY + 36)
-                .text((invoiceData.roomInfo.nights || 1).toString(), roomValueX, roomY + 54)
-                .text(`Rs. ${(invoiceData.roomInfo.pricePerNight *
-                (invoiceData.roomInfo.nights || 1)).toFixed(2)}`, roomValueX, roomY + 72);
+                .fontSize(11)
+                .fillColor(this.mono.text)
+                .text("Room Number:", l, y)
+                .text("Room Type:", l, y + 18)
+                .text("Number of Nights:", l, y + 36);
+            doc
+                .font("Helvetica")
+                .fillColor(this.mono.muted)
+                .text(invoiceData.roomInfo.roomNumber || "N/A", v, y)
+                .text(invoiceData.roomInfo.roomType || "N/A", v, y + 18)
+                .text((invoiceData.roomInfo.nights || 1).toString(), v, y + 36);
+            // divider line
+            doc
+                .moveTo(50, 380)
+                .lineTo(595 - 50, 380)
+                .lineWidth(0.8)
+                .strokeColor("#000000")
+                .stroke();
         }
     }
+    // === Charges table (clean design with bold header) ===
     drawChargesTable(doc, invoiceData) {
-        // Charges Section Title
         doc
-            .fontSize(16)
-            .fillColor("#1e3a8a")
             .font("Helvetica-Bold")
-            .text("Detailed Charges", 50, 480);
-        // Table header
-        const tableStartY = 500;
-        const col1 = 50; // Description
-        const col2 = 320; // Quantity
-        const col3 = 380; // Unit Price
-        const col4 = 460; // Total
-        // Header background
-        doc.rect(col1, tableStartY, 495, 25).fill("#1e3a8a");
-        // Header text
+            .fontSize(14)
+            .fillColor(this.mono.text)
+            .text("Detailed Charges", 50, 400);
+        const y0 = 420, col1 = 50, col2 = 320, col3 = 380, col4 = 460, rowH = 25;
+        let y = y0;
+        // Header with bold border
+        doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
         doc
-            .fontSize(12)
-            .fillColor("#ffffff")
+            .fillColor("#000000")
             .font("Helvetica-Bold")
-            .text("Description", col1 + 10, tableStartY + 8)
-            .text("Qty", col2 + 10, tableStartY + 8)
-            .text("Unit Price", col3 + 10, tableStartY + 8)
-            .text("Total", col4 + 10, tableStartY + 8);
-        let currentY = tableStartY + 25;
-        // Room charges - Only show if room exists
-        if (invoiceData.roomInfo?.roomNumber) {
+            .fontSize(11)
+            .text("Description", col1 + 10, y + 7)
+            .text("Qty", col2 + 10, y + 7)
+            .text("Unit Price", col3 + 10, y + 7)
+            .text("Total", col4 + 10, y + 7);
+        y += rowH;
+        const row = (texts) => {
+            doc.rect(col1, y, 495, rowH).fillAndStroke("#ffffff", "#CCCCCC");
             doc
-                .rect(col1, currentY, 495, 25)
-                .fill("#ffffff")
-                .strokeColor("#e5e7eb")
-                .lineWidth(0.5)
-                .stroke();
-            doc
-                .fontSize(11)
-                .fillColor("#111827")
-                .font("Helvetica-Bold")
-                .text(`${invoiceData.roomInfo.roomType || "N/A"} - Room ${invoiceData.roomInfo.roomNumber || "N/A"}`, col1 + 10, currentY + 8)
+                .fillColor(this.mono.text)
                 .font("Helvetica")
-                .text((invoiceData.roomInfo.nights || 1).toString(), col2 + 10, currentY + 8)
-                .text(`Rs. ${(invoiceData.roomInfo.pricePerNight || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-                .text(`Rs. ${(invoiceData.roomInfo.pricePerNight *
-                (invoiceData.roomInfo.nights || 1)).toFixed(2)}`, col4 + 10, currentY + 8);
-            currentY += 25;
+                .fontSize(10)
+                .text(texts[0], col1 + 10, y + 8)
+                .text(texts[1], col2 + 10, y + 8)
+                .text(texts[2], col3 + 10, y + 8)
+                .text(texts[3], col4 + 10, y + 8);
+            y += rowH;
+        };
+        // Room line (if room exists)
+        if (invoiceData.roomInfo?.roomNumber) {
+            const n = invoiceData.roomInfo.nights || 1;
+            const r = invoiceData.roomInfo.pricePerNight || 0;
+            row([
+                `${invoiceData.roomInfo.roomType || "Room"} - ${invoiceData.roomInfo.roomNumber || ""}`,
+                n.toString(),
+                `${r.toFixed(2)}`,
+                `${(n * r).toFixed(2)}`,
+            ]);
         }
-        // Food items section
-        if (invoiceData.foodItems && invoiceData.foodItems.length > 0) {
+        // Food and Laundry items section
+        if (invoiceData.foodItems?.length) {
             // Separate food and laundry items
             const foodItems = invoiceData.foodItems.filter((item) => {
                 // Try to find the item in database to get category
                 const db = new database_1.default();
                 const items = db.getAllItems();
-                const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                const itemData = items.find(i => i.name === item.name);
                 return itemData && itemData.category === 'Food';
             });
             const laundryItems = invoiceData.foodItems.filter((item) => {
                 // Try to find the item in database to get category
                 const db = new database_1.default();
                 const items = db.getAllItems();
-                const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                const itemData = items.find(i => i.name === item.name);
                 return itemData && itemData.category === 'Laundry';
+            });
+            // Other items (not food or laundry)
+            const otherItems = invoiceData.foodItems.filter((item) => {
+                const db = new database_1.default();
+                const items = db.getAllItems();
+                const itemData = items.find(i => i.name === item.name);
+                return !itemData || (itemData.category !== 'Food' && itemData.category !== 'Laundry');
             });
             // Food section header
             if (foodItems.length > 0) {
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
                 doc
-                    .rect(col1, currentY, 495, 25)
-                    .fill("#f1f5f9")
-                    .strokeColor("#e5e7eb")
-                    .lineWidth(0.5)
-                    .stroke();
-                doc
-                    .fontSize(12)
-                    .fillColor("#374151")
                     .font("Helvetica-Bold")
-                    .text("Food", col1 + 10, currentY + 8);
-                currentY += 25;
-                // Individual food items
-                foodItems.forEach((item) => {
-                    doc
-                        .rect(col1, currentY, 495, 25)
-                        .fill("#ffffff")
-                        .strokeColor("#e5e7eb")
-                        .lineWidth(0.5)
-                        .stroke();
-                    doc
-                        .fontSize(11)
-                        .fillColor("#111827")
-                        .font("Helvetica")
-                        .text(item.name || "N/A", col1 + 10, currentY + 8)
-                        .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
-                        .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-                        .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
-                    currentY += 25;
+                    .fontSize(11)
+                    .fillColor(this.mono.text)
+                    .text("Food & Beverages", col1 + 10, y + 7);
+                y += rowH;
+                foodItems.forEach((it) => {
+                    const qty = it.quantity || 0;
+                    const pr = it.price || 0;
+                    row([
+                        it.name || "Item",
+                        qty.toString().padStart(2, "0"),
+                        `${pr.toFixed(2)}`,
+                        `${(qty * pr).toFixed(2)}`,
+                    ]);
                 });
             }
             // Laundry section header
             if (laundryItems.length > 0) {
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
                 doc
-                    .rect(col1, currentY, 495, 25)
-                    .fill("#f1f5f9")
-                    .strokeColor("#e5e7eb")
-                    .lineWidth(0.5)
-                    .stroke();
-                doc
-                    .fontSize(12)
-                    .fillColor("#374151")
                     .font("Helvetica-Bold")
-                    .text("Laundry", col1 + 10, currentY + 8);
-                currentY += 25;
-                // Individual laundry items
-                laundryItems.forEach((item) => {
-                    doc
-                        .rect(col1, currentY, 495, 25)
-                        .fill("#ffffff")
-                        .strokeColor("#e5e7eb")
-                        .lineWidth(0.5)
-                        .stroke();
-                    doc
-                        .fontSize(11)
-                        .fillColor("#111827")
-                        .font("Helvetica")
-                        .text(item.name || "N/A", col1 + 10, currentY + 8)
-                        .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
-                        .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-                        .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
-                    currentY += 25;
+                    .fontSize(11)
+                    .fillColor(this.mono.text)
+                    .text("Laundry Services", col1 + 10, y + 7);
+                y += rowH;
+                laundryItems.forEach((it) => {
+                    const qty = it.quantity || 0;
+                    const pr = it.price || 0;
+                    row([
+                        it.name || "Item",
+                        qty.toString().padStart(2, "0"),
+                        `${pr.toFixed(2)}`,
+                        `${(qty * pr).toFixed(2)}`,
+                    ]);
+                });
+            }
+            // Other items section (if any)
+            if (otherItems.length > 0) {
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
+                doc
+                    .font("Helvetica-Bold")
+                    .fontSize(11)
+                    .fillColor(this.mono.text)
+                    .text("Other Services", col1 + 10, y + 7);
+                y += rowH;
+                otherItems.forEach((it) => {
+                    const qty = it.quantity || 0;
+                    const pr = it.price || 0;
+                    row([
+                        it.name || "Item",
+                        qty.toString().padStart(2, "0"),
+                        `${pr.toFixed(2)}`,
+                        `${(qty * pr).toFixed(2)}`,
+                    ]);
                 });
             }
         }
-        // Subtotal row
+        // Subtotal
+        doc.rect(col1, y, 495, rowH).fill(this.mono.light).strokeColor(this.mono.hair).stroke();
         doc
-            .rect(col1, currentY, 495, 25)
-            .fill("#f8fafc")
-            .strokeColor("#e5e7eb")
-            .lineWidth(0.5)
-            .stroke();
-        doc
-            .fontSize(11)
-            .fillColor("#374151")
             .font("Helvetica-Bold")
-            .text("Subtotal", col3 + 10, currentY + 8)
-            .text(`Rs. ${(invoiceData.subtotal || 0).toFixed(2)}`, col4 + 10, currentY + 8);
-        currentY += 25;
-        // Tax row
-        doc
-            .rect(col1, currentY, 495, 25)
-            .fill("#f8fafc")
-            .strokeColor("#e5e7eb")
-            .lineWidth(0.5)
-            .stroke();
-        doc
-            .fontSize(11)
-            .fillColor("#374151")
-            .font("Helvetica-Bold")
-            .text(`Tax (${invoiceData.taxRate || 0}%)`, col3 + 10, currentY + 8)
-            .text(`Rs. ${(invoiceData.tax || 0).toFixed(2)}`, col4 + 10, currentY + 8);
-        currentY += 25;
-        // Discount row (if applicable)
-        if ((invoiceData.discount || 0) > 0) {
-            doc
-                .rect(col1, currentY, 495, 25)
-                .fill("#fef2f2")
-                .strokeColor("#e5e7eb")
-                .lineWidth(0.5)
-                .stroke();
-            doc
-                .fontSize(11)
-                .fillColor("#dc2626")
-                .font("Helvetica-Bold")
-                .text("Discount", col3 + 10, currentY + 8)
-                .text(`-Rs. ${(invoiceData.discount || 0).toFixed(2)}`, col4 + 10, currentY + 8);
-            currentY += 25;
-        }
-        // Total row
-        doc
-            .rect(col1, currentY, 495, 30)
-            .fill("#1e3a8a")
-            .strokeColor("#1e3a8a")
-            .lineWidth(1)
-            .stroke();
-        doc
-            .fontSize(13)
-            .fillColor("#ffffff")
-            .font("Helvetica-Bold")
-            .text("TOTAL AMOUNT", col3 + 10, currentY + 10)
-            .text(`Rs. ${(invoiceData.total || 0).toFixed(2)}`, col4 + 10, currentY + 10);
-    }
-    drawFooter(doc) {
-        const pageHeight = 842;
-        const footerY = pageHeight - 120;
-        // Separator line
-        doc
-            .moveTo(50, footerY)
-            .lineTo(545, footerY)
-            .strokeColor("#e5e7eb")
-            .lineWidth(1)
-            .stroke();
-        // Thank you message
-        doc
-            .fontSize(14)
-            .fillColor("#1e3a8a")
-            .font("Helvetica-Bold")
-            .text("Thank You for Choosing Rama Resort!", 50, footerY + 20, {
-            align: "center",
-        });
-        doc
-            .fontSize(11)
-            .fillColor("#64748b")
-            .font("Helvetica")
-            .text("We hope you enjoyed your stay with us. Please visit again!", 50, footerY + 40, { align: "center" });
-        // Contact information
-        doc
             .fontSize(10)
-            .fillColor("#9ca3af")
-            .font("Helvetica")
-            .text(`For any queries, please contact us: ${this.hotelInfo.phone} | ${this.hotelInfo.email}`, 50, footerY + 60, { align: "center" })
-            .text("This is a computer-generated invoice. No signature required.", 50, footerY + 80, { align: "center" });
+            .fillColor(this.mono.text)
+            .text("Subtotal", col3 + 10, y + 8)
+            .text(`${(invoiceData.subtotal || 0).toFixed(2)}`, col4 + 10, y + 8);
+        y += rowH;
+        // Tax
+        doc.rect(col1, y, 495, rowH).fill(this.mono.light).strokeColor(this.mono.hair).stroke();
+        doc
+            .font("Helvetica-Bold")
+            .fontSize(10)
+            .fillColor(this.mono.text)
+            .text(`Tax (${invoiceData.taxRate || 0}%)`, col3 + 10, y + 8)
+            .text(`${(invoiceData.tax || 0).toFixed(2)}`, col4 + 10, y + 8);
+        y += rowH;
+        // Discount (if any)
+        if ((invoiceData.discount || 0) > 0) {
+            doc.rect(col1, y, 495, rowH).fill("#FAFAFA").strokeColor(this.mono.hair).stroke();
+            doc
+                .font("Helvetica-Bold")
+                .fontSize(10)
+                .fillColor(this.mono.text)
+                .text("Discount", col3 + 10, y + 8)
+                .text(`-${(invoiceData.discount || 0).toFixed(2)}`, col4 + 10, y + 8);
+            y += rowH;
+        }
+        // Total emphasis bar (right)
+        const totalY = y + 6;
+        doc.rect(col3 + 10, totalY, 60, 26).fill(this.mono.dark);
+        doc
+            .fillColor("#FFFFFF")
+            .font("Helvetica-Bold")
+            .fontSize(12)
+            .text("Total", col3 + 10, totalY + 7, { width: 60, align: "center" });
+        doc
+            .fillColor(this.mono.text)
+            .font("Helvetica-Bold")
+            .text(`Rs. ${(invoiceData.total || 0).toFixed(2)}`, col4 + 10, totalY + 7);
+        // rule to separate from footer
+        doc
+            .moveTo(50, totalY + 45)
+            .lineTo(595 - 50, totalY + 45)
+            .lineWidth(0.8)
+            .strokeColor("#000000")
+            .stroke();
     }
+    // === Footer (centered, monochrome) ===
+    drawFooter(doc) {
+        const pageH = 842, y = pageH - 70;
+        doc
+            .font("Helvetica-Bold")
+            .fontSize(11)
+            .fillColor(this.mono.text)
+            .text("Thank you for choosing Rama Resort", 50, y + 12, { align: "center" });
+        doc
+            .font("Helvetica")
+            .fontSize(10)
+            .fillColor(this.mono.muted)
+            .text(`${this.hotelInfo.phone}  |  ${this.hotelInfo.email}  |  ${this.hotelInfo.website}`, 50, y + 28, { align: "center" });
+        doc
+            .font("Helvetica")
+            .fontSize(9)
+            .fillColor(this.mono.muted)
+            .text("This is a computer-generated invoice. No signature required.", 50, y + 44, { align: "center" });
+    }
+    // === Public creators ===
     async createInvoicePDF(invoiceId) {
         let invoiceData;
         if (invoiceId) {
@@ -522,11 +511,11 @@ class PDFCreator {
             size: "A4",
             layout: "portrait",
         });
-        const filename = `Invoice_${this.formatInvoiceIdForDisplay(invoiceData.id)}_${new Date().toISOString().split("T")[0]}.pdf`;
+        const filename = `Invoice_${this.formatInvoiceIdForDisplay(invoiceData.id)}_${new Date().toISOString().split("T")[0]}_${Date.now()}.pdf`;
         const filepath = path.join(this.getDownloadsPath(), filename);
         const stream = fs.createWriteStream(filepath);
         doc.pipe(stream);
-        // Draw all sections
+        // Draw all sections (order preserved)
         this.drawHeader(doc);
         this.drawInvoiceTitle(doc, invoiceData);
         this.drawGuestInformation(doc, invoiceData);
@@ -543,7 +532,9 @@ class PDFCreator {
             margin: 50,
             size: "A4",
         });
-        const filename = `Rama_Resort_Report_${new Date().toISOString().split("T")[0]}.pdf`;
+        const filename = `Rama_Resort_Report_${new Date()
+            .toISOString()
+            .split("T")[0]}_${Date.now()}.pdf`;
         const filepath = path.join(this.getDownloadsPath(), filename);
         const stream = fs.createWriteStream(filepath);
         doc.pipe(stream);
@@ -551,39 +542,39 @@ class PDFCreator {
         doc
             .fontSize(24)
             .font("Helvetica-Bold")
-            .fillColor("#1e3a8a")
+            .fillColor(this.mono.text)
             .text(this.hotelInfo.name, { align: "center" })
             .moveDown(0.5);
         doc
             .fontSize(12)
             .font("Helvetica")
-            .fillColor("#6b7280")
+            .fillColor(this.mono.muted)
             .text(this.hotelInfo.tagline, { align: "center" })
             .moveDown(1);
         // Report title
         doc
             .fontSize(20)
             .font("Helvetica-Bold")
-            .fillColor("#111827")
+            .fillColor(this.mono.text)
             .text("HOTEL MANAGEMENT REPORT", { align: "center" })
             .moveDown(1);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor("#6b7280")
+            .fillColor(this.mono.muted)
             .text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" })
             .moveDown(2);
-        // Report content
+        // Report content (static example)
         doc
             .fontSize(14)
             .font("Helvetica-Bold")
-            .fillColor("#1e3a8a")
+            .fillColor(this.mono.text)
             .text("Daily Statistics")
             .moveDown(0.5);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor("#374151")
+            .fillColor(this.mono.text)
             .text("Total Rooms: 50")
             .text("Occupied Rooms: 42")
             .text("Occupancy Rate: 84%")
@@ -593,13 +584,13 @@ class PDFCreator {
         doc
             .fontSize(14)
             .font("Helvetica-Bold")
-            .fillColor("#1e3a8a")
+            .fillColor(this.mono.text)
             .text("Monthly Overview")
             .moveDown(0.5);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor("#374151")
+            .fillColor(this.mono.text)
             .text("Total Bookings: 156")
             .text("Revenue Generated: Rs. 789,450.00")
             .text("Average Guest Rating: 4.8/5")
@@ -609,7 +600,7 @@ class PDFCreator {
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor("#6b7280")
+            .fillColor(this.mono.muted)
             .text("This report was automatically generated by Rama Resort Management System.", { align: "center" });
         doc.end();
         return new Promise((resolve, reject) => {
