@@ -206,6 +206,16 @@ ipcMain.handle("create-pdf", async (event, { type, invoiceId }) => {
     );
     const filepath = await pdfCreator.createPDF(type, invoiceId);
     console.log(`✅ PDF created successfully: ${filepath}`);
+    
+    // Automatically open the PDF after creation
+    try {
+      const { shell } = require("electron");
+      await shell.openPath(filepath);
+      console.log(`📂 PDF opened automatically: ${filepath}`);
+    } catch (openError) {
+      console.warn("⚠️ Could not open PDF automatically:", openError);
+    }
+    
     return { success: true, filepath };
   } catch (error) {
     console.error("Error creating PDF:", error);

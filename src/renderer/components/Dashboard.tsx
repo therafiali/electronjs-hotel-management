@@ -132,27 +132,27 @@ const Dashboard: React.FC<DashboardProps> = ({
     >
       {/* Logo Section */}
       <Box sx={{ 
-        p: 4, 
+        p: 2, 
         borderBottom: '1px solid #e2e8f0', 
-        background: 'linear-gradient(135deg, #0B6623 0%, #0F5132 100%)',
+        // background: 'linear-gradient(135deg, #0B6623 0%, #0F5132 100%)',
         textAlign: 'center' 
       }}>
         <img 
           src={logo} 
           alt="Rama Resort Logo" 
           style={{ 
-            width: '60px', 
-            height: 'auto', 
-            marginBottom: '10px',
-            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+            width: '80px', 
+            height: '100px', 
+            marginBottom: '5px',
+            filter: 'brightness(0) invert(0)', // This will make the image black if it's an SVG or single-color PNG
           }}
         />
-        <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#ffffff' }}>
+        {/* <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#ffffff' }}>
          Rama Resort
         </Typography>
         <Typography variant="body2" sx={{ color: '#e2e8f0', mt: 0.5 }}>
           Management System
-        </Typography>
+        </Typography> */}
       </Box>
 
       {/* Navigation Menu */}
@@ -171,14 +171,14 @@ const Dashboard: React.FC<DashboardProps> = ({
                 color: selectedItem === item.id ? '#6366f1' : '#64748b',
                 backgroundColor: selectedItem === item.id ? 'rgba(99, 102, 241, 0.1)' : 'transparent',
                 '&:hover': {
-                  backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                  backgroundColor: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                   color: '#6366f1'
                 },
                 '&.Mui-selected': {
-                  backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                  backgroundColor: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                   color: '#6366f1',
                   '&:hover': {
-                    backgroundColor: 'rgba(99, 102, 241, 0.15)',
+                    backgroundColor: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))',
                   }
                 }
               }}

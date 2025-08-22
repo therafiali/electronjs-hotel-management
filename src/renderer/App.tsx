@@ -431,7 +431,7 @@ const App: React.FC = () => {
         top: 0,
         left: '320px',
         right: 0,
-                 height: '100px',
+        height: '140px',
         backgroundColor: 'white',
         borderBottom: '1px solid #e5e7eb',
         display: 'flex',
@@ -447,7 +447,7 @@ const App: React.FC = () => {
         }}>
           <h1 style={{
             margin: 0,
-            fontSize: '26px',
+            fontSize: '30px',
             color: '#111827',
             fontWeight: '700',
             letterSpacing: '-0.025em'
@@ -510,7 +510,7 @@ const App: React.FC = () => {
 
       <main className="app-main" style={{ 
         marginLeft: '320px',
-                 marginTop: '100px',
+                 marginTop: '140px',
         padding: '20px',
         backgroundColor: '#f5f5f5',
         minHeight: 'calc(100vh - 80px)'
