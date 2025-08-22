@@ -26,6 +26,7 @@ interface FoodItem {
   quantity: number;
   price: number;
   itemId?: string;  // Add itemId for foreign key reference
+  category?: string; // Add category to distinguish food vs laundry
 }
 
 interface Item {
@@ -58,11 +59,13 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
   });
 
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [laundryItems, setLaundryItems] = useState<FoodItem[]>([]);
   const [newFoodItem, setNewFoodItem] = useState<FoodItem>({
     name: '',
     quantity: 1,
     price: 0,
-    itemId: ''
+    itemId: '',
+    category: ''
   });
 
   // Add stay option state
@@ -75,7 +78,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
         name: selectedItem.name,
         quantity: 1,
         price: selectedItem.price,
-        itemId: selectedItem.id  // Store itemId for foreign key
+        itemId: selectedItem.id,  // Store itemId for foreign key
+        category: selectedItem.category  // Store category
       });
     }
   };
@@ -85,13 +89,21 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
 
   const addFoodItem = () => {
     if (newFoodItem.name && newFoodItem.price > 0 && newFoodItem.itemId) {
-      setFoodItems([...foodItems, newFoodItem]);
-      setNewFoodItem({ name: '', quantity: 1, price: 0, itemId: '' });
+      if (newFoodItem.category === 'Laundry') {
+        setLaundryItems([...laundryItems, newFoodItem]);
+      } else {
+        setFoodItems([...foodItems, newFoodItem]);
+      }
+      setNewFoodItem({ name: '', quantity: 1, price: 0, itemId: '', category: '' });
     }
   };
 
   const removeFoodItem = (index: number) => {
     setFoodItems(foodItems.filter((_, i) => i !== index));
+  };
+
+  const removeLaundryItem = (index: number) => {
+    setLaundryItems(laundryItems.filter((_, i) => i !== index));
   };
 
   // Calculate nights from check-in and check-out dates
@@ -126,8 +138,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     return foodItems.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
+  const calculateLaundryTotal = () => {
+    return laundryItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
   const calculateSubtotal = () => {
-    return calculateRoomTotal() + calculateFoodTotal();
+    return calculateRoomTotal() + calculateFoodTotal() + calculateLaundryTotal();
   };
 
   const calculateTax = () => {
@@ -178,7 +194,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
       invoiceId: generateUniqueId(),
       guestInfo: withStay ? guestInfo : { ...guestInfo, checkIn: '', checkOut: '' },
       roomInfo: withStay ? selectedRoom?.roomId : null,
-      foodItems,
+      foodItems: [...foodItems, ...laundryItems], // Combine both food and laundry items
       taxRate,
       discount,
       subtotal: calculateSubtotal(),
@@ -303,16 +319,16 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
 
         {/* Food Items */}
         <div className="form-section">
-          <h3>Food Orders</h3>
+          <h3>Food & Beverages</h3>
           <div className="food-input-row">
             <div className="form-group">
-              <label>Food Item:</label>
+              <label>Food/Beverage Item:</label>
               <select
                 value=""
                 onChange={(e) => handleItemSelect(e.target.value)}
               >
-                <option value="">Select Food Item</option>
-                {items.map(item => (
+                <option value="">Select Food/Beverage Item</option>
+                {items.filter(item => item.category === 'Food').map(item => (
                   <option key={item.id} value={item.id}>
                     {item.name} - Rs. {item.price}
                   </option>
@@ -355,12 +371,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               />
             </div>
             <button type="button" onClick={addFoodItem} className="add-food-btn">
-              Add Food Item
+              Add Food/Beverage Item
             </button>
           </div>
           
           {/* Food Item Info Display */}
-          {newFoodItem.name && (
+          {newFoodItem.name && newFoodItem.category === 'Food' && (
             <div className="room-info-display">
               <p>Selected Item: {newFoodItem.name}</p>
               <p>Price per Item: Rs. {newFoodItem.price}</p>
@@ -371,11 +387,94 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           {/* Food Items List */}
           {foodItems.length > 0 && (
             <div className="food-items-list">
-              <h4>Added Food Items:</h4>
+              <h4>Added Food & Beverage Items:</h4>
               {foodItems.map((item, index) => (
                 <div key={index} className="food-item">
                   <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
                   <button type="button" onClick={() => removeFoodItem(index)} className="remove-btn">
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Laundry Items */}
+        <div className="form-section">
+          <h3>Laundry Services</h3>
+          <div className="food-input-row">
+            <div className="form-group">
+              <label>Laundry Item:</label>
+              <select
+                value=""
+                onChange={(e) => handleItemSelect(e.target.value)}
+              >
+                <option value="">Select Laundry Item</option>
+                {items.filter(item => item.category === 'Laundry').map(item => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} - Rs. {item.price}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label>Quantity:</label>
+              <input
+                type="number"
+                value={newFoodItem.quantity || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setNewFoodItem({...newFoodItem, quantity: 0});
+                  } else {
+                    setNewFoodItem({...newFoodItem, quantity: Number(value)});
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
+                min="1"
+              />
+            </div>
+            <div className="form-group">
+              <label>Price:</label>
+              <input
+                type="number"
+                value={newFoodItem.price || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '') {
+                    setNewFoodItem({...newFoodItem, price: 0});
+                  } else {
+                    setNewFoodItem({...newFoodItem, price: Number(value)});
+                  }
+                }}
+                onFocus={(e) => e.target.select()}
+                min="0"
+                readOnly
+              />
+            </div>
+            <button type="button" onClick={addFoodItem} className="add-food-btn">
+              Add Laundry Item
+            </button>
+          </div>
+          
+          {/* Laundry Item Info Display */}
+          {newFoodItem.name && newFoodItem.category === 'Laundry' && (
+            <div className="room-info-display">
+              <p>Selected Item: {newFoodItem.name}</p>
+              <p>Price per Item: Rs. {newFoodItem.price}</p>
+              <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
+            </div>
+          )}
+
+          {/* Laundry Items List */}
+          {laundryItems.length > 0 && (
+            <div className="food-items-list">
+              <h4>Added Laundry Items:</h4>
+              {laundryItems.map((item, index) => (
+                <div key={index} className="food-item">
+                  <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
+                  <button type="button" onClick={() => removeLaundryItem(index)} className="remove-btn">
                     Remove
                   </button>
                 </div>
@@ -436,8 +535,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
             </div>
           )}
           <div className="summary-row">
-            <span>Food Total:</span>
+            <span>Food & Beverages Total:</span>
             <span>Rs. {calculateFoodTotal()}</span>
+          </div>
+          <div className="summary-row">
+            <span>Laundry Total:</span>
+            <span>Rs. {calculateLaundryTotal()}</span>
           </div>
           <div className="summary-row">
             <span>Subtotal:</span>

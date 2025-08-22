@@ -1879,6 +1879,20 @@ body {
   background: linear-gradient(90deg, #06b6d4, #0891b2);
 }
 
+.laundry-fill {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+/* Laundry Report Specific Styles */
+.laundry-report h3 {
+  color: #d97706;
+}
+
+.laundry-report .item-category {
+  background: rgba(245, 158, 11, 0.1);
+  color: #d97706;
+}
+
 .breakdown-amount {
   color: #10b981;
   font-weight: 600;
@@ -2150,6 +2164,10 @@ body {
 
 .food-color {
   background: #06b6d4;
+}
+
+.laundry-color {
+  background: #f59e0b;
 }
 
 .legend-item span {

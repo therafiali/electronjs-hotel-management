@@ -618,7 +618,13 @@ const App: React.FC = () => {
                   marginBottom: '8px'
                 }}>
                   Rs. {invoices.reduce((total, invoice) => {
-                    const foodTotal = (invoice.foodItems || []).reduce((sum: number, item: any) => sum + ((item.price || 0) * (item.quantity || 0)), 0);
+                    const foodTotal = (invoice.foodItems || []).reduce((sum: number, item: any) => {
+                      const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                      if (itemData && itemData.category === 'Food') {
+                        return sum + ((item.price || 0) * (item.quantity || 0));
+                      }
+                      return sum;
+                    }, 0);
                     return total + foodTotal;
                   }, 0).toFixed(2)}
                 </h3>
@@ -629,6 +635,46 @@ const App: React.FC = () => {
                   margin: '0'
                 }}>
                   Food Revenue
+                </p>
+              </div>
+
+              {/* Laundry Revenue */}
+              <div style={{
+                backgroundColor: 'white',
+                padding: '30px',
+                borderRadius: '12px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                border: '1px solid #e5e7eb'
+              }}>
+                <div style={{
+                  fontSize: '40px',
+                  marginBottom: '15px'
+                }}>👕</div>
+                <h3 style={{
+                  fontSize: '32px',
+                  fontWeight: '700',
+                  color: '#111827',
+                  marginBottom: '8px'
+                }}>
+                  Rs. {invoices.reduce((total, invoice) => {
+                    const laundryTotal = (invoice.foodItems || []).reduce((sum: number, item: any) => {
+                      const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                      if (itemData && itemData.category === 'Laundry') {
+                        return sum + ((item.price || 0) * (item.quantity || 0));
+                      }
+                      return sum;
+                    }, 0);
+                    return total + laundryTotal;
+                  }, 0).toFixed(2)}
+                </h3>
+                <p style={{
+                  fontSize: '16px',
+                  color: '#6b7280',
+                  fontWeight: '500',
+                  margin: '0'
+                }}>
+                  Laundry Revenue
                 </p>
               </div>
 

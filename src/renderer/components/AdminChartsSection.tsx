@@ -62,7 +62,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
 
   // Revenue Trend Chart Removed as per user request
 
-  // Room vs Food Revenue Distribution
+  // Room vs Food vs Laundry Revenue Distribution
   const getRevenueDistribution = () => {
     const filteredInvoices = getFilteredInvoices();
     
@@ -78,19 +78,39 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
       }
       return sum;
     }, 0);
+    
     const foodRevenue = filteredInvoices.reduce((sum, inv) => {
       if (inv.foodItems && Array.isArray(inv.foodItems)) {
-        return sum + inv.foodItems.reduce((itemSum: number, item: any) => 
-          itemSum + ((item.quantity || 0) * (item.price || 0)), 0);
+        return sum + inv.foodItems.reduce((itemSum: number, item: any) => {
+          const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+          if (itemData && itemData.category === 'Food') {
+            return itemSum + ((item.quantity || 0) * (item.price || 0));
+          }
+          return itemSum;
+        }, 0);
       }
       return sum;
     }, 0);
     
-    const total = roomRevenue + foodRevenue;
+    const laundryRevenue = filteredInvoices.reduce((sum, inv) => {
+      if (inv.foodItems && Array.isArray(inv.foodItems)) {
+        return sum + inv.foodItems.reduce((itemSum: number, item: any) => {
+          const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+          if (itemData && itemData.category === 'Laundry') {
+            return itemSum + ((item.quantity || 0) * (item.price || 0));
+          }
+          return itemSum;
+        }, 0);
+      }
+      return sum;
+    }, 0);
+    
+    const total = roomRevenue + foodRevenue + laundryRevenue;
     
     return {
       room: { amount: roomRevenue, percentage: total > 0 ? (roomRevenue / total) * 100 : 0 },
       food: { amount: foodRevenue, percentage: total > 0 ? (foodRevenue / total) * 100 : 0 },
+      laundry: { amount: laundryRevenue, percentage: total > 0 ? (laundryRevenue / total) * 100 : 0 },
       total
     };
   };
@@ -114,20 +134,28 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
     }));
   };
 
-  // Top Performing Items
+  // Top Performing Items (Food + Laundry)
   const getTopItems = () => {
     const filteredInvoices = getFilteredInvoices();
-    const itemSales: { [key: string]: { quantity: number; revenue: number; name: string } } = {};
+    const itemSales: { [key: string]: { quantity: number; revenue: number; name: string; category: string } } = {};
     
     filteredInvoices.forEach(invoice => {
       if (invoice.foodItems && Array.isArray(invoice.foodItems)) {
         invoice.foodItems.forEach((foodItem: any) => {
           const itemId = foodItem.itemId || foodItem.name;
-          if (!itemSales[itemId]) {
-            itemSales[itemId] = { quantity: 0, revenue: 0, name: foodItem.name };
+          const itemData = items.find(i => i.id === foodItem.itemId || i.name === foodItem.name);
+          if (itemData) {
+            if (!itemSales[itemId]) {
+              itemSales[itemId] = { 
+                quantity: 0, 
+                revenue: 0, 
+                name: foodItem.name,
+                category: itemData.category
+              };
+            }
+            itemSales[itemId].quantity += foodItem.quantity || 0;
+            itemSales[itemId].revenue += (foodItem.quantity || 0) * (foodItem.price || 0);
           }
-          itemSales[itemId].quantity += foodItem.quantity || 0;
-          itemSales[itemId].revenue += (foodItem.quantity || 0) * (foodItem.price || 0);
         });
       }
     });
@@ -138,10 +166,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+    return `Rs. ${amount.toFixed(2)}`;
   };
 
   // Recalculate data when timeFilter changes
@@ -254,6 +279,17 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
                     strokeDashoffset={`-${(revenueDistribution.room.percentage / 100) * 377}`}
                     transform="rotate(-90 75 75)"
                   />
+                  <circle
+                    cx="75"
+                    cy="75"
+                    r="60"
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="20"
+                    strokeDasharray={`${(revenueDistribution.laundry.percentage / 100) * 377} 377`}
+                    strokeDashoffset={`-${((revenueDistribution.room.percentage + revenueDistribution.food.percentage) / 100) * 377}`}
+                    transform="rotate(-90 75 75)"
+                  />
                 </svg>
               </div>
               <div className="pie-legend">
@@ -266,6 +302,11 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
                   <span className="legend-color food-color"></span>
                   <span>Food & Items: {formatCurrency(revenueDistribution.food.amount)}</span>
                   <span className="percentage">({revenueDistribution.food.percentage.toFixed(1)}%)</span>
+                </div>
+                <div className="legend-item">
+                  <span className="legend-color laundry-color"></span>
+                  <span>Laundry: {formatCurrency(revenueDistribution.laundry.amount)}</span>
+                  <span className="percentage">({revenueDistribution.laundry.percentage.toFixed(1)}%)</span>
                 </div>
               </div>
             </div>
@@ -330,6 +371,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
                   <div className="item-info">
                     <span className="item-rank">#{index + 1}</span>
                     <span className="item-name">{item.name}</span>
+                    <span className="item-category">{item.category}</span>
                   </div>
                   <div className="item-stats">
                     <div className="item-revenue">{formatCurrency(item.revenue)}</div>

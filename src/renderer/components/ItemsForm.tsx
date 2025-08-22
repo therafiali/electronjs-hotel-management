@@ -22,14 +22,7 @@ const ItemsForm: React.FC<ItemsFormProps> = ({ onSubmit, items, onRefreshItems, 
 
   const categories = [
     'Food',
-    'Beverage',
-    'Service',
-    'Amenity',
-    'Room Service',
-    'Laundry',
-    'Transportation',
-    'Recreation',
-    'Other'
+    'Laundry'
   ];
 
   const resetForm = () => {

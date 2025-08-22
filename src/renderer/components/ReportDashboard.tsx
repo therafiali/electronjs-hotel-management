@@ -37,7 +37,7 @@ interface ReportDashboardProps {
 }
 
 const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
-  const [activeFilter, setActiveFilter] = useState<'room' | 'item' | 'roomitem'>('room');
+  const [activeFilter, setActiveFilter] = useState<'room' | 'item' | 'laundry' | 'roomitem'>('room');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -127,7 +127,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
     return Object.values(roomData);
   };
 
-  // Get item sales data
+  // Get item sales data (Food items only)
   const getItemSalesData = () => {
     const filteredInvoices = getFilteredInvoices();
     const itemData: { [key: string]: { item: Item; quantity: number; total: number; invoices: Invoice[] } } = {};
@@ -136,7 +136,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
       if (invoice.foodItems && Array.isArray(invoice.foodItems)) {
         invoice.foodItems.forEach((foodItem: any) => {
           const item = items.find(i => i.id === foodItem.itemId || i.name === foodItem.name);
-          if (item) {
+          if (item && item.category === 'Food') {
             if (!itemData[item.id]) {
               itemData[item.id] = {
                 item,
@@ -158,6 +158,68 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
     return Object.values(itemData);
   };
 
+  // Get all item sales data (Food + Laundry) for combined report
+  const getAllItemSalesData = () => {
+    const filteredInvoices = getFilteredInvoices();
+    const itemData: { [key: string]: { item: Item; quantity: number; total: number; invoices: Invoice[] } } = {};
+    
+    filteredInvoices.forEach(invoice => {
+      if (invoice.foodItems && Array.isArray(invoice.foodItems)) {
+        invoice.foodItems.forEach((foodItem: any) => {
+          const item = items.find(i => i.id === foodItem.itemId || i.name === foodItem.name);
+          if (item && (item.category === 'Food' || item.category === 'Laundry')) {
+            if (!itemData[item.id]) {
+              itemData[item.id] = {
+                item,
+                quantity: 0,
+                total: 0,
+                invoices: []
+              };
+            }
+            itemData[item.id].quantity += foodItem.quantity || 0;
+            itemData[item.id].total += (foodItem.quantity || 0) * (foodItem.price || 0);
+            if (!itemData[item.id].invoices.find(inv => inv.invoiceId === invoice.invoiceId)) {
+              itemData[item.id].invoices.push(invoice);
+            }
+          }
+        });
+      }
+    });
+    
+    return Object.values(itemData);
+  };
+
+  // Get laundry sales data
+  const getLaundrySalesData = () => {
+    const filteredInvoices = getFilteredInvoices();
+    const laundryData: { [key: string]: { item: Item; quantity: number; total: number; invoices: Invoice[] } } = {};
+    
+    filteredInvoices.forEach(invoice => {
+      if (invoice.foodItems && Array.isArray(invoice.foodItems)) {
+        invoice.foodItems.forEach((foodItem: any) => {
+          const item = items.find(i => i.id === foodItem.itemId || i.name === foodItem.name);
+          if (item && item.category === 'Laundry') {
+            if (!laundryData[item.id]) {
+              laundryData[item.id] = {
+                item,
+                quantity: 0,
+                total: 0,
+                invoices: []
+              };
+            }
+            laundryData[item.id].quantity += foodItem.quantity || 0;
+            laundryData[item.id].total += (foodItem.quantity || 0) * (foodItem.price || 0);
+            if (!laundryData[item.id].invoices.find(inv => inv.invoiceId === invoice.invoiceId)) {
+              laundryData[item.id].invoices.push(invoice);
+            }
+          }
+        });
+      }
+    });
+    
+    return Object.values(laundryData);
+  };
+
   // Calculate totals
   const calculateTotals = () => {
     const filteredInvoices = getFilteredInvoices();
@@ -173,21 +235,42 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
       }
       return sum;
     }, 0);
-    const itemTotal = filteredInvoices.reduce((sum, inv) => {
+    
+    const foodTotal = filteredInvoices.reduce((sum, inv) => {
       if (inv.foodItems && Array.isArray(inv.foodItems)) {
-        return sum + inv.foodItems.reduce((itemSum: number, item: any) => 
-          itemSum + ((item.quantity || 0) * (item.price || 0)), 0);
+        return sum + inv.foodItems.reduce((itemSum: number, item: any) => {
+          const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+          if (itemData && itemData.category === 'Food') {
+            return itemSum + ((item.quantity || 0) * (item.price || 0));
+          }
+          return itemSum;
+        }, 0);
       }
       return sum;
     }, 0);
-    const grandTotal = filteredInvoices.reduce((sum, inv) => sum + inv.total, 0);
     
-    return { roomTotal, itemTotal, grandTotal };
+    const laundryTotal = filteredInvoices.reduce((sum, inv) => {
+      if (inv.foodItems && Array.isArray(inv.foodItems)) {
+        return sum + inv.foodItems.reduce((itemSum: number, item: any) => {
+          const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+          if (itemData && itemData.category === 'Laundry') {
+            return itemSum + ((item.quantity || 0) * (item.price || 0));
+          }
+          return itemSum;
+        }, 0);
+      }
+      return sum;
+    }, 0);
+    
+    const grandTotal = roomTotal + foodTotal + laundryTotal;
+    
+    return { roomTotal, foodTotal, laundryTotal, grandTotal };
   };
 
-  const { roomTotal, itemTotal, grandTotal } = calculateTotals();
+  const { roomTotal, foodTotal, laundryTotal, grandTotal } = calculateTotals();
   const roomRevenueData = getRoomRevenueData();
   const itemSalesData = getItemSalesData();
+  const laundrySalesData = getLaundrySalesData();
 
   const formatCurrency = (amount: number) => {
     return `Rs. ${amount.toFixed(2)}`;
@@ -260,7 +343,14 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
           <div className="summary-icon">🍽️</div>
           <div className="summary-content">
             <h3>Food & Items</h3>
-            <p className="summary-amount">{formatCurrency(itemTotal)}</p>
+            <p className="summary-amount">{formatCurrency(foodTotal)}</p>
+          </div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-icon">👕</div>
+          <div className="summary-content">
+            <h3>Laundry Revenue</h3>
+            <p className="summary-amount">{formatCurrency(laundryTotal)}</p>
           </div>
         </div>
         <div className="summary-card grand-total">
@@ -284,7 +374,13 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
           className={`filter-tab ${activeFilter === 'item' ? 'active' : ''}`}
           onClick={() => setActiveFilter('item')}
         >
-          🍽️ Item Reports
+          🍽️ Food Reports
+        </button>
+        <button
+          className={`filter-tab ${activeFilter === 'laundry' ? 'active' : ''}`}
+          onClick={() => setActiveFilter('laundry')}
+        >
+          👕 Laundry Reports
         </button>
         <button
           className={`filter-tab ${activeFilter === 'roomitem' ? 'active' : ''}`}
@@ -346,7 +442,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
 
         {activeFilter === 'item' && (
           <div className="item-report">
-            <h3>🍽️ Item Sales Report</h3>
+            <h3>🍽️ Food Sales Report</h3>
             <div className="report-grid">
               {itemSalesData.map((itemData) => (
                 <div
@@ -392,7 +488,60 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
               ))}
             </div>
             <div className="section-total">
-              <strong>Total Item Revenue: {formatCurrency(itemTotal)}</strong>
+              <strong>Total Food Revenue: {formatCurrency(foodTotal)}</strong>
+            </div>
+          </div>
+        )}
+
+        {activeFilter === 'laundry' && (
+          <div className="laundry-report">
+            <h3>👕 Laundry Sales Report</h3>
+            <div className="report-grid">
+              {laundrySalesData.map((itemData) => (
+                <div
+                  key={itemData.item.id}
+                  className={`report-card clickable ${selectedItem === itemData.item.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedItem(selectedItem === itemData.item.id ? null : itemData.item.id)}
+                >
+                  <div className="card-header">
+                    <h4>{itemData.item.name}</h4>
+                    <span className="item-category">{itemData.item.category}</span>
+                  </div>
+                  <div className="card-stats">
+                    <div className="stat">
+                      <span className="stat-label">Quantity Sold:</span>
+                      <span className="stat-value">{itemData.quantity}</span>
+                    </div>
+                    <div className="stat">
+                      <span className="stat-label">Revenue:</span>
+                      <span className="stat-value total-amount">{formatCurrency(itemData.total)}</span>
+                    </div>
+                  </div>
+                  
+                  {selectedItem === itemData.item.id && (
+                    <div className="detailed-data">
+                      <h5>📋 Sales Details:</h5>
+                      {itemData.invoices.map((invoice) => {
+                        const foodItem = invoice.foodItems?.find((fi: any) => 
+                          fi.itemId === itemData.item.id || fi.name === itemData.item.name
+                        );
+                        return (
+                          <div key={invoice.invoiceId} className="detail-row">
+                            <span className="detail-date">{formatDate(invoice.date)}</span>
+                            <span className="detail-qty">Qty: {foodItem?.quantity || 0}</span>
+                            <span className="detail-amount">
+                              {formatCurrency((foodItem?.quantity || 0) * (foodItem?.price || 0))}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="section-total">
+              <strong>Total Laundry Revenue: {formatCurrency(laundryTotal)}</strong>
             </div>
           </div>
         )}
@@ -418,14 +567,15 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
               </div>
               
               <div className="combined-section">
-                <h4>🏆 Top Selling Items</h4>
-                {itemSalesData
+                <h4>🏆 Top Selling Items (Food & Laundry)</h4>
+                {getAllItemSalesData()
                   .sort((a, b) => b.total - a.total)
                   .slice(0, 5)
                   .map((itemData, index) => (
                     <div key={itemData.item.id} className="performance-row">
                       <span className="rank">#{index + 1}</span>
                       <span className="name">{itemData.item.name}</span>
+                      <span className="item-category">{itemData.item.category === 'Food' ? '🍽️ Food' : '👕 Laundry'}</span>
                       <span className="amount">{formatCurrency(itemData.total)}</span>
                     </div>
                   ))}
@@ -447,14 +597,24 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
                   <span className="breakdown-amount">{formatCurrency(roomTotal)}</span>
                 </div>
                 <div className="breakdown-item">
-                  <span className="breakdown-label">Item Revenue</span>
+                  <span className="breakdown-label">Food Revenue</span>
                   <div className="breakdown-bar">
                     <div 
                       className="breakdown-fill item-fill" 
-                      style={{width: `${(itemTotal / grandTotal) * 100}%`}}
+                      style={{width: `${(foodTotal / grandTotal) * 100}%`}}
                     ></div>
                   </div>
-                  <span className="breakdown-amount">{formatCurrency(itemTotal)}</span>
+                  <span className="breakdown-amount">{formatCurrency(foodTotal)}</span>
+                </div>
+                <div className="breakdown-item">
+                  <span className="breakdown-label">Laundry Revenue</span>
+                  <div className="breakdown-bar">
+                    <div 
+                      className="breakdown-fill laundry-fill" 
+                      style={{width: `${(laundryTotal / grandTotal) * 100}%`}}
+                    ></div>
+                  </div>
+                  <span className="breakdown-amount">{formatCurrency(laundryTotal)}</span>
                 </div>
                 <div className="breakdown-total">
                   <strong>Grand Total: {formatCurrency(grandTotal)}</strong>
