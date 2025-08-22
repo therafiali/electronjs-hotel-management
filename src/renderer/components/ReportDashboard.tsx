@@ -342,7 +342,7 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
         <div className="summary-card">
           <div className="summary-icon">🍽️</div>
           <div className="summary-content">
-            <h3>Food & Items</h3>
+            <h3>Food</h3>
             <p className="summary-amount">{formatCurrency(foodTotal)}</p>
           </div>
         </div>

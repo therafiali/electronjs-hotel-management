@@ -333,37 +333,87 @@ class PDFCreator {
         }
         // Food items section
         if (invoiceData.foodItems && invoiceData.foodItems.length > 0) {
+            // Separate food and laundry items
+            const foodItems = invoiceData.foodItems.filter((item) => {
+                // Try to find the item in database to get category
+                const db = new database_1.default();
+                const items = db.getAllItems();
+                const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                return itemData && itemData.category === 'Food';
+            });
+            const laundryItems = invoiceData.foodItems.filter((item) => {
+                // Try to find the item in database to get category
+                const db = new database_1.default();
+                const items = db.getAllItems();
+                const itemData = items.find(i => i.id === item.itemId || i.name === item.name);
+                return itemData && itemData.category === 'Laundry';
+            });
             // Food section header
-            doc
-                .rect(col1, currentY, 495, 25)
-                .fill("#f1f5f9")
-                .strokeColor("#e5e7eb")
-                .lineWidth(0.5)
-                .stroke();
-            doc
-                .fontSize(12)
-                .fillColor("#374151")
-                .font("Helvetica-Bold")
-                .text("Food & Beverages", col1 + 10, currentY + 8);
-            currentY += 25;
-            // Individual food items
-            invoiceData.foodItems.forEach((item) => {
+            if (foodItems.length > 0) {
                 doc
                     .rect(col1, currentY, 495, 25)
-                    .fill("#ffffff")
+                    .fill("#f1f5f9")
                     .strokeColor("#e5e7eb")
                     .lineWidth(0.5)
                     .stroke();
                 doc
-                    .fontSize(11)
-                    .fillColor("#111827")
-                    .font("Helvetica")
-                    .text(item.name || "N/A", col1 + 10, currentY + 8)
-                    .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
-                    .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
-                    .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
+                    .fontSize(12)
+                    .fillColor("#374151")
+                    .font("Helvetica-Bold")
+                    .text("Food", col1 + 10, currentY + 8);
                 currentY += 25;
-            });
+                // Individual food items
+                foodItems.forEach((item) => {
+                    doc
+                        .rect(col1, currentY, 495, 25)
+                        .fill("#ffffff")
+                        .strokeColor("#e5e7eb")
+                        .lineWidth(0.5)
+                        .stroke();
+                    doc
+                        .fontSize(11)
+                        .fillColor("#111827")
+                        .font("Helvetica")
+                        .text(item.name || "N/A", col1 + 10, currentY + 8)
+                        .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
+                        .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
+                        .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
+                    currentY += 25;
+                });
+            }
+            // Laundry section header
+            if (laundryItems.length > 0) {
+                doc
+                    .rect(col1, currentY, 495, 25)
+                    .fill("#f1f5f9")
+                    .strokeColor("#e5e7eb")
+                    .lineWidth(0.5)
+                    .stroke();
+                doc
+                    .fontSize(12)
+                    .fillColor("#374151")
+                    .font("Helvetica-Bold")
+                    .text("Laundry", col1 + 10, currentY + 8);
+                currentY += 25;
+                // Individual laundry items
+                laundryItems.forEach((item) => {
+                    doc
+                        .rect(col1, currentY, 495, 25)
+                        .fill("#ffffff")
+                        .strokeColor("#e5e7eb")
+                        .lineWidth(0.5)
+                        .stroke();
+                    doc
+                        .fontSize(11)
+                        .fillColor("#111827")
+                        .font("Helvetica")
+                        .text(item.name || "N/A", col1 + 10, currentY + 8)
+                        .text((item.quantity || 0).toString(), col2 + 10, currentY + 8)
+                        .text(`Rs. ${(item.price || 0).toFixed(2)}`, col3 + 10, currentY + 8)
+                        .text(`Rs. ${((item.quantity || 0) * (item.price || 0)).toFixed(2)}`, col4 + 10, currentY + 8);
+                    currentY += 25;
+                });
+            }
         }
         // Subtotal row
         doc

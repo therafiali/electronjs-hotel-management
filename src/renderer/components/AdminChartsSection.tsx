@@ -300,7 +300,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
                 </div>
                 <div className="legend-item">
                   <span className="legend-color food-color"></span>
-                  <span>Food & Items: {formatCurrency(revenueDistribution.food.amount)}</span>
+                  <span>Food: {formatCurrency(revenueDistribution.food.amount)}</span>
                   <span className="percentage">({revenueDistribution.food.percentage.toFixed(1)}%)</span>
                 </div>
                 <div className="legend-item">

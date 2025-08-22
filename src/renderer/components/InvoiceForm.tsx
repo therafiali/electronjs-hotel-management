@@ -319,15 +319,15 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
 
         {/* Food Items */}
         <div className="form-section">
-          <h3>Food & Beverages</h3>
+          <h3>🍽️ Food</h3>
           <div className="food-input-row">
             <div className="form-group">
-              <label>Food/Beverage Item:</label>
+              <label>Food Item:</label>
               <select
                 value=""
                 onChange={(e) => handleItemSelect(e.target.value)}
               >
-                <option value="">Select Food/Beverage Item</option>
+                <option value="">Select Food Item</option>
                 {items.filter(item => item.category === 'Food').map(item => (
                   <option key={item.id} value={item.id}>
                     {item.name} - Rs. {item.price}
@@ -371,7 +371,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               />
             </div>
             <button type="button" onClick={addFoodItem} className="add-food-btn">
-              Add Food/Beverage Item
+              Add Food Item
             </button>
           </div>
           
@@ -387,7 +387,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           {/* Food Items List */}
           {foodItems.length > 0 && (
             <div className="food-items-list">
-              <h4>Added Food & Beverage Items:</h4>
+              <h4>Added Food Items:</h4>
               {foodItems.map((item, index) => (
                 <div key={index} className="food-item">
                   <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
@@ -400,9 +400,10 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
           )}
         </div>
 
-        {/* Laundry Items */}
-        <div className="form-section">
-          <h3>Laundry Services</h3>
+        {/* Laundry Items - Only show when withStay is true */}
+        {withStay && (
+          <div className="form-section">
+            <h3>👕 Laundry Services (Available with Room Stay)</h3>
           <div className="food-input-row">
             <div className="form-group">
               <label>Laundry Item:</label>
@@ -482,6 +483,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
             </div>
           )}
         </div>
+        )}
 
         {/* Pricing */}
         <div className="form-section">
@@ -535,7 +537,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
             </div>
           )}
           <div className="summary-row">
-            <span>Food & Beverages Total:</span>
+            <span>Food Total:</span>
             <span>Rs. {calculateFoodTotal()}</span>
           </div>
           <div className="summary-row">
