@@ -46,7 +46,7 @@ declare global {
       getAllItems: () => Promise<any[]>;
       deleteItem: (itemId: string) => Promise<any>;
       updateItem: (id: string, updateData: any) => Promise<any>;
-                   saveRoom: (roomData: any) => Promise<any>;
+      saveRoom: (roomData: any) => Promise<any>;
       getAllRooms: () => Promise<any[]>;
       updateRoom: (id: string, updateData: any) => Promise<any>;
       getAllActivityLogs: () => Promise<any[]>;
@@ -137,9 +137,9 @@ const App: React.FC = () => {
     }
   };
 
-      const handleInvoiceClick = (invoice: any) => {
-      console.log("Invoice clicked:", invoice);
-    };
+  const handleInvoiceClick = (invoice: any) => {
+    console.log("Invoice clicked:", invoice);
+  };
 
   const handlePrintInvoice = async (invoiceId: string) => {
     try {
@@ -351,9 +351,8 @@ const App: React.FC = () => {
   const handleItemClick = (item: any) => {
     console.log("Item clicked:", item);
     alert(
-              `Item Details:\nName: ${item.name}\nCategory: ${
-          item.category
-        }\nPrice: Rs. ${item.price.toFixed(2)}`
+      `Item Details:\nName: ${item.name}\nCategory: ${item.category
+      }\nPrice: Rs. ${item.price.toFixed(2)}`
     );
   };
 
@@ -424,14 +423,14 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         currentUser={currentUser!}
       />
-      
+
       {/* Header */}
       <header style={{
         position: 'fixed',
         top: 0,
         left: '320px',
         right: 0,
-                 height: '100px',
+        height: '140px',
         backgroundColor: 'white',
         borderBottom: '1px solid #e5e7eb',
         display: 'flex',
@@ -447,15 +446,15 @@ const App: React.FC = () => {
         }}>
           <h1 style={{
             margin: 0,
-            fontSize: '26px',
+            fontSize: '30px',
             color: '#111827',
             fontWeight: '700',
             letterSpacing: '-0.025em'
           }}>
-             Rama Resort Management System
+            Rama Resort Management System
           </h1>
         </div>
-        
+
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -508,16 +507,16 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="app-main" style={{ 
+      <main className="app-main" style={{
         marginLeft: '320px',
-                 marginTop: '100px',
+        marginTop: '140px',
         padding: '20px',
         backgroundColor: '#f5f5f5',
         minHeight: 'calc(100vh - 80px)'
       }}>
-                 {currentView === "dashboard" ? (
-           <div>
-             {/* Dashboard Statistics */}
+        {currentView === "dashboard" ? (
+          <div>
+            {/* Dashboard Statistics */}
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
@@ -581,7 +580,7 @@ const App: React.FC = () => {
                       const checkIn = new Date(invoice.guestInfo.checkIn);
                       const checkOut = new Date(invoice.guestInfo.checkOut);
                       const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
-                      
+
                       // Calculate room revenue: price per night × number of nights
                       return total + ((invoice.room_price || 0) * (nights > 0 ? nights : 1));
                     }
@@ -709,13 +708,13 @@ const App: React.FC = () => {
                 </p>
               </div>
             </div>
-            
+
             {/* Admin Analytics Charts - Only show for admin users */}
             {currentUser?.role === "admin" && (
-              <AdminChartsSection 
-                invoices={invoices} 
-                rooms={rooms} 
-                items={items} 
+              <AdminChartsSection
+                invoices={invoices}
+                rooms={rooms}
+                items={items}
               />
             )}
 
@@ -732,8 +731,8 @@ const App: React.FC = () => {
                 marginLeft: "auto",
                 marginRight: "auto"
               }}>
-                <h3 style={{ 
-                  margin: "0 0 15px 0", 
+                <h3 style={{
+                  margin: "0 0 15px 0",
                   color: "#111827",
                   fontSize: "18px",
                   fontWeight: "600",
@@ -741,15 +740,15 @@ const App: React.FC = () => {
                 }}>
                   🗄️ Database Management
                 </h3>
-                <p style={{ 
-                  margin: "0 0 20px 0", 
-                  fontSize: "14px", 
+                <p style={{
+                  margin: "0 0 20px 0",
+                  fontSize: "14px",
                   color: "#6b7280",
                   textAlign: "center"
                 }}>
                   Upload updated database files or export current database for backup
                 </p>
-                
+
                 {/* Database Path Display */}
                 <div style={{
                   background: "#f8f9fa",
@@ -760,11 +759,11 @@ const App: React.FC = () => {
                   textAlign: "left"
                 }}>
                   <h4 style={{ margin: "0 0 10px 0", color: "#0c5460" }}>📁 Current Database Location:</h4>
-                  <p style={{ 
-                    margin: "0", 
-                    fontFamily: "monospace", 
-                    fontSize: "12px", 
-                    color: "#0c5460", 
+                  <p style={{
+                    margin: "0",
+                    fontFamily: "monospace",
+                    fontSize: "12px",
+                    color: "#0c5460",
                     wordBreak: "break-all",
                     background: "#e9ecef",
                     padding: "10px",
@@ -789,11 +788,11 @@ const App: React.FC = () => {
                     Refresh Path
                   </button>
                 </div>
-                
+
                 {/* Database Management Buttons */}
-                <div style={{ 
-                  display: "flex", 
-                  gap: "15px", 
+                <div style={{
+                  display: "flex",
+                  gap: "15px",
                   justifyContent: "center",
                   flexWrap: "wrap"
                 }}>
@@ -803,16 +802,16 @@ const App: React.FC = () => {
                         setLoading(true);
                         const result = await window.electronAPI.selectDatabaseFile();
                         if (result.success && result.filePath) {
-                                                  const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
-                        if (uploadResult.success) {
-                          console.log(`✅ ${uploadResult.message}\nBackup created at: ${uploadResult.backupPath}`);
-                          await loadInvoices();
-                          await loadItems();
-                          await loadRooms();
-                          await loadDatabasePath();
-                        } else {
-                          console.error(`❌ ${uploadResult.message}`);
-                        }
+                          const uploadResult = await window.electronAPI.uploadDatabase(result.filePath);
+                          if (uploadResult.success) {
+                            console.log(`✅ ${uploadResult.message}\nBackup created at: ${uploadResult.backupPath}`);
+                            await loadInvoices();
+                            await loadItems();
+                            await loadRooms();
+                            await loadDatabasePath();
+                          } else {
+                            console.error(`❌ ${uploadResult.message}`);
+                          }
                         } else {
                           console.log('ℹ️ No file selected');
                         }
@@ -840,7 +839,7 @@ const App: React.FC = () => {
                   >
                     📁 Upload Database
                   </button>
-                  
+
                   <button
                     onClick={async () => {
                       try {
@@ -984,8 +983,8 @@ const App: React.FC = () => {
           </div>
         ) : currentView === "items" ? (
           <div>
-            <ItemsForm 
-              onSubmit={handleItemSubmit} 
+            <ItemsForm
+              onSubmit={handleItemSubmit}
               items={items}
               onRefreshItems={loadItems}
               onUpdateItemPrice={handleUpdateItemPrice}
@@ -1010,8 +1009,8 @@ const App: React.FC = () => {
 
         ) : currentView === "rooms" ? (
           <div>
-            <RoomForm 
-              onSubmit={handleRoomSubmit} 
+            <RoomForm
+              onSubmit={handleRoomSubmit}
               rooms={rooms}
               onRefreshRooms={loadRooms}
               onUpdateRoomPrice={handleUpdateRoomPrice}
@@ -1039,9 +1038,9 @@ const App: React.FC = () => {
               <ActivityLogs onBackToDashboard={() => setCurrentView("dashboard")} />
             </div>
           ) : (
-            <div style={{ 
-              padding: '2rem', 
-              textAlign: 'center', 
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
               color: '#f1f5f9',
               background: '#0f1419',
               minHeight: '400px',
@@ -1076,9 +1075,9 @@ const App: React.FC = () => {
               <ReportDashboard onBack={() => setCurrentView("dashboard")} />
             </div>
           ) : (
-            <div style={{ 
-              padding: '2rem', 
-              textAlign: 'center', 
+            <div style={{
+              padding: '2rem',
+              textAlign: 'center',
               color: '#f1f5f9',
               background: '#0f1419',
               minHeight: '400px',
