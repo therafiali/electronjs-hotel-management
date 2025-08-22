@@ -147,7 +147,7 @@ class PDFCreator {
                     const ext = path.extname(p).toLowerCase();
                     if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
                         // Draw a white background rectangle first to avoid transparency
-                        doc.rect(50, 34, 64, 64).fill("#000000");
+                        doc.rect(50, 34, 64, 64).fill("#FFFFFF");
                         doc.image(buf, 50, 34, { width: 64, height: 64, fit: [64, 64] });
                         return true;
                     }
