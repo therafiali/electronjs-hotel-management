@@ -718,8 +718,8 @@ const App: React.FC = () => {
               />
             )}
 
-            {/* Database Management Section - Only show for admin users */}
-            {currentUser?.role === "admin" && (
+            {/* Database Management Section - Available for all users */}
+            {(
               <div style={{
                 background: "#ffffff",
                 border: "1px solid #e5e7eb",
