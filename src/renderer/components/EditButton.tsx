@@ -32,6 +32,11 @@ const EditButton: React.FC<EditButtonProps> = ({
       return;
     }
 
+    // For number fields, don't allow empty values
+    if (fieldType === 'number' && editValue === '') {
+      return;
+    }
+
     try {
       setIsLoading(true);
       await onSave(editValue);
@@ -79,7 +84,14 @@ const EditButton: React.FC<EditButtonProps> = ({
           <input
             type={fieldType}
             value={editValue}
-            onChange={(e) => setEditValue(fieldType === 'number' ? Number(e.target.value) : e.target.value)}
+            onChange={(e) => {
+              if (fieldType === 'number') {
+                const value = e.target.value;
+                setEditValue(value === '' ? '' : Number(value));
+              } else {
+                setEditValue(e.target.value);
+              }
+            }}
             onKeyDown={handleKeyPress}
             placeholder={placeholder}
             autoFocus

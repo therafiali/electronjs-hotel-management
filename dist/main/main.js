@@ -188,7 +188,7 @@ electron_1.ipcMain.handle("export-database", async () => {
         // Open save dialog for user to choose where to save
         const result = await dialog.showSaveDialog({
             title: 'Export Database',
-            defaultPath: 'hotel_export.db',
+            defaultPath: 'hotel.db',
             filters: [
                 { name: 'SQLite Database', extensions: ['db'] },
                 { name: 'All Files', extensions: ['*'] }

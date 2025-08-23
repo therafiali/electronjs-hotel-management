@@ -112,11 +112,10 @@ const InvoiceList: React.FC<InvoiceListProps> = ({
       render: (value: any, row: any) => {
         // Find the original invoice data to ensure we have the correct ID
         const originalInvoice = invoices.find(
-          (invoice) =>
-            invoice.id === row.id || invoice.guestInfo.name === row.guestName
+          (invoice) => formatInvoiceIdForDisplay(invoice.invoiceId) === row.invoiceNumber
         );
         console.log("Original invoice", originalInvoice);
-        const invoiceId = originalInvoice?.invoiceId || row.id;
+        const invoiceId = originalInvoice?.invoiceId;
         console.log("Invoice ID", invoiceId);
         if (!invoiceId) {
           console.error("Could not find invoice ID for row:", row);
