@@ -2182,6 +2182,12 @@ body {
 }
 
 /* Room Occupancy Bar Chart */
+.bar-chart-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
 .bar-chart {
   display: flex;
   gap: 1rem;
@@ -2191,7 +2197,7 @@ body {
 }
 
 .occupancy-bar {
-  flex: 1;
+  flex: 1 0 80px;
   display: flex;
   flex-direction: column;
   align-items: center;

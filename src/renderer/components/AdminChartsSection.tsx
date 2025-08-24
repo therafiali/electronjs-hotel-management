@@ -66,15 +66,25 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
   const getRevenueDistribution = () => {
     const filteredInvoices = getFilteredInvoices();
     
+    // Get the same cutoff date used in filtering
+    const now = new Date();
+    const daysBack = timeFilter === '7d' ? 7 : timeFilter === '30d' ? 30 : 90;
+    const cutoffDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000));
+    
     const roomRevenue = filteredInvoices.reduce((sum, inv) => {
       if (inv.room_id && inv.guestInfo?.checkIn && inv.guestInfo?.checkOut) {
-        // Calculate nights from check-in/check-out dates
         const checkIn = new Date(inv.guestInfo.checkIn);
         const checkOut = new Date(inv.guestInfo.checkOut);
-        const nights = Math.ceil(Math.abs(checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
         
-        // Calculate room revenue: price per night × number of nights
-        return sum + ((inv.room_price || 0) * (nights > 0 ? nights : 1));
+        // Calculate only the nights that fall within the filtered period
+        const effectiveCheckIn = checkIn > cutoffDate ? checkIn : cutoffDate;
+        const effectiveCheckOut = checkOut < now ? checkOut : now;
+        
+        // Only calculate revenue if there's overlap with the filtered period
+        if (effectiveCheckIn < effectiveCheckOut) {
+          const nightsInPeriod = Math.ceil(Math.abs(effectiveCheckOut.getTime() - effectiveCheckIn.getTime()) / (1000 * 60 * 60 * 24));
+          return sum + ((inv.room_price || 0) * (nightsInPeriod > 0 ? nightsInPeriod : 1));
+        }
       }
       return sum;
     }, 0);
@@ -118,19 +128,33 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
   // Room Occupancy Data
   const getRoomOccupancyData = () => {
     const filteredInvoices = getFilteredInvoices();
-    const roomBookings: { [key: string]: number } = {};
+    const now = new Date();
+    const daysBack = timeFilter === '7d' ? 7 : timeFilter === '30d' ? 30 : 90;
+    const cutoffDate = new Date(now.getTime() - (daysBack * 24 * 60 * 60 * 1000));
+    
+    const roomOccupancy: { [key: string]: number } = {};
     
     filteredInvoices.forEach(invoice => {
-      if (invoice.room_id) {
-        roomBookings[invoice.room_id] = (roomBookings[invoice.room_id] || 0) + 1;
+      if (invoice.room_id && invoice.guestInfo?.checkIn && invoice.guestInfo?.checkOut) {
+        const checkIn = new Date(invoice.guestInfo.checkIn);
+        const checkOut = new Date(invoice.guestInfo.checkOut);
+        
+        // Calculate nights that fall within the filtered period
+        const effectiveCheckIn = checkIn > cutoffDate ? checkIn : cutoffDate;
+        const effectiveCheckOut = checkOut < now ? checkOut : now;
+        
+        if (effectiveCheckIn < effectiveCheckOut) {
+          const nightsInPeriod = Math.ceil(Math.abs(effectiveCheckOut.getTime() - effectiveCheckIn.getTime()) / (1000 * 60 * 60 * 24));
+          roomOccupancy[invoice.room_id] = (roomOccupancy[invoice.room_id] || 0) + nightsInPeriod;
+        }
       }
     });
     
     return rooms.map(room => ({
       ...room,
-      bookings: roomBookings[room.roomId] || 0,
-      occupancyRate: roomBookings[room.roomId] ? 
-        Math.min((roomBookings[room.roomId] / (timeFilter === '7d' ? 7 : timeFilter === '30d' ? 30 : 90)) * 100, 100) : 0
+      bookings: roomOccupancy[room.roomId] || 0, // Nights occupied for this room
+      occupancyRate: roomOccupancy[room.roomId] ? 
+        Math.min((roomOccupancy[room.roomId] / daysBack) * 100, 100) : 0
     }));
   };
 
@@ -174,7 +198,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
     const result = getRevenueDistribution();
     console.log(`Revenue distribution for ${timeFilter}:`, result);
     return result;
-  }, [timeFilter, invoices]);
+  }, [timeFilter, invoices, items]);
   
   const occupancyData = useMemo(() => {
     const result = getRoomOccupancyData();
@@ -186,7 +210,7 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
     const result = getTopItems();
     console.log(`Top items for ${timeFilter}:`, result);
     return result;
-  }, [timeFilter, invoices]);
+  }, [timeFilter, invoices, items]);
 
   return (
     <div className="admin-charts-section">
@@ -330,20 +354,22 @@ const AdminChartsSection: React.FC<AdminChartsSectionProps> = ({ invoices, rooms
               </div>
               Room Occupancy Rate
             </h3>
-            <div className="bar-chart">
-              {occupancyData.map((room, index) => (
-                <div key={room.roomId} className="occupancy-bar">
-                  <div className="bar-container">
-                    <div 
-                      className="occupancy-fill"
-                      style={{ height: `${room.occupancyRate}%` }}
-                    />
-                    <span className="occupancy-percentage">{room.occupancyRate.toFixed(0)}%</span>
+            <div className="bar-chart-container">
+              <div className="bar-chart">
+                {occupancyData.map((room, index) => (
+                  <div key={room.roomId} className="occupancy-bar">
+                    <div className="bar-container">
+                      <div 
+                        className="occupancy-fill"
+                        style={{ height: `${room.occupancyRate}%` }}
+                      />
+                      <span className="occupancy-percentage">{room.occupancyRate.toFixed(0)}%</span>
+                    </div>
+                    <span className="room-label">Room {room.roomNumber}</span>
+                    <span className="booking-count">{room.bookings} bookings</span>
                   </div>
-                  <span className="room-label">Room {room.roomNumber}</span>
-                  <span className="booking-count">{room.bookings} bookings</span>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}
