@@ -247,45 +247,7 @@ const PDFCreator: React.FC = () => {
           Upload updated database files or export current database for backup
         </p>
         
-        {/* Database Path Display */}
-        <div style={{
-          background: "#f8f9fa",
-          border: "1px solid #dee2e6",
-          borderRadius: "8px",
-          padding: "15px",
-          margin: "15px 0",
-          textAlign: "left"
-        }}>
-          <h4 style={{ margin: "0 0 10px 0", color: "#0c5460" }}>📁 Current Database Location:</h4>
-          <p style={{ 
-            margin: "0", 
-            fontFamily: "monospace", 
-            fontSize: "12px", 
-            color: "#0c5460", 
-            wordBreak: "break-all",
-            background: "#e9ecef",
-            padding: "10px",
-            borderRadius: "6px",
-            border: "1px solid #ced4da"
-          }}>
-            {databasePath || "Loading database path..."}
-          </p>
-          <button
-            onClick={loadDatabasePath}
-            style={{
-              background: "#6c757d",
-              color: "white",
-              border: "none",
-              padding: "5px 10px",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontSize: "12px",
-              marginTop: "10px"
-            }}
-          >
-            Refresh Path
-          </button>
-        </div>
+
         
         {/* Database Management Buttons */}
         <div style={{ 

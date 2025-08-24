@@ -150,8 +150,12 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     return (calculateSubtotal() * taxRate) / 100;
   };
 
+  const calculateDiscount = () => {
+    return (calculateSubtotal() * discount) / 100;
+  };
+
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateTax() - discount;
+    return calculateSubtotal() + calculateTax() - calculateDiscount();
   };
 
   // Generate unique ID for each invoice
@@ -160,8 +164,6 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
     const random = Math.random().toString(36).substring(2, 8);
     return `invoice_${timestamp}_${random}`;
   };
-
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -404,85 +406,85 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
         {withStay && (
           <div className="form-section">
             <h3>👕 Laundry Services (Available with Room Stay)</h3>
-          <div className="food-input-row">
-            <div className="form-group">
-              <label>Laundry Item:</label>
-              <select
-                value=""
-                onChange={(e) => handleItemSelect(e.target.value)}
-              >
-                <option value="">Select Laundry Item</option>
-                {items.filter(item => item.category === 'Laundry').map(item => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} - Rs. {item.price}
-                  </option>
-                ))}
-              </select>
+            <div className="food-input-row">
+              <div className="form-group">
+                <label>Laundry Item:</label>
+                <select
+                  value=""
+                  onChange={(e) => handleItemSelect(e.target.value)}
+                >
+                  <option value="">Select Laundry Item</option>
+                  {items.filter(item => item.category === 'Laundry').map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} - Rs. {item.price}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Quantity:</label>
+                <input
+                  type="number"
+                  value={newFoodItem.quantity || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setNewFoodItem({...newFoodItem, quantity: 0});
+                    } else {
+                      setNewFoodItem({...newFoodItem, quantity: Number(value)});
+                    }
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  min="1"
+                />
+              </div>
+              <div className="form-group">
+                <label>Price:</label>
+                <input
+                  type="number"
+                  value={newFoodItem.price || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setNewFoodItem({...newFoodItem, price: 0});
+                    } else {
+                      setNewFoodItem({...newFoodItem, price: Number(value)});
+                    }
+                  }}
+                  onFocus={(e) => e.target.select()}
+                  min="0"
+                  readOnly
+                />
+              </div>
+              <button type="button" onClick={addFoodItem} className="add-food-btn">
+                Add Laundry Item
+              </button>
             </div>
-            <div className="form-group">
-              <label>Quantity:</label>
-              <input
-                type="number"
-                value={newFoodItem.quantity || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    setNewFoodItem({...newFoodItem, quantity: 0});
-                  } else {
-                    setNewFoodItem({...newFoodItem, quantity: Number(value)});
-                  }
-                }}
-                onFocus={(e) => e.target.select()}
-                min="1"
-              />
-            </div>
-            <div className="form-group">
-              <label>Price:</label>
-              <input
-                type="number"
-                value={newFoodItem.price || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '') {
-                    setNewFoodItem({...newFoodItem, price: 0});
-                  } else {
-                    setNewFoodItem({...newFoodItem, price: Number(value)});
-                  }
-                }}
-                onFocus={(e) => e.target.select()}
-                min="0"
-                readOnly
-              />
-            </div>
-            <button type="button" onClick={addFoodItem} className="add-food-btn">
-              Add Laundry Item
-            </button>
-          </div>
-          
-          {/* Laundry Item Info Display */}
-          {newFoodItem.name && newFoodItem.category === 'Laundry' && (
-            <div className="room-info-display">
-              <p>Selected Item: {newFoodItem.name}</p>
-              <p>Price per Item: Rs. {newFoodItem.price}</p>
-              <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
-            </div>
-          )}
+            
+            {/* Laundry Item Info Display */}
+            {newFoodItem.name && newFoodItem.category === 'Laundry' && (
+              <div className="room-info-display">
+                <p>Selected Item: {newFoodItem.name}</p>
+                <p>Price per Item: Rs. {newFoodItem.price}</p>
+                <p>Item Total: Rs. {newFoodItem.price * newFoodItem.quantity}</p>
+              </div>
+            )}
 
-          {/* Laundry Items List */}
-          {laundryItems.length > 0 && (
-            <div className="food-items-list">
-              <h4>Added Laundry Items:</h4>
-              {laundryItems.map((item, index) => (
-                <div key={index} className="food-item">
-                  <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
-                  <button type="button" onClick={() => removeLaundryItem(index)} className="remove-btn">
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+            {/* Laundry Items List */}
+            {laundryItems.length > 0 && (
+              <div className="food-items-list">
+                <h4>Added Laundry Items:</h4>
+                {laundryItems.map((item, index) => (
+                  <div key={index} className="food-item">
+                    <span>{item.name} - Qty: {item.quantity} - Price: Rs. {item.price}</span>
+                    <button type="button" onClick={() => removeLaundryItem(index)} className="remove-btn">
+                      Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {/* Pricing */}
@@ -508,7 +510,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
               />
             </div>
             <div className="form-group">
-              <label>Discount Amount:</label>
+              <label>Discount Rate (%):</label>
               <input
                 type="number"
                 value={discount || ''}
@@ -522,6 +524,7 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
                 }}
                 onFocus={(e) => e.target.select()}
                 min="0"
+                max="100"
               />
             </div>
           </div>
@@ -553,8 +556,8 @@ const InvoiceForm: React.FC<InvoiceFormProps> = ({ onSubmit, rooms, items }) => 
             <span>Rs. {calculateTax()}</span>
           </div>
           <div className="summary-row">
-            <span>Discount:</span>
-            <span>-Rs. {discount}</span>
+            <span>Discount ({discount}%):</span>
+            <span>-Rs. {calculateDiscount().toFixed(2)}</span>
           </div>
           <div className="summary-row total">
             <span>Total:</span>

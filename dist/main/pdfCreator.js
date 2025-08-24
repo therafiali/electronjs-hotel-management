@@ -57,7 +57,7 @@ class PDFCreator {
             muted: "#555555",
             hair: "#E6E6E6",
             light: "#F7F7F7",
-            dark: "#000000",
+            dark: "#0B6623", // British green for dark text
         };
         this.ensureDownloadsDirectory();
     }
@@ -164,7 +164,7 @@ class PDFCreator {
             doc
                 .font("Helvetica-Bold")
                 .fontSize(20)
-                .fillColor(this.mono.text)
+                .fillColor(this.mono.dark)
                 .text("🏨", 50, 40);
         }
         // Right-side INVOICE tag (solid black)
@@ -183,7 +183,7 @@ class PDFCreator {
             .moveTo(50, 110)
             .lineTo(595 - 50, 110)
             .lineWidth(0.8)
-            .strokeColor("#000000")
+            .strokeColor(this.mono.dark)
             .stroke();
     }
     // === Invoice meta (same fields, cleaner style) ===
@@ -192,30 +192,30 @@ class PDFCreator {
         doc
             .font("Helvetica-Bold")
             .fontSize(11)
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Invoice Number", left, top);
         doc
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(this.formatInvoiceIdForDisplay(invoiceData.id) || "N/A", left, top + lh);
-        doc.font("Helvetica-Bold").fillColor(this.mono.text).text("Date", left, top + 2 * lh);
+        doc.font("Helvetica-Bold").fillColor(this.mono.dark).text("Date", left, top + 2 * lh);
         doc
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(invoiceData.date
             ? new Date(invoiceData.date).toLocaleDateString()
             : "N/A", left, top + 3 * lh);
         doc
             .font("Helvetica-Bold")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Payment Status", left, top + 4 * lh);
-        doc.font("Helvetica").fillColor(this.mono.muted).text("PAID", left, top + 5 * lh);
+        doc.font("Helvetica").fillColor(this.mono.dark).text("PAID", left, top + 5 * lh);
         // divider line
         doc
             .moveTo(50, 230)
             .lineTo(595 - 50, 230)
             .lineWidth(0.8)
-            .strokeColor("#000000")
+            .strokeColor(this.mono.dark)
             .stroke();
     }
     // === Guest & Room sections (same logic, refined visuals) ===
@@ -236,24 +236,24 @@ class PDFCreator {
         doc
             .font("Helvetica")
             .fontSize(11)
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Guest Name:", labelX, y)
             .text("Phone Number:", labelX, y + 18);
         doc
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(invoiceData.guestInfo.name || "N/A", valueX, y)
             .text(invoiceData.guestInfo.phone || "N/A", valueX, y + 18);
         // Only show check-in/check-out dates if room exists
         if (invoiceData.roomInfo?.roomNumber) {
             doc
                 .font("Helvetica")
-                .fillColor(this.mono.text)
+                .fillColor(this.mono.dark)
                 .text("Check-in Date:", labelX, y + 36)
                 .text("Check-out Date:", labelX, y + 54);
             doc
                 .font("Helvetica")
-                .fillColor(this.mono.muted)
+                .fillColor(this.mono.dark)
                 .text(invoiceData.guestInfo.checkIn
                 ? new Date(invoiceData.guestInfo.checkIn).toLocaleDateString()
                 : "N/A", valueX, y + 36)
@@ -266,7 +266,7 @@ class PDFCreator {
             doc
                 .font("Helvetica-Bold")
                 .fontSize(14)
-                .fillColor(this.mono.text)
+                .fillColor(this.mono.dark)
                 .text("Room Information", 330, 250);
             // Room details box
             doc
@@ -277,13 +277,13 @@ class PDFCreator {
             doc
                 .font("Helvetica")
                 .fontSize(11)
-                .fillColor(this.mono.text)
+                .fillColor(this.mono.dark)
                 .text("Room Number:", l, y)
                 .text("Room Type:", l, y + 18)
                 .text("Number of Nights:", l, y + 36);
             doc
                 .font("Helvetica")
-                .fillColor(this.mono.muted)
+                .fillColor(this.mono.dark)
                 .text(invoiceData.roomInfo.roomNumber || "N/A", v, y)
                 .text(invoiceData.roomInfo.roomType || "N/A", v, y + 18)
                 .text((invoiceData.roomInfo.nights || 1).toString(), v, y + 36);
@@ -292,7 +292,7 @@ class PDFCreator {
                 .moveTo(50, 380)
                 .lineTo(595 - 50, 380)
                 .lineWidth(0.8)
-                .strokeColor("#000000")
+                .strokeColor(this.mono.dark)
                 .stroke();
         }
     }
@@ -301,14 +301,14 @@ class PDFCreator {
         doc
             .font("Helvetica-Bold")
             .fontSize(14)
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Detailed Charges", 50, 400);
         const y0 = 420, col1 = 50, col2 = 320, col3 = 380, col4 = 460, rowH = 25;
         let y = y0;
         // Header with bold border
-        doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
+        doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, this.mono.dark);
         doc
-            .fillColor("#000000")
+            .fillColor(this.mono.dark)
             .font("Helvetica-Bold")
             .fontSize(11)
             .text("Description", col1 + 10, y + 7)
@@ -319,7 +319,7 @@ class PDFCreator {
         const row = (texts) => {
             doc.rect(col1, y, 495, rowH).fillAndStroke("#ffffff", "#CCCCCC");
             doc
-                .fillColor(this.mono.text)
+                .fillColor(this.mono.dark)
                 .font("Helvetica")
                 .fontSize(10)
                 .text(texts[0], col1 + 10, y + 8)
@@ -365,12 +365,12 @@ class PDFCreator {
             });
             // Food section header
             if (foodItems.length > 0) {
-                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, this.mono.dark);
                 doc
                     .font("Helvetica-Bold")
                     .fontSize(11)
-                    .fillColor(this.mono.text)
-                    .text("Food & Beverages", col1 + 10, y + 7);
+                    .fillColor(this.mono.dark)
+                    .text("Food", col1 + 10, y + 7);
                 y += rowH;
                 foodItems.forEach((it) => {
                     const qty = it.quantity || 0;
@@ -383,13 +383,13 @@ class PDFCreator {
                     ]);
                 });
             }
-            // Laundry section header
-            if (laundryItems.length > 0) {
-                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
+            // Laundry section header - Only show if there's a room stay
+            if (laundryItems.length > 0 && invoiceData.roomInfo?.roomNumber) {
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, this.mono.dark);
                 doc
                     .font("Helvetica-Bold")
                     .fontSize(11)
-                    .fillColor(this.mono.text)
+                    .fillColor(this.mono.dark)
                     .text("Laundry Services", col1 + 10, y + 7);
                 y += rowH;
                 laundryItems.forEach((it) => {
@@ -405,11 +405,11 @@ class PDFCreator {
             }
             // Other items section (if any)
             if (otherItems.length > 0) {
-                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, "#000000");
+                doc.rect(col1, y, 495, rowH).fillAndStroke(this.mono.light, this.mono.dark);
                 doc
                     .font("Helvetica-Bold")
                     .fontSize(11)
-                    .fillColor(this.mono.text)
+                    .fillColor(this.mono.dark)
                     .text("Other Services", col1 + 10, y + 7);
                 y += rowH;
                 otherItems.forEach((it) => {
@@ -429,16 +429,16 @@ class PDFCreator {
         doc
             .font("Helvetica-Bold")
             .fontSize(10)
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Subtotal", col3 + 10, y + 8)
             .text(`${(invoiceData.subtotal || 0).toFixed(2)}`, col4 + 10, y + 8);
         y += rowH;
         // Tax
         doc.rect(col1, y, 495, rowH).fill(this.mono.light).strokeColor(this.mono.hair).stroke();
         doc
+            .fillColor(this.mono.dark)
             .font("Helvetica-Bold")
             .fontSize(10)
-            .fillColor(this.mono.text)
             .text(`Tax (${invoiceData.taxRate || 0}%)`, col3 + 10, y + 8)
             .text(`${(invoiceData.tax || 0).toFixed(2)}`, col4 + 10, y + 8);
         y += rowH;
@@ -448,9 +448,9 @@ class PDFCreator {
             doc
                 .font("Helvetica-Bold")
                 .fontSize(10)
-                .fillColor(this.mono.text)
-                .text("Discount", col3 + 10, y + 8)
-                .text(`-${(invoiceData.discount || 0).toFixed(2)}`, col4 + 10, y + 8);
+                .fillColor(this.mono.dark)
+                .text(`Discount (${invoiceData.discount || 0}%)`, col3 + 10, y + 8)
+                .text(`-${((invoiceData.subtotal || 0) * (invoiceData.discount || 0) / 100).toFixed(2)}`, col4 + 10, y + 8);
             y += rowH;
         }
         // Total emphasis bar (right)
@@ -462,7 +462,7 @@ class PDFCreator {
             .fontSize(12)
             .text("Total", col3 + 10, totalY + 7, { width: 60, align: "center" });
         doc
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .font("Helvetica-Bold")
             .text(`Rs. ${(invoiceData.total || 0).toFixed(2)}`, col4 + 10, totalY + 7);
         // rule to separate from footer
@@ -470,7 +470,7 @@ class PDFCreator {
             .moveTo(50, totalY + 45)
             .lineTo(595 - 50, totalY + 45)
             .lineWidth(0.8)
-            .strokeColor("#000000")
+            .strokeColor(this.mono.dark)
             .stroke();
     }
     // === Footer (centered, monochrome) ===
@@ -479,17 +479,17 @@ class PDFCreator {
         doc
             .font("Helvetica-Bold")
             .fontSize(11)
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Thank you for choosing Rama Resort", 50, y + 12, { align: "center" });
         doc
             .font("Helvetica")
             .fontSize(10)
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(`${this.hotelInfo.phone}  |  ${this.hotelInfo.email}  |  ${this.hotelInfo.website}`, 50, y + 28, { align: "center" });
         doc
             .font("Helvetica")
             .fontSize(9)
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text("This is a computer-generated invoice. No signature required.", 50, y + 44, { align: "center" });
     }
     // === Public creators ===
@@ -542,39 +542,39 @@ class PDFCreator {
         doc
             .fontSize(24)
             .font("Helvetica-Bold")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text(this.hotelInfo.name, { align: "center" })
             .moveDown(0.5);
         doc
             .fontSize(12)
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(this.hotelInfo.tagline, { align: "center" })
             .moveDown(1);
         // Report title
         doc
             .fontSize(20)
             .font("Helvetica-Bold")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("HOTEL MANAGEMENT REPORT", { align: "center" })
             .moveDown(1);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text(`Generated on: ${new Date().toLocaleString()}`, { align: "center" })
             .moveDown(2);
         // Report content (static example)
         doc
             .fontSize(14)
             .font("Helvetica-Bold")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Daily Statistics")
             .moveDown(0.5);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Total Rooms: 50")
             .text("Occupied Rooms: 42")
             .text("Occupancy Rate: 84%")
@@ -584,13 +584,13 @@ class PDFCreator {
         doc
             .fontSize(14)
             .font("Helvetica-Bold")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Monthly Overview")
             .moveDown(0.5);
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor(this.mono.text)
+            .fillColor(this.mono.dark)
             .text("Total Bookings: 156")
             .text("Revenue Generated: Rs. 789,450.00")
             .text("Average Guest Rating: 4.8/5")
@@ -600,7 +600,7 @@ class PDFCreator {
         doc
             .fontSize(10)
             .font("Helvetica")
-            .fillColor(this.mono.muted)
+            .fillColor(this.mono.dark)
             .text("This report was automatically generated by Rama Resort Management System.", { align: "center" });
         doc.end();
         return new Promise((resolve, reject) => {

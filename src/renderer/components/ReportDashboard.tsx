@@ -331,34 +331,135 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ onBack }) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="summary-cards">
-        <div className="summary-card">
-          <div className="summary-icon">🏨</div>
-          <div className="summary-content">
-            <h3>Room Revenue</h3>
-            <p className="summary-amount">{formatCurrency(roomTotal)}</p>
-          </div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+        gap: '20px',
+        maxWidth: '1000px',
+        margin: '0 auto 2rem auto'
+      }}>
+        {/* Room Revenue */}
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{
+            fontSize: '40px',
+            marginBottom: '15px'
+          }}>🏨</div>
+          <h3 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '8px'
+          }}>
+            {formatCurrency(roomTotal)}
+          </h3>
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280',
+            fontWeight: '500',
+            margin: '0'
+          }}>
+            Room Revenue
+          </p>
         </div>
-        <div className="summary-card">
-          <div className="summary-icon">🍽️</div>
-          <div className="summary-content">
-            <h3>Food</h3>
-            <p className="summary-amount">{formatCurrency(foodTotal)}</p>
-          </div>
+
+        {/* Food Revenue */}
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{
+            fontSize: '40px',
+            marginBottom: '15px'
+          }}>🍽️</div>
+          <h3 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '8px'
+          }}>
+            {formatCurrency(foodTotal)}
+          </h3>
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280',
+            fontWeight: '500',
+            margin: '0'
+          }}>
+            Food Revenue
+          </p>
         </div>
-        <div className="summary-card">
-          <div className="summary-icon">👕</div>
-          <div className="summary-content">
-            <h3>Laundry Revenue</h3>
-            <p className="summary-amount">{formatCurrency(laundryTotal)}</p>
-          </div>
+
+        {/* Laundry Revenue */}
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{
+            fontSize: '40px',
+            marginBottom: '15px'
+          }}>👕</div>
+          <h3 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '8px'
+          }}>
+            {formatCurrency(laundryTotal)}
+          </h3>
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280',
+            fontWeight: '500',
+            margin: '0'
+          }}>
+            Laundry Revenue
+          </p>
         </div>
-        <div className="summary-card grand-total">
-          <div className="summary-icon">💰</div>
-          <div className="summary-content">
-            <h3>Grand Total</h3>
-            <p className="summary-amount">{formatCurrency(grandTotal)}</p>
-          </div>
+
+        {/* Grand Total */}
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+          textAlign: 'center',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div style={{
+            fontSize: '40px',
+            marginBottom: '15px'
+          }}>💰</div>
+          <h3 style={{
+            fontSize: '32px',
+            fontWeight: '700',
+            color: '#111827',
+            marginBottom: '8px'
+          }}>
+            {formatCurrency(grandTotal)}
+          </h3>
+          <p style={{
+            fontSize: '16px',
+            color: '#6b7280',
+            fontWeight: '500',
+            margin: '0'
+          }}>
+            Grand Total
+          </p>
         </div>
       </div>
 
