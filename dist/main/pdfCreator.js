@@ -126,14 +126,14 @@ class PDFCreator {
     }
     getPossibleLogoPaths() {
         return [
-            path.join(__dirname, "../renderer/components/img/logo.png"),
-            path.join(__dirname, "../../src/renderer/components/img/logo.png"),
             path.join(__dirname, "../renderer/components/img/Rama Resort Logo White without BG .png"),
             path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo White without BG .png"),
             path.join(__dirname, "../renderer/components/img/Rama Resort Logo White without BG.png"),
             path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo White without BG.png"),
             path.join(__dirname, "../renderer/components/img/Rama Resort Logo.png"),
             path.join(__dirname, "../../src/renderer/components/img/Rama Resort Logo.png"),
+            path.join(__dirname, "../renderer/components/img/logo.png"),
+            path.join(__dirname, "../../src/renderer/components/img/logo.png"),
             path.join(__dirname, "../renderer/components/img/images.jpeg"),
             path.join(__dirname, "../../src/renderer/components/img/images.jpeg"),
         ];
