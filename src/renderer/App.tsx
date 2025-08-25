@@ -857,27 +857,9 @@ const App: React.FC = () => {
                   borderRadius: "6px",
                   cursor: "pointer",
                   fontSize: "14px",
-                  marginRight: "10px",
                 }}
               >
                 View Invoice List
-              </button>
-              <button
-                onClick={async () => {
-                  setCurrentView("debug");
-                  await loadDebugData();
-                }}
-                style={{
-                  background: "#e74c3c",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
-                Debug Data Preview
               </button>
             </div>
           </div>
@@ -899,27 +881,9 @@ const App: React.FC = () => {
                   borderRadius: "6px",
                   cursor: "pointer",
                   fontSize: "14px",
-                  marginRight: "10px",
                 }}
               >
                 Back to Dashboard
-              </button>
-              <button
-                onClick={async () => {
-                  setCurrentView("debug");
-                  await loadDebugData();
-                }}
-                style={{
-                  background: "#e74c3c",
-                  color: "white",
-                  border: "none",
-                  padding: "10px 20px",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontSize: "14px",
-                }}
-              >
-                Debug Data Preview
               </button>
             </div>
           </div>
